@@ -2,6 +2,10 @@ package database
 
 import (
 	"be_golang/klp3/app/config"
+	absensi "be_golang/klp3/features/absensi/data"
+	cuti "be_golang/klp3/features/cuti/data"
+	reimbusment "be_golang/klp3/features/reimbusment/data"
+	target "be_golang/klp3/features/target/data"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -17,4 +21,8 @@ func InitMysql(cfg *config.AppConfig) *gorm.DB {
 		panic(err)
 	}
 	return DB
+}
+
+func InitialMigration(db *gorm.DB){
+	db.AutoMigrate(&absensi.Absensi{},&cuti.Cuti{},&reimbusment.Reimbursement{},target.Target{})
 }

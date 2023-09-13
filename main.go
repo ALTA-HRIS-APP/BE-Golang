@@ -10,8 +10,8 @@ import (
 
 func main() {
 	cfg := config.InitConfig()
-	database.InitMysql(cfg)
-	// database.InitialMigration(mysql)
+	mysql:=database.InitMysql(cfg)
+	database.InitialMigration(mysql)
 	e := echo.New()
 
 	e.Pre(middleware.RemoveTrailingSlash())
