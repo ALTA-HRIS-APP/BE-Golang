@@ -9,6 +9,7 @@ type ReimbursementRequest struct {
 	BatasanReimburs int 	`json:"batasan_reimburs" form:"batasan_reimburs"`
 	Nominal         int 	`json:"nominal" form:"nominal"`
 	Tipe            string `json:"tipe" form:"tipe"`
+	Date 			string `json:"date" form:"date"`
 	Persetujuan     string `json:"persetujuan" form:"persetujuan"`
 	UrlBukti        string `json:"url_bukti" form:"url_bukti"`
 	UserID          string `json:"user_id" form:"user_id"`
@@ -30,6 +31,7 @@ func RequestToEntity(user ReimbursementRequest)reimbusment.ReimbursementEntity{
 		BatasanReimburs: user.BatasanReimburs,
 		Nominal:         user.Nominal,
 		Tipe:            user.Tipe,
+		Date: 			 user.Date,
 		Persetujuan:     user.Persetujuan,
 		UrlBukti:        user.UrlBukti,
 		UserID:          user.UserID,

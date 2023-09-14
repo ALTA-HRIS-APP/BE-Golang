@@ -16,6 +16,7 @@ type Reimbursement struct {
 	Status 			string 			`gorm:"default:pending"`
 	BatasanReimburs int 			`gorm:"default:5000000"`
 	Nominal 		int
+	Date 			string           `gorm:"column:date;not nul"`
 	Tipe 			string
 	Persetujuan 	string 			`gorm:"default:-"`
 	UrlBukti 		string
@@ -50,6 +51,7 @@ func EntityToModel(user reimbusment.ReimbursementEntity)Reimbursement{
 		BatasanReimburs: user.BatasanReimburs,
 		Nominal:         user.Nominal,
 		Tipe:            user.Tipe,
+		Date: 			 user.Date,
 		Persetujuan:     user.Persetujuan,
 		UrlBukti:        user.UrlBukti,
 		UserID:          user.UserID,
@@ -77,6 +79,7 @@ func ModelToEntity(user Reimbursement)reimbusment.ReimbursementEntity{
 		BatasanReimburs: user.BatasanReimburs,
 		Nominal:         user.Nominal,
 		Tipe:            user.Tipe,
+		Date: 			 user.Date,
 		Persetujuan:     user.Persetujuan,
 		UrlBukti:        user.UrlBukti,
 		UserID:          user.UserID,

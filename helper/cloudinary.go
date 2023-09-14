@@ -25,7 +25,7 @@ func UploadImage(c echo.Context) (string,error) {
 	file, err := c.FormFile("image")
 	if err != nil {
 		// Menangani error ketika gagal mendapatkan file
-		return "", FailedNotFound(c, "Failed to get image file from request", nil)
+		return "", FailedNotFound(c, "Failed to get image file from request"+err.Error(), nil)
 	}
 
 	// Membuka file
