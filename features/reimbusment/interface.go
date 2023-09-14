@@ -14,6 +14,7 @@ type ReimbursementEntity struct {
 	BatasanReimburs int 
 	Nominal         int 	`validate:"required"`
 	Tipe            string 	`validate:"required"`
+	Date 			string `validate:"required"`
 	Persetujuan     string 
 	UrlBukti        string 	`validate:"required"`
 	UserID          string 

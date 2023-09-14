@@ -9,6 +9,7 @@ type ReimbursementResponse struct {
 	BatasanReimburs int `json:"batasan_reimburs,omitempty"`
 	Nominal         int `json:"nominal,omitempty"`
 	Tipe            string `json:"tipe,omitempty"`
+	Date 			string `json:"date,omitempty"`
 	Persetujuan     string `json:"persetujuan,omitempty"`
 	UrlBukti        string `json:"url_bukti,omitempty"`
 	UserID          string `json:"user_id,omitempty"`
