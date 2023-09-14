@@ -8,19 +8,19 @@ import (
 )
 
 type Reimbursement struct {
-	ID        		string `gorm:"primaryKey"`
+	ID        		string 			`gorm:"primaryKey"`
 	CreatedAt 		time.Time
 	UpdatedAt 		time.Time
 	DeletedAt 		gorm.DeletedAt `gorm:"index"`
 	Description 	string
-	Status 			string `gorm:"default:pending"`
-	BatasanReimburs int `gorm:"default:5000000"`
+	Status 			string 			`gorm:"default:pending"`
+	BatasanReimburs int 			`gorm:"default:5000000"`
 	Nominal 		int
 	Tipe 			string
-	Persetujuan 	string `gorm:"default:-"`
+	Persetujuan 	string 			`gorm:"default:-"`
 	UrlBukti 		string
-	UserID 			string `gorm:"type:varchar(255)"`
-	User            User `gorm:"foreignKey:UserID"`
+	UserID 			string 			`gorm:"type:varchar(255)"`
+	User            User 			`gorm:"foreignKey:UserID"`
 }
 
 type User struct{
@@ -38,7 +38,7 @@ func UserEntityToModel(user reimbusment.UserEntity)User{
 		ID:        user.ID,
 		Name:      user.Name,
 		Role:      user.Role,
-		Devisi:    user.Role,
+		Devisi:    user.Devisi,
 	}
 }
 
@@ -61,7 +61,7 @@ func UserModelToEntity(user User)reimbusment.UserEntity{
 		ID:        user.ID,
 		Name:      user.Name,
 		Role:      user.Role,
-		Devisi:    user.Role,
+		Devisi:    user.Devisi,
 	}
 }
 
