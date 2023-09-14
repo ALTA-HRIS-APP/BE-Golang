@@ -3,6 +3,7 @@ package main
 import (
 	"be_golang/klp3/app/config"
 	"be_golang/klp3/app/database"
+	"be_golang/klp3/app/router"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -20,7 +21,7 @@ func main() {
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
 
-	// router.InitRouter(e, mysql)
+	router.InitRouter(e, mysql)
 	e.Logger.Fatal(e.Start(":80"))
 
 }
