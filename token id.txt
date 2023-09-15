@@ -1,0 +1,7 @@
+{
+  "emails": "rajih@gmail.com",
+  "id": "0563582c-fcdd-4252-a0a7-5fb5472a0e43",
+  "role": "user",
+  "iat": 1694772465,
+  "exp": 1694773065
+}

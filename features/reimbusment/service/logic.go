@@ -92,10 +92,6 @@ func (service *ReimbursementService) Add(input reimbusment.ReimbursementEntity) 
 	if errValidate != nil {
 		return errors.New("error validate, data deskripsi, nominal, tipe reimbusment required")
 	}
-	_, errUser := service.reimbursmentService.SelectUser(input.UserID)
-	if errUser != nil {
-		return errors.New("user not found")
-	}
 	_, errInsert := service.reimbursmentService.Insert(input)
 	if errInsert != nil {
 		return errInsert

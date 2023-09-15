@@ -4,7 +4,6 @@ import (
 	"be_golang/klp3/app/config"
 	"be_golang/klp3/app/database"
 	"be_golang/klp3/app/router"
-	usernodejs "be_golang/klp3/features/userNodejs"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -21,7 +20,6 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
-	usernodejs.GetAllUser()
 	router.InitRouter(e, mysql)
 	e.Logger.Fatal(e.Start(":80"))
 
