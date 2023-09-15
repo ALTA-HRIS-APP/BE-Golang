@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/reimbusment"
 	"be_golang/klp3/helper"
 	"fmt"
@@ -61,8 +62,9 @@ func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
 }
 
 func (handler *ReimbusmentHandler)Add(c echo.Context)error{
-	// idUser,_:=middleware.ExtractToken(c)
-	idUser:="651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+	idUser,_,_:=middlewares.ExtractToken(c)
+	// email:=middlewares.ExtractTokenID()
+	// fmt.Println("email",email)
 	var request ReimbursementRequest
 	errBind:=c.Bind(&request)
 	if errBind != nil{

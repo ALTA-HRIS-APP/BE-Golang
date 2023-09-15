@@ -1,6 +1,7 @@
 package router
 
 import (
+	"be_golang/klp3/app/middlewares"
 	dataR "be_golang/klp3/features/reimbusment/data"
 	handlerR "be_golang/klp3/features/reimbusment/handler"
 	serviceR "be_golang/klp3/features/reimbusment/service"
@@ -14,6 +15,6 @@ func InitRouter(c *echo.Echo,db *gorm.DB){
 	serviceRes:=serviceR.New(dataRes)
 	handlerRes:=handlerR.New(serviceRes)
 
-	c.POST("/reimbursments",handlerRes.Add)
+	c.POST("/reimbursments",handlerRes.Add,middlewares.JWTMiddleware())
 	c.PUT("/reimbursments/:id_reimbusherment",handlerRes.Edit)
 }

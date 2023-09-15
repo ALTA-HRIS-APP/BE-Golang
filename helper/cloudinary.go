@@ -64,7 +64,7 @@ func UploadImage(c echo.Context) (string,error) {
 		return "", FailedNotFound(c, "failed asset "+errAsset.Error(), nil)
 	}
 
-	log.Printf("Public ID: %v, URL: %v\n", asset.PublicID, asset.SecureURL)
+	// log.Printf("Public ID: %v, URL: %v\n", asset.PublicID, asset.SecureURL)
 	searchQuery := search.Query{
 		Expression: "resource_type:image AND uploaded_at>1d AND bytes<1m",
 		SortBy:     []search.SortByField{{"created_at": search.Descending}},
