@@ -4,14 +4,18 @@ import (
 	"be_golang/klp3/app/config"
 	"be_golang/klp3/app/database"
 	"be_golang/klp3/app/router"
+	"be_golang/klp3/features/target/api/service"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	service.ApiGetUser()
+	return
+
 	cfg := config.InitConfig()
-	mysql:=database.InitMysql(cfg)
+	mysql := database.InitMysql(cfg)
 	database.InitialMigration(mysql)
 	e := echo.New()
 

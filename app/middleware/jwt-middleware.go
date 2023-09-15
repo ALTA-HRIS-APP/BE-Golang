@@ -9,6 +9,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type ClaimsToken struct {
+	Emails string `json:"emails"`
+	ID     string `json:"id"`
+	Role   string `json:"role"`
+	Iat    int    `json:"iat"`
+	Exp    int    `json:"exp"`
+}
+
 func JWTMiddleware() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
 		SigningKey:    []byte(config.JWT_SECRRET),
@@ -27,13 +35,15 @@ func CreateToken(userId string, userRole string) (string, error) {
 	return token.SignedString([]byte(config.JWT_SECRRET))
 }
 
-func ExtractToken(e echo.Context) (string,string) {
+func ExtractToken(e echo.Context) *ClaimsToken {
 	user := e.Get("user").(*jwt.Token)
-	if user.Valid {
-		claims := user.Claims.(jwt.MapClaims)
-		userId := claims["userId"].(string)
-		role:=claims["userRole"].(string)
-		return userId,role
+	var data ClaimsToken
+	if !user.Valid {
+		return nil
 	}
-	return "",""
+	claims := user.Claims.(jwt.MapClaims)
+	data.Emails = claims["email"].(string)
+	data.ID = claims["userId"].(string)
+	data.Role = claims["userRole"].(string)
+	return &data
 }
