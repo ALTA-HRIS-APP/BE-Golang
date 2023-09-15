@@ -1,0 +1,479 @@
+openapi: 3.0.0
+info:
+  version: 1.0.2
+  title: HRIS
+  description: The documentation of endpoints for HRIS
+
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/WAYANPUTRIYANTI1502_1/HRIS/1.0.2
+  - url: http://54.198.234.61
+
+tags:
+  - name: Absensi
+    description: operation about absensi
+  - name: Target
+    description: operation about target
+  - name: Reimbursment
+    description: operation about reimbursment
+  - name: Cuti
+    description: operation about cuti
+paths:
+  /reimbursments:
+    post:
+      tags:
+        - Reimbursment
+      summary: create reimbursment
+      security:
+        - JWTAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/create_reimbursment"
+      responses:
+        "201":
+          $ref: "#/components/responses/responseSuccessCreate"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+
+    get:
+      tags:
+        - Reimbursment
+      description: read all reimbursment
+      summary: get all reimbushment
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: page
+          description: "untuk menentukan page ke berapa"
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: itemsPerPage
+          description: "jumlah users yang ditampilan per halaman"
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: searchName
+          description: "keyword untuk searching berdasarkan nama karyawan"
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/responseGetAllReimbursment"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+  /reimbursments/{id_reimbusherment}:
+    put:
+      tags:
+        - Reimbursment
+      summary: update reimbursment untuk manager
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: id_reimbusherment
+          description: contain id of the reimbursment
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/update_reimbursment_manager"
+
+      responses:
+        "200":
+          $ref: "#/components/responses/responseSuccess"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+  /reimbursments/{id_reimbusherments}:
+    put:
+      tags:
+        - Reimbursment
+      summary: create reimbursment untuk user karyawan
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: id_reimbusherments
+          description: contain id of the reimbursment
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/update_reimbursment_karyawan"
+      responses:
+        "200":
+          $ref: "#/components/responses/responseSuccess"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+  /reimbursments/{id_reimbursment}:
+    put:
+      tags:
+        - Reimbursment
+      summary: update reimbursment untuk manager
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: id_reimbursment
+          description: contain id of the reimbursment
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/update_reimbursment_HR"
+      responses:
+        "200":
+          $ref: "#/components/responses/responseSuccess"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+    get:
+      tags:
+        - Reimbursment
+      summary: reimbursment get by id
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: id_reimbursment
+          description: contain id of the reimbursment
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+      responses:
+        "200":
+          $ref: "#/components/responses/responseGetByIdReimbursment"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+    delete:
+      tags:
+        - Reimbursment
+      summary: reimbursment get by id
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: id_reimbursment
+          description: contain id of the reimbursment
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+      responses:
+        "200":
+          $ref: "#/components/responses/responseSuccess"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+#==================================#
+# component
+#==================================#
+components:
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "use Token"
+
+  schemas:
+    create_reimbursment:
+      type: object
+      properties:
+        tipe:
+          type: string
+        cash_out_date:
+          type: string
+        nominal:
+          type: integer
+        description:
+          type: string
+        image:
+          type: string
+          format: binary
+          description: "allowed file extension: jpg, png, jpeg"
+        status:
+          type: string
+
+    update_reimbursment_karyawan:
+      type: object
+      properties:
+        tipe:
+          type: string
+        cash_out_date:
+          type: string
+        nominal:
+          type: integer
+        description:
+          type: string
+        image:
+          type: string
+          format: binary
+          description: "allowed file extension: jpg, png, jpeg"
+
+    update_reimbursment_manager:
+      description: khusus untuk update approve oleh manager
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+        status:
+          type: string
+          example: "approve"
+    update_reimbursment_HR:
+      description: khusus untuk update approve oleh HR
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+        persetujuan:
+          type: string
+          example: "approve"
+  responses:
+    responseSuccess:
+      description: failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 200
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: success
+              "data":
+                type: object
+                example: null
+    responseSuccessCreate:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 201
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: created
+              "data":
+                type: object
+                example: null
+    responseGetByIdReimbursment:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int64
+                example: 200
+              message:
+                type: string
+                example: "success get reimbursment by id"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "0bab9e2b-dc1c-4d95-aece-06e9e28707d4"
+                  name:
+                    type: string
+                    example: "Sandi Gunawan"
+                  tipe:
+                    type: string
+                    example: "operational"
+                  cash_out_date:
+                    type: string
+                    example: "09-09-2023"
+                  nominal:
+                    type: integer
+                    example: 180000
+                  description:
+                    type: string
+                    example: "sewa hotel"
+                  image:
+                    type: string
+                    example: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                  status:
+                    type: string
+                    example: "pending"
+
+    responseGetAllReimbursment:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int64
+                example: 200
+              message:
+                type: string
+                example: "success get all reimbursment"
+              next:
+                type: boolean
+                example: true
+              data:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    tipe:
+                      type: string
+                    cash_out_date:
+                      type: string
+                    nominal:
+                      type: integer
+                    description:
+                      type: string
+                    image:
+                      type: string
+                    status:
+                      type: string
+                example:
+                  - id: "0bab9e2b-dc1c-4d95-aece-06e9e28707d4"
+                    name: "Sandi Gunawan"
+                    tipe: "operational"
+                    cash_out_date: "09-09-2023"
+                    nominal: 180000
+                    description: "sewa hotel"
+                    image: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                    status: "pending"
+                  - id: "0bab9e2b-dc1c-4d95-aece-06e9e218207d3"
+                    name: "Maria Sari"
+                    tipe: "operational"
+                    cash_out_date: "10-09-2023"
+                    nominal: 340000
+                    description: "beli peralatan"
+                    image: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                    status: "approve"
+                  - id: "0bab9e2b-dc1c-4d95-aece-06e9e287079203"
+                    name: "Melita"
+                    tipe: "operational"
+                    cash_out_date: "24-09-2023"
+                    nominal: 170000
+                    description: "sewa hotel"
+                    image: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                    status: "pending"
+    responseBadRequest:
+      description: failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 400
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: operation failed, request resource not valid
+              "data":
+                type: object
+                example: null
+
+    responseNotFound:
+      description: resouse was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                description: HTTP status code (e.g., 200 for success).
+                example: 404
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: operation failed, resource not found
+              "data":
+                type: object
+                example: null
+
+    responseFailedInternal:
+      description: failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 500
+              "message":
+                type: string
+                example: operation failed, internal server error
+              "data":
+                type: object
+                example: null
