@@ -4,7 +4,6 @@ import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/cuti"
 	"be_golang/klp3/helper"
-	"fmt"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -29,7 +28,6 @@ func (handler *CutiHandler) AddCuti(c echo.Context) error {
 	entity := RequestToEntity(input)
 	entity.UserID = idUser
 	entity.UrlPendukung = link
-	fmt.Println("cuti", entity)
 	err := handler.cutiHandler.Add(entity)
 	if err != nil {
 		if strings.Contains(err.Error(), "validation") {
