@@ -15,8 +15,8 @@ type ReimbusmentHandler struct {
 }
 
 func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
-		// idUser,_:=middleware.ExtractToken(c)
-		idUser:="651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+
+		idUser,_,_:=middlewares.ExtractToken(c)
 		
 		var request ReimbursementRequest
 		errBind:=c.Bind(&request)
@@ -41,18 +41,6 @@ func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
 				return helper.InternalError(c,err.Error(),nil)
 			}
 		}else{
-			if entity.Description !=""{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit description",nil)
-			}
-			if entity.Tipe !=""{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit type",nil)
-			}
-			if entity.Nominal !=0{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit nominal",nil)
-			}
-			if entity.UrlBukti !=""{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit bukti transaksi",nil)
-			}
 			err:=handler.reimbushmentHandler.EditAdmin(entity.Status,entity.UserID,idUser,id)
 			if err != nil{
 				return helper.InternalError(c,err.Error(),nil)
@@ -63,6 +51,7 @@ func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
 
 func (handler *ReimbusmentHandler)Add(c echo.Context)error{
 	idUser,_,_:=middlewares.ExtractToken(c)
+
 
 	var request ReimbursementRequest
 	errBind:=c.Bind(&request)

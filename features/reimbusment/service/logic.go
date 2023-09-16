@@ -2,6 +2,7 @@ package service
 
 import (
 	"be_golang/klp3/features/reimbusment"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"errors"
 
 	"github.com/go-playground/validator/v10"
@@ -12,23 +13,23 @@ type ReimbursementService struct {
 	validate            *validator.Validate
 }
 func (service *ReimbursementService) EditAdmin(status string,userID string,UserAdmin string,id string) error {
-	dataUser,errUser:=service.reimbursmentService.SelectUser(UserAdmin)
+	dataUser,errUser:=usernodejs.GetByIdUser(UserAdmin)
 	if errUser != nil{
 		return errUser
 	}
-	dataUserA,errUserA:=service.reimbursmentService.SelectUser(userID)
+	dataUserA,errUserA:=usernodejs.GetByIdUser(userID)
 	if errUserA != nil{
 		return errUserA
 	}
 
-	if dataUser.Devisi=="manager"{
-		if dataUserA.Devisi =="C-Level"{
+	if dataUser.Jabatan=="manager"{
+		if dataUserA.Jabatan =="c-level"{
 			return errors.New("tidak dapat approve C-Level, hanya dapat approve di N-1")
 		}
-		if dataUserA.Devisi =="HR"{
+		if dataUserA.Jabatan =="HR"{
 			return errors.New("tidak dapat approve HR, hanya dapat approve di N-1")
 		}
-		if dataUserA.Devisi =="manager"{
+		if dataUserA.Jabatan =="manager"{
 			return errors.New("tidak dapat approve manager, hanya dapat approve di N-1")
 		}
 		errUpdate:=service.reimbursmentService.UpdateStatusByManager(status,userID,id)
@@ -36,17 +37,17 @@ func (service *ReimbursementService) EditAdmin(status string,userID string,UserA
 			return errUpdate
 		}
 
-	}else if dataUser.Devisi=="lead"{
-		if dataUserA.Devisi =="C-Level"{
+	}else if dataUser.Jabatan=="lead"{
+		if dataUserA.Jabatan =="C-Level"{
 			return errors.New("tidak dapat approve C-Level, hanya dapat approve di N-1")
 		}
-		if dataUserA.Devisi =="HR"{
+		if dataUserA.Jabatan =="HR"{
 			return errors.New("tidak dapat approve HR, hanya dapat approve di N-1")
 		}
-		if dataUserA.Devisi =="manager"{
+		if dataUserA.Jabatan =="manager"{
 			return errors.New("tidak dapat approve manager, hanya dapat approve di N-1")
 		}
-		if dataUserA.Devisi =="lead"{
+		if dataUserA.Jabatan =="lead"{
 			return errors.New("tidak dapat approve lead, hanya dapat approve di N-1")
 		}		
 		errUpdate:=service.reimbursmentService.UpdateStatusByManager(status,userID,id)
@@ -54,24 +55,24 @@ func (service *ReimbursementService) EditAdmin(status string,userID string,UserA
 			return errUpdate
 		}
 
-	}else if dataUser.Devisi=="HR"{
-		if dataUserA.Devisi =="HR"{
+	}else if dataUser.Jabatan=="HR"{
+		if dataUserA.Jabatan =="HR"{
 			return errors.New("tidak dapak approve HR, hanya dapat approve di N-1")
 		}
-		if dataUserA.Devisi =="C-Level"{
+		if dataUserA.Jabatan =="C-Level"{
 			return errors.New("tidak dapak approve C-Level, hanya dapat approve di N-1")
 		}
 		errUpdate:=service.reimbursmentService.UpdateStatusByHR(status,userID,id)
 		if errUpdate != nil{
 			return errUpdate
 		}		
-	}else if dataUser.Devisi=="C-Level"{
+	}else if dataUser.Jabatan=="C-Level"{
 		errUpdate:=service.reimbursmentService.UpdateStatusByHR(status,userID,id)
 		if errUpdate != nil{
 			return errUpdate
 		}	
 	}else{
-		return errors.New("selain HR dan manager, anda tidak dapat merubah status")
+		return errors.New("selain admin dan superadmin, anda tidak dapat merubah status")
 	}
 	return nil
 }
