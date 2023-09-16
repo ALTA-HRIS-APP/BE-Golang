@@ -14,70 +14,69 @@ type ReimbusmentHandler struct {
 	reimbushmentHandler reimbusment.ReimbusmentServiceInterface
 }
 
-func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
+func (handler *ReimbusmentHandler) Edit(c echo.Context) error {
 
-		idUser,_,_:=middlewares.ExtractToken(c)
-		
-		var request ReimbursementRequest
-		errBind:=c.Bind(&request)
-		if errBind != nil{
-			return helper.FailedRequest(c, "error bind data"+errBind.Error(), nil)
-		}
-
-		id:=c.Param("id_reimbusherment")
-
-		entity:=RequestToEntity(request)
-
-		if entity.UserID == ""{
-			if entity.Status !=""{
-				return helper.FailedRequest(c,"hanya admin yang dapat mengedit status",nil)
-			}
-			if entity.Persetujuan !=""{
-				return helper.FailedRequest(c,"hanya HR yang dapat mengedit persetujuan",nil)
-			}
-			entity.UserID=idUser
-			err:=handler.reimbushmentHandler.Edit(entity,id)
-			if err != nil{
-				return helper.InternalError(c,err.Error(),nil)
-			}
-		}else{
-			err:=handler.reimbushmentHandler.EditAdmin(entity.Status,entity.UserID,idUser,id)
-			if err != nil{
-				return helper.InternalError(c,err.Error(),nil)
-			}
-		}
-		return helper.SuccessWithOutData(c,"success update reimbursment")
-}
-
-func (handler *ReimbusmentHandler)Add(c echo.Context)error{
-	idUser,_,_:=middlewares.ExtractToken(c)
-
+	idUser, _, _ := middlewares.ExtractToken(c)
 
 	var request ReimbursementRequest
-	errBind:=c.Bind(&request)
-	if errBind != nil{
+	errBind := c.Bind(&request)
+	if errBind != nil {
 		return helper.FailedRequest(c, "error bind data"+errBind.Error(), nil)
 	}
-	link,errLink:=helper.UploadImage(c)
-	if errLink != nil{
+
+	id := c.Param("id_reimbusherment")
+
+	entity := RequestToEntity(request)
+
+	if entity.UserID == "" {
+		if entity.Status != "" {
+			return helper.FailedRequest(c, "hanya admin yang dapat mengedit status", nil)
+		}
+		if entity.Persetujuan != "" {
+			return helper.FailedRequest(c, "hanya HR yang dapat mengedit persetujuan", nil)
+		}
+		entity.UserID = idUser
+		err := handler.reimbushmentHandler.Edit(entity, id)
+		if err != nil {
+			return helper.InternalError(c, err.Error(), nil)
+		}
+	} else {
+		err := handler.reimbushmentHandler.EditAdmin(entity.Status, entity.UserID, idUser, id)
+		if err != nil {
+			return helper.InternalError(c, err.Error(), nil)
+		}
+	}
+	return helper.SuccessWithOutData(c, "success update reimbursment")
+}
+
+func (handler *ReimbusmentHandler) Add(c echo.Context) error {
+	idUser, _, _ := middlewares.ExtractToken(c)
+
+	var request ReimbursementRequest
+	errBind := c.Bind(&request)
+	if errBind != nil {
+		return helper.FailedRequest(c, "error bind data"+errBind.Error(), nil)
+	}
+	link, errLink := helper.UploadImage(c)
+	if errLink != nil {
 		return helper.FailedRequest(c, errLink.Error(), nil)
 	}
 
 	fmt.Println(request)
-	entity:=RequestToEntity(request)
+	entity := RequestToEntity(request)
 	entity.UserID = idUser
 	entity.UrlBukti = link
-	err:= handler.reimbushmentHandler.Add(entity)
-	if err != nil{
-		if strings.Contains(err.Error(),"validation"){
-			return helper.FailedRequest(c,err.Error(),nil)
-		}else{
-			return helper.InternalError(c,err.Error(),nil)
+	err := handler.reimbushmentHandler.Add(entity)
+	if err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return helper.FailedRequest(c, err.Error(), nil)
+		} else {
+			return helper.InternalError(c, err.Error(), nil)
 		}
 	}
-	return helper.SuccessWithOutData(c,"success create reimbursment")
+	return helper.SuccessWithOutData(c, "success create reimbursment")
 }
-func New(handler reimbusment.ReimbusmentServiceInterface)*ReimbusmentHandler{
+func New(handler reimbusment.ReimbusmentServiceInterface) *ReimbusmentHandler {
 	return &ReimbusmentHandler{
 		reimbushmentHandler: handler,
 	}
