@@ -34,6 +34,15 @@ type User struct{
 	Devisi 			string	
 }
 
+// func PenggunaToUser(user usernodejs.Pengguna)User{
+// 	return User{
+// 		ID: user.ID,
+// 		Name: user.NamaLengkap,
+// 		Role: user.Role.Nama,
+// 		Devisi: user.Devisi.Nama,
+// 	}
+// }
+
 func UserEntityToModel(user reimbusment.UserEntity)User{
 	return User{
 		ID:        user.ID,
