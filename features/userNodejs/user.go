@@ -19,7 +19,7 @@ func LoginUser(login Login)(string,error){
 		return "",err
 	}
 		
-	request,_:=http.NewRequest("POST","http://pintu2.otixx.online/user/login",bytes.NewBuffer(jsonData))
+	request,_:=http.NewRequest("POST","http://pintu2.otixx.online/login",bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type","application/json")
 	client:=&http.Client{}
 	response,err:=client.Do(request)
@@ -42,8 +42,7 @@ func LoginUser(login Login)(string,error){
 }
 
 func GetProfil(token string)(Pengguna,error){
-    // Membuat permintaan HTTP
-	url := "http://pintu2.otixx.online/user/profile"
+	url := "http://pintu2.otixx.online/profile"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
@@ -96,6 +95,25 @@ func GetAllUser() ([]Pengguna, error) {
 		return dataPengguna,nil
 	}
 	return nil,err
+}
+
+func GetByIdUser(idUser string) (Pengguna, error) {
+	url := fmt.Sprintf("http://pintu2.otixx.online/user/%s", idUser)
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("the HTTP request failed with error %s\n", err)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		var respData ResponseDataUser
+		err := json.Unmarshal(data, &respData)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return Pengguna{},err
+		}
+		dataPengguna:=ByteToResponse(respData.Data)
+		return dataPengguna,nil
+	}
+	return Pengguna{},err
 }
 
 func GetTokenHandler(c echo.Context) (string,error) {
