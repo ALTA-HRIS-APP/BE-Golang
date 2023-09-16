@@ -15,7 +15,7 @@ type TargetEntity struct {
 	UserIDPembuat  string
 	UserIDPenerima string `validate:"required"`
 	Due_Date       string `validate:"required"`
-	Proofs         []string
+	Proofs         string
 	// User           UserEntity
 }
 

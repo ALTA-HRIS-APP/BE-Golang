@@ -15,6 +15,7 @@ type ClaimsToken struct {
 	Role   string `json:"role"`
 	Iat    int    `json:"iat"`
 	Exp    int    `json:"exp"`
+	Token  string `json:"token"`
 }
 
 func JWTMiddleware() echo.MiddlewareFunc {
@@ -42,8 +43,9 @@ func ExtractToken(e echo.Context) *ClaimsToken {
 		return nil
 	}
 	claims := user.Claims.(jwt.MapClaims)
-	data.Emails = claims["email"].(string)
-	data.ID = claims["userId"].(string)
-	data.Role = claims["userRole"].(string)
+	data.Emails = claims["emails"].(string)
+	data.ID = claims["id"].(string)
+	data.Role = claims["role"].(string)
+	data.Token = user.Raw
 	return &data
 }

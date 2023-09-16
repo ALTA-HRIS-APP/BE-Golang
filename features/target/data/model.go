@@ -18,7 +18,7 @@ type Target struct {
 	UserIDPembuat  string         `gorm:"column:user_id_pembuat;not null"`
 	UserIDPenerima string         `gorm:"column:user_id_penerima;not null"`
 	Due_Date       string         `gorm:"column:due_date;not null"`
-	Proofs         []string       `gorm:"column:proofs"`
+	Proofs         string         `gorm:"column:proofs"`
 	// User           User           `gorm:"foreignKey:UserIDPembuat"`
 }
 
