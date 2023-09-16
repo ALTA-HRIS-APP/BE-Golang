@@ -1,6 +1,7 @@
 package data
 
 import (
+	"be_golang/klp3/features/target"
 	"time"
 
 	"gorm.io/gorm"
@@ -19,4 +20,36 @@ type Target struct {
 	Due_Date       string         `gorm:"column:due_date;not null"`
 	Proofs         []string       `gorm:"column:proofs"`
 	// User           User           `gorm:"foreignKey:UserIDPembuat"`
+}
+
+func MapEntityToModel(entity target.TargetEntity) Target {
+	return Target{
+		// ID:             entity.ID,
+		// CreatedAt:      entity.CreatedAt,
+		// UpdatedAt:      entity.UpdatedAt,
+		// DeletedAt:      entity.DeletedAt.Time,
+		KontenTarget:   entity.KontenTarget,
+		Status:         entity.Status,
+		DevisiID:       entity.DevisiID,
+		UserIDPembuat:  entity.UserIDPembuat,
+		UserIDPenerima: entity.UserIDPenerima,
+		Due_Date:       entity.Due_Date,
+		Proofs:         entity.Proofs,
+	}
+}
+
+func MapModelToEntity(model Target) target.TargetEntity {
+	return target.TargetEntity{
+		ID:             model.ID,
+		CreatedAt:      model.CreatedAt,
+		UpdatedAt:      model.UpdatedAt,
+		DeletedAt:      model.DeletedAt.Time,
+		KontenTarget:   model.KontenTarget,
+		Status:         model.Status,
+		DevisiID:       model.DevisiID,
+		UserIDPembuat:  model.UserIDPembuat,
+		UserIDPenerima: model.UserIDPenerima,
+		Due_Date:       model.Due_Date,
+		Proofs:         model.Proofs,
+	}
 }

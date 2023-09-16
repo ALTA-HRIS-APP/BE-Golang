@@ -1,4 +1,4 @@
-package service
+package api
 
 import (
 	"be_golang/klp3/helper"

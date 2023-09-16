@@ -12,25 +12,25 @@ type TargetEntity struct {
 	KontenTarget   string `validate:"required"`
 	Status         string
 	DevisiID       string `validate:"required"`
-	UserIDPembuat  string `validate:"required"`
+	UserIDPembuat  string
 	UserIDPenerima string `validate:"required"`
 	Due_Date       string `validate:"required"`
 	Proofs         []string
 	// User           UserEntity
 }
 
-type ProjectDataInterface interface {
+type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	// SelectAll(userID uint) ([]CoreProject, error)
-	// Select(projectId uint, userID uint) (CoreProject, error)
-	// Update(projectId uint, userID uint, projectData CoreProject) error
+	// SelectAll(userID uint) ([]CoreTarget, error)
+	// Select(projectId uint, userID uint) (CoreTarget, error)
+	// Update(projectId uint, userID uint, projectData CoreTarget) error
 	// Delete(projectId uint, userID uint) error
 }
 
-type ProjectServiceInterface interface {
-	Create(input TargetEntity) (string, error)
-	// GetAll(userID uint) ([]CoreProject, error)
-	// GetById(userID uint, projectId uint) (CoreProject, error)
-	// UpdateById(projectId uint, userID uint, projectData CoreProject) error
+type TargetServiceInterface interface {
+	Create(input TargetEntity) error
+	// GetAll(userID uint) ([]CoreTarget, error)
+	// GetById(userID uint, projectId uint) (CoreTarget, error)
+	// UpdateById(projectId uint, userID uint, projectData CoreTarget) error
 	// DeleteById(projectId uint, userID uint) error
 }
