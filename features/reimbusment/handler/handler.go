@@ -3,7 +3,6 @@ package handler
 import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/reimbusment"
-	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"fmt"
 	"strings"
@@ -64,12 +63,7 @@ func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
 
 func (handler *ReimbusmentHandler)Add(c echo.Context)error{
 	idUser,_,_:=middlewares.ExtractToken(c)
-	// email:=middlewares.ExtractTokenID()
-	token,errToken:=usernodejs.GetTokenHandler(c)
-	if errToken != nil{
-		return helper.UnAutorization(c,"gagal get token",nil)
-	}
-	fmt.Println("token user",token)
+
 	var request ReimbursementRequest
 	errBind:=c.Bind(&request)
 	if errBind != nil{

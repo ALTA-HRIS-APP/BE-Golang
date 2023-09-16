@@ -21,7 +21,6 @@ type Reimbursement struct {
 	Persetujuan 	string 			`gorm:"default:-"`
 	UrlBukti 		string
 	UserID 			string 			`gorm:"type:varchar(255)"`
-	User            User 			`gorm:"foreignKey:UserID"`
 }
 
 type User struct{
@@ -64,7 +63,6 @@ func EntityToModel(user reimbusment.ReimbursementEntity)Reimbursement{
 		Persetujuan:     user.Persetujuan,
 		UrlBukti:        user.UrlBukti,
 		UserID:          user.UserID,
-		User: UserEntityToModel(user.User),
 	}
 }
 func UserModelToEntity(user User)reimbusment.UserEntity{
@@ -92,6 +90,5 @@ func ModelToEntity(user Reimbursement)reimbusment.ReimbursementEntity{
 		Persetujuan:     user.Persetujuan,
 		UrlBukti:        user.UrlBukti,
 		UserID:          user.UserID,
-		User: UserModelToEntity(user.User),
 	}
 }
