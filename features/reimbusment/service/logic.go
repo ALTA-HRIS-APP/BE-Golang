@@ -23,13 +23,13 @@ func (service *ReimbursementService) EditAdmin(status string,userID string,UserA
 
 	if dataUser.Devisi=="manager"{
 		if dataUserA.Devisi =="C-Level"{
-			return errors.New("tidak dapak approve C-Level, hanya dapat approve di N-1")
+			return errors.New("tidak dapat approve C-Level, hanya dapat approve di N-1")
 		}
 		if dataUserA.Devisi =="HR"{
-			return errors.New("tidak dapak approve HR, hanya dapat approve di N-1")
+			return errors.New("tidak dapat approve HR, hanya dapat approve di N-1")
 		}
 		if dataUserA.Devisi =="manager"{
-			return errors.New("tidak dapak approve manager, hanya dapat approve di N-1")
+			return errors.New("tidak dapat approve manager, hanya dapat approve di N-1")
 		}
 		errUpdate:=service.reimbursmentService.UpdateStatusByManager(status,userID,id)
 		if errUpdate != nil{
@@ -38,16 +38,16 @@ func (service *ReimbursementService) EditAdmin(status string,userID string,UserA
 
 	}else if dataUser.Devisi=="lead"{
 		if dataUserA.Devisi =="C-Level"{
-			return errors.New("tidak dapak approve C-Level, hanya dapat approve di N-1")
+			return errors.New("tidak dapat approve C-Level, hanya dapat approve di N-1")
 		}
 		if dataUserA.Devisi =="HR"{
-			return errors.New("tidak dapak approve HR, hanya dapat approve di N-1")
+			return errors.New("tidak dapat approve HR, hanya dapat approve di N-1")
 		}
 		if dataUserA.Devisi =="manager"{
-			return errors.New("tidak dapak approve manager, hanya dapat approve di N-1")
+			return errors.New("tidak dapat approve manager, hanya dapat approve di N-1")
 		}
 		if dataUserA.Devisi =="lead"{
-			return errors.New("tidak dapak approve lead, hanya dapat approve di N-1")
+			return errors.New("tidak dapat approve lead, hanya dapat approve di N-1")
 		}		
 		errUpdate:=service.reimbursmentService.UpdateStatusByManager(status,userID,id)
 		if errUpdate != nil{

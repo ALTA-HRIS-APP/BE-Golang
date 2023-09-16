@@ -1,6 +1,9 @@
 package handler
 
-import "be_golang/klp3/features/reimbusment"
+import (
+	"be_golang/klp3/features/reimbusment"
+	usernodejs "be_golang/klp3/features/userNodejs"
+)
 
 type ReimbursementRequest struct {
 	ID              string `json:"id" form:"id"`
@@ -23,6 +26,17 @@ type UserRequest struct {
 	Devisi string `json:"devisi" form:"devisi"`
 }
 
+type LoginReguest struct{
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
+
+func Login(login LoginReguest)usernodejs.Login{
+	return usernodejs.Login{
+		Email: login.Email,
+		Password: login.Password,
+	}
+}
 func RequestToEntity(user ReimbursementRequest)reimbusment.ReimbursementEntity{
 	return reimbusment.ReimbursementEntity{
 		ID:              user.ID,

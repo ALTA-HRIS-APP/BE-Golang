@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+type Login struct{
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
+
 // Struct untuk data devisi
 type Devisi struct {
 	ID        string    `json:"id"`
@@ -19,7 +24,26 @@ type Role struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
-
+type ResponseDataToken struct {
+    Meta MetaInfo `json:"meta"`
+    Data DataInfo `json:"data"`
+}
+type MetaInfo struct {
+    Status  int    `json:"status"`
+    Message string `json:"message"`
+}
+type DataInfo struct {
+    Token string `json:"token"`
+}
+type ResponseDataUser struct {
+    Meta MetaInfo `json:"meta"`
+    Data Pengguna `json:"data"`
+}
+func MappingToken(token DataInfo)DataInfo{
+	return DataInfo{
+		Token: token.Token,
+	}
+}
 // Struct untuk data pengguna
 type Pengguna struct {
 	ID          string    `json:"id"`
@@ -44,6 +68,24 @@ type Data struct {
 		Message string     `json:"message"`
 		Data    []Pengguna `json:"data"`
 	} `json:"meta"`
+}
+
+func ByteToResponseById(pengguna Pengguna) Pengguna {
+	return Pengguna{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Surel:       pengguna.Surel,
+		NoHP:        pengguna.NoHP,
+		Jabatan:     pengguna.Jabatan,
+		KataSandi:   pengguna.KataSandi,
+		Status:      pengguna.Status,
+		CreatedAt:   pengguna.CreatedAt,
+		UpdatedAt:   pengguna.UpdatedAt,
+		DevisiID:    pengguna.DevisiID,
+		RoleID:      pengguna.RoleID,
+		Devisi:      Devisipe(pengguna.Devisi),
+		Role:        Rolepe(pengguna.Role),
+	}
 }
 
 func ByteToResponse(pengguna Pengguna) Pengguna {

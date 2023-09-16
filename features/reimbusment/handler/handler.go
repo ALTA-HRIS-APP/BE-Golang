@@ -64,7 +64,7 @@ func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
 func (handler *ReimbusmentHandler)Add(c echo.Context)error{
 	idUser,_,_:=middlewares.ExtractToken(c)
 	// email:=middlewares.ExtractTokenID()
-	// fmt.Println("email",email)
+
 	var request ReimbursementRequest
 	errBind:=c.Bind(&request)
 	if errBind != nil{
