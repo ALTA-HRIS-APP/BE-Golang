@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 func LoginUser(login Login)(string,error){
@@ -93,4 +96,20 @@ func GetAllUser() ([]Pengguna, error) {
 		return dataPengguna,nil
 	}
 	return nil,err
+}
+
+func GetTokenHandler(c echo.Context) (string,error) {
+	authHeader := c.Request().Header.Get("Authorization")
+
+	if authHeader == "" {
+		return "",c.String(http.StatusUnauthorized, "Header Authorization tidak ditemukan")
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		return "",c.String(http.StatusUnauthorized, "Token tidak valid")
+	}
+
+	token := parts[1]
+	return token,nil
 }
