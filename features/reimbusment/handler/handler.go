@@ -14,40 +14,6 @@ type ReimbusmentHandler struct {
 	reimbushmentHandler reimbusment.ReimbusmentServiceInterface
 }
 
-func (handler *ReimbusmentHandler) Edit(c echo.Context) error {
-
-	idUser, _, _ := middlewares.ExtractToken(c)
-
-	var request ReimbursementRequest
-	errBind := c.Bind(&request)
-	if errBind != nil {
-		return helper.FailedRequest(c, "error bind data"+errBind.Error(), nil)
-	}
-
-	id := c.Param("id_reimbusherment")
-
-	entity := RequestToEntity(request)
-
-	if entity.UserID == "" {
-		if entity.Status != "" {
-			return helper.FailedRequest(c, "hanya admin yang dapat mengedit status", nil)
-		}
-		if entity.Persetujuan != "" {
-			return helper.FailedRequest(c, "hanya HR yang dapat mengedit persetujuan", nil)
-		}
-		entity.UserID = idUser
-		err := handler.reimbushmentHandler.Edit(entity, id)
-		if err != nil {
-			return helper.InternalError(c, err.Error(), nil)
-		}
-	} else {
-		err := handler.reimbushmentHandler.EditAdmin(entity.Status, entity.UserID, idUser, id)
-		if err != nil {
-			return helper.InternalError(c, err.Error(), nil)
-		}
-	}
-	return helper.SuccessWithOutData(c, "success update reimbursment")
-}
 
 func (handler *ReimbusmentHandler) Add(c echo.Context) error {
 	idUser, _, _ := middlewares.ExtractToken(c)
@@ -75,6 +41,25 @@ func (handler *ReimbusmentHandler) Add(c echo.Context) error {
 		}
 	}
 	return helper.SuccessWithOutData(c, "success create reimbursment")
+}
+
+func (handler *ReimbusmentHandler) Edit(c echo.Context)error{
+	idRemb:=c.Param("id_reimbursement")
+	var request ReimbursementRequest
+	errBind:=c.Bind(&request)	
+	if errBind != nil{
+		return helper.FailedRequest(c,"error binding data",nil)
+	}
+	entity:=RequestToEntity(request)
+	err:=handler.reimbushmentHandler.Edit(entity,idRemb)
+	if err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return helper.FailedRequest(c, err.Error(), nil)
+		} else {
+			return helper.InternalError(c, err.Error(), nil)
+		}
+	}
+	return helper.SuccessWithOutData(c,"success update data reimbursement")
 }
 func New(handler reimbusment.ReimbusmentServiceInterface) *ReimbusmentHandler {
 	return &ReimbusmentHandler{
