@@ -63,26 +63,12 @@ func (repo *ReimbusmentData) Insert(input reimbusment.ReimbursementEntity) (stri
 	inputModel.ID = idUUID
 	tx := repo.db.Create(&inputModel)
 	if tx.Error != nil {
-		return "", errors.New("create failed")
+		return "", tx.Error
 	}
 	if tx.RowsAffected == 0{
 		return "",errors.New("row not affected")
 	}
 	return inputModel.ID, nil
-}
-
-// SelectUser implements reimbusment.ReimbusmentDataInterface.
-func (repo *ReimbusmentData) SelectUser(UserID string) (reimbusment.UserEntity, error) {
-	var input User
-	tx := repo.db.Where("id=?", UserID).First(&input)
-	if tx.Error != nil {
-		return reimbusment.UserEntity{}, tx.Error
-	}
-	if tx.RowsAffected == 0{
-		return reimbusment.UserEntity{},errors.New("row not affected")
-	}
-	output := UserModelToEntity(input)
-	return output, nil
 }
 
 func New(db *gorm.DB) reimbusment.ReimbusmentDataInterface {

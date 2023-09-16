@@ -33,7 +33,6 @@ type UserEntity struct{
 
 type ReimbusmentDataInterface interface{
 	Insert(input ReimbursementEntity)(string,error)
-	SelectUser(UserID string)(UserEntity,error)
 	UpdateUser(input ReimbursementEntity,idUser string,id string)error
 	UpdateStatusByManager(status string,idUser string,id string)(error)
 	UpdateStatusByHR(status string,idUser string,id string)(error)
