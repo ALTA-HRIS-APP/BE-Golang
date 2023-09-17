@@ -19,11 +19,20 @@ type CutiEntity struct {
 	EndCuti      string
 	UrlPendukung string `validate:"required"`
 	UserID       string
+	User         UserEntity
+}
+
+type UserEntity struct {
+	ID   string
+	Name string
 }
 
 type CutiDataInterface interface {
 	Insert(input CutiEntity) error
+	SelectAllKaryawan(idUser string) ([]CutiEntity, error)
+	SelectAll() ([]CutiEntity, error)
 }
 type CutiServiceInterface interface {
 	Add(input CutiEntity) error
+	Get(idUser string) ([]CutiEntity, error)
 }
