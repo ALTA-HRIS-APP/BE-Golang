@@ -14,48 +14,93 @@ type ReimbursementService struct {
 	validate            *validator.Validate
 }
 
-// Edit implements reimbusment.ReimbusmentServiceInterface.
-func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity, id string,idUser string) error {
+// Get implements reimbusment.ReimbusmentServiceInterface.
+func (service *ReimbursementService) Get(idUser string,param reimbusment.QueryParams) (bool,[]reimbusment.ReimbursementEntity, error) {
+	var total_pages int64
+	nextPage := true
 	dataUser,errUser:=usernodejs.GetByIdUser(idUser)
-	if errUser !=nil{
+	if errUser != nil{
+		return true,nil,errors.New("error get data user")
+	}
+
+	if dataUser.Jabatan == "karyawan"{
+		count,dataReim,errReim:=service.reimbursmentService.SelectAllKaryawan(idUser,param)
+		if errReim != nil{
+			return true,nil,errReim
+		}
+		if param.IsClassDashboard{
+			total_pages = count /int64(param.ItemsPerPage)
+			if count % int64(param.ItemsPerPage) != 0{
+				total_pages +=1
+			}
+	
+			if param.Page == int(total_pages){
+				nextPage = false
+			}
+		}
+		return nextPage,dataReim,nil
+	}else{
+		count,dataReim,errReim:=service.reimbursmentService.SelectAll(param)
+		if errReim != nil{
+			return true,nil,errReim
+		}
+		if param.IsClassDashboard{
+			total_pages = count /int64(param.ItemsPerPage)
+			if count % int64(param.ItemsPerPage) != 0{
+				total_pages +=1
+			}
+	
+			if param.Page == int(total_pages){
+				nextPage = false
+			}
+		}
+		return nextPage,dataReim,nil
+
+	}
+}
+
+// Edit implements reimbusment.ReimbusmentServiceInterface.
+func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity, id string, idUser string) error {
+	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	if errUser != nil {
 		return errors.New("failed get user by id")
 	}
 
-	batasan,errBatasan:=service.reimbursmentService.SelectById(id)
-	if errBatasan != nil{
+	batasan, errBatasan := service.reimbursmentService.SelectById(id)
+	if errBatasan != nil {
 		return errBatasan
 	}
-	if input.Nominal > batasan{
+	if input.Nominal > batasan {
 		return errors.New("nominal tidak boleh melebihi batasan reimbursment")
 	}
-	if dataUser.Jabatan =="karyawan"{
-		if input.BatasanReimburs != 0{
+	if dataUser.Jabatan == "karyawan" {
+		if input.BatasanReimburs != 0 {
 			return errors.New("karyawan tidak berhak mengedit batasan reimbursement, harap berkonsultasi dengan atasan")
 		}
-		if input.Persetujuan != ""{
+		if input.Persetujuan != "" {
 			return errors.New("hanya HR yang bisa approve final")
 		}
-		if input.Status != ""{
+		if input.Status != "" {
 			return errors.New("hanya Manager yang bisa approve")
 		}
-		input.UserID=idUser
-		err:=service.reimbursmentService.UpdateKaryawan(input,id)
-		if err != nil{
+		input.UserID = idUser
+		err := service.reimbursmentService.UpdateKaryawan(input, id)
+		if err != nil {
 			return err
 		}
 		return nil
-	}else if dataUser.Jabatan == "manager"{
-		if input.Persetujuan != ""{
+	} else if dataUser.Jabatan == "manager" {
+		if input.Persetujuan != "" {
 			return errors.New("hanya hr yang bisa approve final")
 		}
-		err:=service.reimbursmentService.Update(input,id)
-		if err != nil{
+		err := service.reimbursmentService.Update(input, id)
+		if err != nil {
 			return err
 		}
 		return nil
-	}else{
-		err:=service.reimbursmentService.Update(input,id)
-		if err != nil{
+	} else {
+		err := service.reimbursmentService.Update(input, id)
+		if err != nil {
 			return err
 		}
 		return nil
@@ -68,7 +113,7 @@ func (service *ReimbursementService) Add(input reimbusment.ReimbursementEntity) 
 	if errValidate != nil {
 		return errors.New("error validate, data deskripsi, nominal, tipe reimbusment required")
 	}
-	if input.Nominal > 5000000{
+	if input.Nominal > 5000000 {
 		return errors.New("pengajuan reimbursement tidak boleh melebihi Rp. 5.000.000")
 	}
 	errInsert := service.reimbursmentService.Insert(input)

@@ -2,6 +2,7 @@ package data
 
 import (
 	"be_golang/klp3/features/reimbusment"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"time"
 
 	"gorm.io/gorm"
@@ -23,31 +24,76 @@ type Reimbursement struct {
 	UserID 			string 			`gorm:"type:varchar(255)"`
 }
 
-type User struct{
-	ID        		string `gorm:"primaryKey;type:varchar(255)"`
+type ReimbursementPengguna struct {
+	ID        		string 			
 	CreatedAt 		time.Time
 	UpdatedAt 		time.Time
-	DeletedAt 		gorm.DeletedAt `gorm:"index"`
-	Name 			string
-	Role 			string
-	Devisi 			string	
+	DeletedAt 		gorm.DeletedAt 
+	Description 	string
+	Status 			string 			
+	BatasanReimburs int 			
+	Nominal 		int
+	Date 			string           
+	Tipe 			string
+	Persetujuan 	string 			
+	UrlBukti 		string
+	UserID 			string
+	User            User 			
 }
 
-// func PenggunaToUser(user usernodejs.Pengguna)User{
-// 	return User{
-// 		ID: user.ID,
-// 		Name: user.NamaLengkap,
-// 		Role: user.Role.Nama,
-// 		Devisi: user.Devisi.Nama,
-// 	}
-// }
+type User struct{
+	ID        		string 
+	Name 			string	
+}
 
-func UserEntityToModel(user reimbusment.UserEntity)User{
+
+func ModelToPengguna(user Reimbursement)ReimbursementPengguna{
+	return ReimbursementPengguna{
+		ID:              user.ID,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
+		DeletedAt:       user.DeletedAt,
+		Description:     user.Description,
+		Status:          user.Status,
+		BatasanReimburs: user.BatasanReimburs,
+		Nominal:         user.Nominal,
+		Date:            user.Date,
+		Tipe:            user.Tipe,
+		Persetujuan:     user.Persetujuan,
+		UrlBukti:        user.UrlBukti,
+		UserID:          user.UserID,
+	}
+}
+
+func PenggunaToEntity(user ReimbursementPengguna)reimbusment.ReimbursementEntity{
+	return reimbusment.ReimbursementEntity{
+		ID:              user.ID,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
+		Description:     user.Description,
+		Status:          user.Status,
+		BatasanReimburs: user.BatasanReimburs,
+		Nominal:         user.Nominal,
+		Date:            user.Date,
+		Tipe:            user.Tipe,
+		Persetujuan:     user.Persetujuan,
+		UrlBukti:        user.UrlBukti,
+		UserID:          user.UserID,
+		User: UserToEntity(user.User),
+	}
+}
+
+func PenggunaToUser(user usernodejs.Pengguna)User{
 	return User{
-		ID:        user.ID,
-		Name:      user.Name,
-		Role:      user.Role,
-		Devisi:    user.Devisi,
+		ID: user.ID,
+		Name: user.NamaLengkap,
+	}
+}
+
+func UserToEntity(user User)reimbusment.UserEntity{
+	return reimbusment.UserEntity{
+		ID:   user.ID,
+		Name: user.Name,
 	}
 }
 
@@ -63,14 +109,6 @@ func EntityToModel(user reimbusment.ReimbursementEntity)Reimbursement{
 		Persetujuan:     user.Persetujuan,
 		UrlBukti:        user.UrlBukti,
 		UserID:          user.UserID,
-	}
-}
-func UserModelToEntity(user User)reimbusment.UserEntity{
-	return reimbusment.UserEntity{
-		ID:        user.ID,
-		Name:      user.Name,
-		Role:      user.Role,
-		Devisi:    user.Devisi,
 	}
 }
 

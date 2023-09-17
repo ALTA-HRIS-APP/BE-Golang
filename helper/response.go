@@ -14,6 +14,15 @@ func Success(c echo.Context, message string, data any) error{
 	})
 }
 
+func SuccessGetAll(c echo.Context, message string, data any,bol bool) error{
+	return c.JSON(http.StatusOK, map[string]any{
+		"status":"success",
+		"message":message,
+		"next_page":bol,
+		"data":data,
+	})
+}
+
 func SuccessWithOutData(c echo.Context, message string) error{
 	return c.JSON(http.StatusOK, map[string]any{
 		"status":"success",

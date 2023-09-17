@@ -19,8 +19,6 @@ type ReimbursementResponse struct {
 type UserResponse struct {
 	ID     string `json:"id,omitempty"`
 	Name   string `json:"name,omitempty"`
-	Role   string `json:"role,omitempty"`
-	Devisi string `json:"devisi,omitempty"`
 }
 
 func EntityToResponse(user reimbusment.ReimbursementEntity) ReimbursementResponse {
@@ -42,7 +40,5 @@ func UserEntityToResponse(user reimbusment.UserEntity) UserResponse {
 	return UserResponse{
 		ID:     user.ID,
 		Name:   user.Name,
-		Role:   user.Role,
-		Devisi: user.Devisi,
 	}
 }
