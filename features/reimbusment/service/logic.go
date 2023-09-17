@@ -36,18 +36,12 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 		if input.Persetujuan != ""{
 			return errors.New("hanya hr yang bisa approve final")
 		}
-		if input.UserID == ""{
-			return errors.New("harap pilih user id yang ingin di approve")
-		}
 		err:=service.reimbursmentService.Update(input,id)
 		if err != nil{
 			return err
 		}
 		return nil
 	}else{
-		if input.UserID == ""{
-			return errors.New("harap pilih user id yang ingin di approve")
-		}
 		err:=service.reimbursmentService.Update(input,id)
 		if err != nil{
 			return err
