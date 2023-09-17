@@ -109,10 +109,11 @@ func (repo *ReimbusmentData) SelectAllKaryawan(idUser string,param reimbusment.Q
 	}
 	var reimbushEntity []reimbusment.ReimbursementEntity
 	for _,value:=range reimbushPengguna{
-		value.User=User(userEntity)
-		reimbushEntity = append(reimbushEntity, PenggunaToEntity(value))
+		if value.UserID == userEntity.ID{
+			value.User=User(userEntity)
+			reimbushEntity = append(reimbushEntity, PenggunaToEntity(value))
+		}
 	}
-	
 	return total_reimbursement,reimbushEntity,nil	
 }
 
