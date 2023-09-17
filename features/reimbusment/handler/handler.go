@@ -116,6 +116,15 @@ func (handler *ReimbusmentHandler)GetAll(c echo.Context)error{
 	return helper.SuccessGetAll(c,"get all reimbursement successfully",response,bol)
 }
 
+func (handler *ReimbusmentHandler)Delete(c echo.Context)error{
+	id:=c.Param("id_reimbursement")
+	err:=handler.reimbushmentHandler.Delete(id)
+	if err != nil{
+		return helper.InternalError(c,err.Error(),nil)
+	}
+	return helper.SuccessWithOutData(c,"success delete reimbursement")
+}
+
 func New(handler reimbusment.ReimbusmentServiceInterface) *ReimbusmentHandler {
 	return &ReimbusmentHandler{
 		reimbushmentHandler: handler,

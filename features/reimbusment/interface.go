@@ -40,10 +40,12 @@ type ReimbusmentDataInterface interface{
 	SelectById(id string)(int,error)
 	SelectAllKaryawan(idUser string,param QueryParams)(int64,[]ReimbursementEntity,error)
 	SelectAll(param QueryParams)(int64,[]ReimbursementEntity,error)
+	Delete(id string)error
 }
 
 type ReimbusmentServiceInterface interface{
 	Add(input ReimbursementEntity)(error)
 	Edit(input ReimbursementEntity,id string,idUser string)(error)
 	Get(idUser string,param QueryParams)(bool,[]ReimbursementEntity,error)
+	Delete(id string)error
 }

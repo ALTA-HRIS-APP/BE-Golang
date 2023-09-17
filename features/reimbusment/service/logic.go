@@ -14,47 +14,56 @@ type ReimbursementService struct {
 	validate            *validator.Validate
 }
 
+// Delete implements reimbusment.ReimbusmentServiceInterface.
+func (service *ReimbursementService) Delete(id string) error {
+	err:=service.reimbursmentService.Delete(id)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
 // Get implements reimbusment.ReimbusmentServiceInterface.
-func (service *ReimbursementService) Get(idUser string,param reimbusment.QueryParams) (bool,[]reimbusment.ReimbursementEntity, error) {
+func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
 	var total_pages int64
 	nextPage := true
-	dataUser,errUser:=usernodejs.GetByIdUser(idUser)
-	if errUser != nil{
-		return true,nil,errors.New("error get data user")
+	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	if errUser != nil {
+		return true, nil, errors.New("error get data user")
 	}
 
-	if dataUser.Jabatan == "karyawan"{
-		count,dataReim,errReim:=service.reimbursmentService.SelectAllKaryawan(idUser,param)
-		if errReim != nil{
-			return true,nil,errReim
+	if dataUser.Jabatan == "karyawan" {
+		count, dataReim, errReim := service.reimbursmentService.SelectAllKaryawan(idUser, param)
+		if errReim != nil {
+			return true, nil, errReim
 		}
-		if param.IsClassDashboard{
-			total_pages = count /int64(param.ItemsPerPage)
-			if count % int64(param.ItemsPerPage) != 0{
-				total_pages +=1
+		if param.IsClassDashboard {
+			total_pages = count / int64(param.ItemsPerPage)
+			if count%int64(param.ItemsPerPage) != 0 {
+				total_pages += 1
 			}
-	
-			if param.Page == int(total_pages){
+
+			if param.Page == int(total_pages) {
 				nextPage = false
 			}
 		}
-		return nextPage,dataReim,nil
-	}else{
-		count,dataReim,errReim:=service.reimbursmentService.SelectAll(param)
-		if errReim != nil{
-			return true,nil,errReim
+		return nextPage, dataReim, nil
+	} else {
+		count, dataReim, errReim := service.reimbursmentService.SelectAll(param)
+		if errReim != nil {
+			return true, nil, errReim
 		}
-		if param.IsClassDashboard{
-			total_pages = count /int64(param.ItemsPerPage)
-			if count % int64(param.ItemsPerPage) != 0{
-				total_pages +=1
+		if param.IsClassDashboard {
+			total_pages = count / int64(param.ItemsPerPage)
+			if count%int64(param.ItemsPerPage) != 0 {
+				total_pages += 1
 			}
-	
-			if param.Page == int(total_pages){
+
+			if param.Page == int(total_pages) {
 				nextPage = false
 			}
 		}
-		return nextPage,dataReim,nil
+		return nextPage, dataReim, nil
 
 	}
 }
