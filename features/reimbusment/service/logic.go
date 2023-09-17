@@ -15,19 +15,31 @@ type ReimbursementService struct {
 }
 
 // Edit implements reimbusment.ReimbusmentServiceInterface.
-func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity, id string) error {
-	dataUser,errUser:=usernodejs.GetByIdUser(input.ID)
+func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity, id string,idUser string) error {
+	dataUser,errUser:=usernodejs.GetByIdUser(idUser)
 	if errUser !=nil{
 		return errors.New("failed get user by id")
 	}
+
+	batasan,errBatasan:=service.reimbursmentService.SelectById(id)
+	if errBatasan != nil{
+		return errBatasan
+	}
+	if input.Nominal > batasan{
+		return errors.New("nominal tidak boleh melebihi batasan reimbursment")
+	}
 	if dataUser.Jabatan =="karyawan"{
+		if input.BatasanReimburs != 0{
+			return errors.New("karyawan tidak berhak mengedit batasan reimbursement, harap berkonsultasi dengan atasan")
+		}
 		if input.Persetujuan != ""{
-			return errors.New("hanya hr yang bisa approve final")
+			return errors.New("hanya HR yang bisa approve final")
 		}
 		if input.Status != ""{
-			return errors.New("hanya manager yang bisa approve")
+			return errors.New("hanya Manager yang bisa approve")
 		}
-		err:=service.reimbursmentService.Update(input,id)
+		input.UserID=idUser
+		err:=service.reimbursmentService.UpdateKaryawan(input,id)
 		if err != nil{
 			return err
 		}

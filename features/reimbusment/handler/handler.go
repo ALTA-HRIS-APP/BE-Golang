@@ -44,14 +44,28 @@ func (handler *ReimbusmentHandler) Add(c echo.Context) error {
 }
 
 func (handler *ReimbusmentHandler) Edit(c echo.Context)error{
+
 	idRemb:=c.Param("id_reimbursement")
+	idUser,_,_:=middlewares.ExtractToken(c)
+
 	var request ReimbursementRequest
 	errBind:=c.Bind(&request)	
 	if errBind != nil{
 		return helper.FailedRequest(c,"error binding data",nil)
 	}
+
+	_, errFile := c.FormFile("image")
+	var link string
+	var errLink error
+	if errFile == nil {
+		link, errLink = helper.UploadImage(c)
+		if errLink != nil {
+			fmt.Println("Error mengunggah gambar:", errLink)
+		}
+	}
 	entity:=RequestToEntity(request)
-	err:=handler.reimbushmentHandler.Edit(entity,idRemb)
+	entity.UrlBukti=link
+	err:=handler.reimbushmentHandler.Edit(entity,idRemb,idUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "validation") {
 			return helper.FailedRequest(c, err.Error(), nil)
