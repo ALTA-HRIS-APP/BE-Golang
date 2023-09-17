@@ -60,7 +60,7 @@ func (handler *ReimbusmentHandler) Edit(c echo.Context)error{
 	if errFile == nil {
 		link, errLink = helper.UploadImage(c)
 		if errLink != nil {
-			fmt.Println("Error mengunggah gambar:", errLink)
+			return helper.FailedRequest(c,errLink.Error(),nil)
 		}
 	}
 	entity:=RequestToEntity(request)
