@@ -21,8 +21,6 @@ func New(service target.TargetServiceInterface) *targetHandler {
 }
 
 func (h *targetHandler) CreateTarget(c echo.Context) error {
-	// newTarget := new(TargetRequest)
-	// form, err := c.MultipartForm()
 	// Mengambil ID pengguna dari token JWT yang terkait dengan permintaan
 	user := middleware.ExtractToken(c)
 	// helper.PrettyPrint(user)
@@ -36,16 +34,14 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 		return helper.FailedRequest(c, "error bind data", nil)
 	}
 
-	responseUser, err := api.ApiGetUser(user.Token)
+	responseUser, err := api.ApiGetUserProfile(user.Token)
 	if err != nil {
 		log.Printf("Error get detail user: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
-	// _, err = api.ApiGetUsers(user.Token)
-	// if err != nil {
-	// 	log.Printf("Error get user: %s", err.Error())
-	// 	return helper.FailedRequest(c, err.Error(), nil)
-	// }
+	if user.Role=="user"{
+		return helper.UnAutorization(c.Echo().NewContext())
+	}
 	link, err := helper.UploadImage(c)
 	if err != nil {
 		log.Printf("Error link: %s", err.Error())
