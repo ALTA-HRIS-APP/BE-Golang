@@ -22,9 +22,11 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.PUT("/reimbursements/:id_reimbursement",handlerRes.Edit,middlewares.JWTMiddleware())
 	c.GET("/reimbursements",handlerRes.GetAll,middlewares.JWTMiddleware())
 
+
 	dataCuti := dataC.New(db)
 	serviceCuti := serviceC.New(dataCuti)
 	handlerCuti := handlerC.New(serviceCuti)
 
 	c.POST("/cutis", handlerCuti.AddCuti, middlewares.JWTMiddleware())
+	c.GET("/cutis", handlerCuti.GetAll, middlewares.JWTMiddleware())
 }

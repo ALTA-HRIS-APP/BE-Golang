@@ -2,6 +2,7 @@ package service
 
 import (
 	"be_golang/klp3/features/cuti"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"errors"
 
 	"github.com/go-playground/validator/v10"
@@ -10,6 +11,27 @@ import (
 type CutiService struct {
 	cutiService cuti.CutiDataInterface
 	validate    *validator.Validate
+}
+
+// Get implements cuti.CutiServiceInterface.
+func (service *CutiService) Get(idUser string) ([]cuti.CutiEntity, error) {
+	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	if errUser != nil {
+		return nil, errors.New("eror get data user")
+	}
+	if dataUser.Jabatan == "karyawan" {
+		dataCuti, errCuti := service.cutiService.SelectAllKaryawan(idUser)
+		if errCuti != nil {
+			return nil, errCuti
+		}
+		return dataCuti, nil
+	} else {
+		dataCuti, errCuti := service.cutiService.SelectAll()
+		if errCuti != nil {
+			return nil, errCuti
+		}
+		return dataCuti, nil
+	}
 }
 
 // Add implements cuti.CutiServiceInterface.
