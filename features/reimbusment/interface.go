@@ -23,12 +23,14 @@ type ReimbursementEntity struct {
 
 type UserEntity struct{
 	ID        		string 
-	CreatedAt 		time.Time
-	UpdatedAt 		time.Time
-	DeletedAt 		time.Time
 	Name 			string
-	Role 			string
-	Devisi 			string	
+}
+
+type QueryParams struct {
+	Page            int
+	ItemsPerPage    int
+	SearchName      string
+	IsClassDashboard bool
 }
 
 type ReimbusmentDataInterface interface{
@@ -36,10 +38,12 @@ type ReimbusmentDataInterface interface{
 	UpdateKaryawan(input ReimbursementEntity,id string)(error)
 	Update(input ReimbursementEntity,id string)(error)
 	SelectById(id string)(int,error)
-
+	SelectAllKaryawan(idUser string,param QueryParams)(int64,[]ReimbursementEntity,error)
+	SelectAll(param QueryParams)(int64,[]ReimbursementEntity,error)
 }
 
 type ReimbusmentServiceInterface interface{
 	Add(input ReimbursementEntity)(error)
 	Edit(input ReimbursementEntity,id string,idUser string)(error)
+	Get(idUser string,param QueryParams)(bool,[]ReimbursementEntity,error)
 }

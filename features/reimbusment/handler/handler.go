@@ -5,6 +5,7 @@ import (
 	"be_golang/klp3/features/reimbusment"
 	"be_golang/klp3/helper"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -75,6 +76,46 @@ func (handler *ReimbusmentHandler) Edit(c echo.Context)error{
 	}
 	return helper.SuccessWithOutData(c,"success update data reimbursement")
 }
+
+func (handler *ReimbusmentHandler)GetAll(c echo.Context)error{
+	var qparams reimbusment.QueryParams
+	page:=c.QueryParam("page")
+	itemsPerPage:=c.QueryParam("itemsPerPage")
+
+	if itemsPerPage ==""{
+		qparams.IsClassDashboard=false
+	}else{
+		qparams.IsClassDashboard=true
+		itemsConv,errItem:=strconv.Atoi(itemsPerPage)
+		if errItem != nil{
+			return helper.FailedRequest(c,"item per page not valid",nil)
+		}
+		qparams.ItemsPerPage=itemsConv		
+	}
+	if page==""{
+		qparams.Page=1
+	}else{
+		pageConv,errPage:=strconv.Atoi(page)
+		if errPage != nil{
+			return helper.FailedRequest(c,"page not valid",nil)
+		}
+		qparams.Page=pageConv
+	}
+	
+	searchName:=c.QueryParam("searchName")
+	qparams.SearchName=searchName
+	idUser,_,_:=middlewares.ExtractToken(c)
+	bol,data,err:=handler.reimbushmentHandler.Get(idUser,qparams)
+	if err != nil{
+		return helper.InternalError(c,err.Error(),nil)
+	}
+	var response []ReimbursementResponse
+	for _,value:=range data{
+		response = append(response, EntityToResponse(value))
+	}
+	return helper.SuccessGetAll(c,"get all reimbursement successfully",response,bol)
+}
+
 func New(handler reimbusment.ReimbusmentServiceInterface) *ReimbusmentHandler {
 	return &ReimbusmentHandler{
 		reimbushmentHandler: handler,
