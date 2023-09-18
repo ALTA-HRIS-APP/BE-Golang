@@ -18,9 +18,16 @@ type TargetEntity struct {
 	Proofs         string
 }
 
+type QueryParam struct {
+	Page           int
+	LimitPerPage   int
+	SearchKonten   string
+	SearchStatus   string
+	ExistOtherPage bool
+}
 type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	SelectAll(userID string) ([]TargetEntity, error)
+	SelectAll(userID string, param QueryParam) (int64, []TargetEntity, error)
 	Select(targetID string, userID string) (TargetEntity, error)
 	Update(targetID string, userID string, targetData TargetEntity) error
 	Delete(targetID string, userID string) error
@@ -28,7 +35,7 @@ type TargetDataInterface interface {
 
 type TargetServiceInterface interface {
 	Create(input TargetEntity) (string, error)
-	GetAll(userID string) ([]TargetEntity, error)
+	GetAll(userID string, param QueryParam) (bool, []TargetEntity, error)
 	GetById(targetID string, userID string) (TargetEntity, error)
 	UpdateById(targetID string, userID string, targetData TargetEntity) error
 	DeleteById(targetID string, userID string) error

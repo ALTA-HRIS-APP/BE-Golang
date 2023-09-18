@@ -6,6 +6,7 @@ import (
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"log"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -76,18 +77,45 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 
 func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	// Mengambil ID pengguna dari token JWT yang terkait dengan permintaan
+	var qParam target.QueryParam
+	page := c.QueryParam("page")
+	limitPerPage := c.QueryParam("limitPerPage")
+
+	if limitPerPage != "" {
+		qParam.ExistOtherPage = true
+		limitConv, err := strconv.Atoi(limitPerPage)
+		if err != nil {
+			return helper.FailedRequest(c, "limit item per page not valid", nil)
+		}
+		qParam.LimitPerPage = limitConv
+	}
+	if page != "" {
+		pageConv, err := strconv.Atoi(page)
+		if err != nil {
+			return helper.FailedRequest(c, "page not valid", nil)
+		}
+		qParam.Page = pageConv
+	} else {
+		qParam.Page = 1
+	}
+	searchKonten := c.QueryParam("searchKonten")
+	qParam.SearchKonten = searchKonten
+
+	searchStatus := c.QueryParam("searchStatus")
+	qParam.SearchStatus = searchStatus
+
 	userID, _, _ := middlewares.ExtractToken(c)
-	result, err := usernodejs.GetByIdUser(userID)
+	_, data, err := h.targetService.GetAll(userID, qParam)
+
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
+		return helper.InternalError(c, err.Error(), nil)
 	}
 
-	// var targetsResponse []TargetResponse
-	// for _, v := range result {
-	// 	targetsResponse = append(targetsResponse, EntityToResponse(v))
-	// }
-	return helper.Found(c, "success create target", result)
+	var targetsResponse []TargetResponse
+	for _, v := range data {
+		targetsResponse = append(targetsResponse, EntityToResponse(v))
+	}
+	return helper.Success(c, "get all target successfully", targetsResponse)
 }
 
 func (h *targetHandler) GetTargetById(c echo.Context) error {

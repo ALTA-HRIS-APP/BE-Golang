@@ -45,12 +45,25 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 }
 
 // GetAll implements target.TargetServiceInterface.
-func (s *targetService) GetAll(userID string) ([]target.TargetEntity, error) {
-	result, err := s.targetRepo.SelectAll(userID)
+func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
+	var total_page int64
+	nextPage := true
+
+	count, data, err := s.targetRepo.SelectAll(userID, param)
 	if err != nil {
-		return nil, err
+		return true, nil, err
 	}
-	return result, nil
+	if param.ExistOtherPage {
+		total_page = count / int64(param.LimitPerPage)
+		if count%int64(param.LimitPerPage) != 0 {
+			total_page += 1
+		}
+
+		if param.Page == int(total_page) {
+			nextPage = false
+		}
+	}
+	return nextPage, data, nil
 }
 
 // GetById implements target.TargetServiceInterface.

@@ -44,20 +44,38 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 }
 
 // SelectAll implements target.TargetDataInterface.
-func (r *targetQuery) SelectAll(userID string) ([]target.TargetEntity, error) {
-	var dataTarget []Target
-	tx := r.db.Where("user_id", userID).Find(&dataTarget)
+func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+	// Inisialisasi variabel
+	var inputModel []Target
+	var totalTarget int64
+
+	// Query awal
+	query := r.db.Where("user_id = ?", userID)
+
+	// Handle pencarian berdasarkan nama jika diberikan
+	if param.SearchKonten != "" {
+		query = query.Where("description like ?", "%"+param.SearchKonten+"%")
+	}
+	if param.SearchStatus != "" {
+		query = query.Where("description like ?", "%"+param.SearchStatus+"%")
+	}
+
+	// Handle kondisi khusus untuk dashboard kelas
+	if param.ExistOtherPage {
+		offset := (param.Page - 1) * param.LimitPerPage
+		query = query.Offset(offset).Limit(param.LimitPerPage)
+	}
+
+	// Eksekusi query ke database
+	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		log.Printf("Error read target: %s", tx.Error)
-		return nil, tx.Error
+		return 0, nil, errors.New("failed to get all target")
 	}
-	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when read target")
-		return nil, errors.New("target not found")
-	}
-	resultTargetSlice := ListModelToEntity(dataTarget)
+	totalTarget = tx.RowsAffected
+
+	resultTargetSlice := ListModelToEntity(inputModel)
 	log.Println("Read target successfully")
-	return resultTargetSlice, nil
+	return totalTarget, resultTargetSlice, nil
 
 }
 
