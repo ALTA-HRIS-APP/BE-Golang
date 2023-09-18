@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/reimbusment"
 	"be_golang/klp3/helper"
 	"fmt"
@@ -13,81 +14,68 @@ type ReimbusmentHandler struct {
 	reimbushmentHandler reimbusment.ReimbusmentServiceInterface
 }
 
-func (handler *ReimbusmentHandler)Edit(c echo.Context)error{
-		// idUser,_:=middleware.ExtractToken(c)
-		idUser:="651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
-		
-		var request ReimbursementRequest
-		errBind:=c.Bind(&request)
-		if errBind != nil{
-			return helper.FailedRequest(c, "error bind data"+errBind.Error(), nil)
-		}
 
-		id:=c.Param("id_reimbusherment")
+func (handler *ReimbusmentHandler) Add(c echo.Context) error {
+	idUser, _, _ := middlewares.ExtractToken(c)
 
-		entity:=RequestToEntity(request)
-
-		if entity.UserID == ""{
-			if entity.Status !=""{
-				return helper.FailedRequest(c,"hanya admin yang dapat mengedit status",nil)
-			}
-			if entity.Persetujuan !=""{
-				return helper.FailedRequest(c,"hanya HR yang dapat mengedit persetujuan",nil)
-			}
-			entity.UserID=idUser
-			err:=handler.reimbushmentHandler.Edit(entity,id)
-			if err != nil{
-				return helper.InternalError(c,err.Error(),nil)
-			}
-		}else{
-			if entity.Description !=""{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit description",nil)
-			}
-			if entity.Tipe !=""{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit type",nil)
-			}
-			if entity.Nominal !=0{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit nominal",nil)
-			}
-			if entity.UrlBukti !=""{
-				return helper.FailedRequest(c,"hanya user yang dapat mengedit bukti transaksi",nil)
-			}
-			err:=handler.reimbushmentHandler.EditAdmin(entity.Status,entity.UserID,idUser,id)
-			if err != nil{
-				return helper.InternalError(c,err.Error(),nil)
-			}
-		}
-		return helper.SuccessWithOutData(c,"success update reimbursment")
-}
-
-func (handler *ReimbusmentHandler)Add(c echo.Context)error{
-	// idUser,_:=middleware.ExtractToken(c)
-	idUser:="651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
 	var request ReimbursementRequest
-	errBind:=c.Bind(&request)
-	if errBind != nil{
+	errBind := c.Bind(&request)
+	if errBind != nil {
 		return helper.FailedRequest(c, "error bind data"+errBind.Error(), nil)
 	}
-	link,errLink:=helper.UploadImage(c)
-	if errLink != nil{
+	link, errLink := helper.UploadImage(c)
+	if errLink != nil {
 		return helper.FailedRequest(c, errLink.Error(), nil)
 	}
 
 	fmt.Println(request)
-	entity:=RequestToEntity(request)
+	entity := RequestToEntity(request)
 	entity.UserID = idUser
 	entity.UrlBukti = link
-	err:= handler.reimbushmentHandler.Add(entity)
-	if err != nil{
-		if strings.Contains(err.Error(),"validation"){
-			return helper.FailedRequest(c,err.Error(),nil)
-		}else{
-			return helper.InternalError(c,err.Error(),nil)
+	err := handler.reimbushmentHandler.Add(entity)
+	if err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return helper.FailedRequest(c, err.Error(), nil)
+		} else {
+			return helper.InternalError(c, err.Error(), nil)
 		}
 	}
-	return helper.SuccessWithOutData(c,"success create reimbursment")
+	return helper.SuccessWithOutData(c, "success create reimbursment")
 }
-func New(handler reimbusment.ReimbusmentServiceInterface)*ReimbusmentHandler{
+
+func (handler *ReimbusmentHandler) Edit(c echo.Context)error{
+
+	idRemb:=c.Param("id_reimbursement")
+	idUser,_,_:=middlewares.ExtractToken(c)
+
+	var request ReimbursementRequest
+	errBind:=c.Bind(&request)	
+	if errBind != nil{
+		return helper.FailedRequest(c,"error binding data",nil)
+	}
+
+	_, errFile := c.FormFile("image")
+	var link string
+	var errLink error
+	if errFile == nil {
+		link, errLink = helper.UploadImage(c)
+		if errLink != nil {
+			return helper.FailedRequest(c,errLink.Error(),nil)
+		}
+	}
+	entity:=RequestToEntity(request)
+	entity.UrlBukti=link
+	err:=handler.reimbushmentHandler.Edit(entity,idRemb,idUser)
+	if err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return helper.FailedRequest(c, err.Error(), nil)
+		} else {
+			return helper.InternalError(c, err.Error(), nil)
+		}
+	}
+	return helper.SuccessWithOutData(c,"success update data reimbursement")
+}
+func New(handler reimbusment.ReimbusmentServiceInterface) *ReimbusmentHandler {
 	return &ReimbusmentHandler{
 		reimbushmentHandler: handler,
 	}

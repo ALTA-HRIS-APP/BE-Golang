@@ -15,13 +15,26 @@ type TargetRequest struct {
 	// User           UserEntity
 }
 
+type TargetReqPenerima struct {
+	Status string `json:"status,omitempty" form:"status"`
+	Proofs string `json:"proofs,omitempty" form:"proofs"`
+}
+
 func TargetRequestToEntity(req TargetRequest) target.TargetEntity {
 	return target.TargetEntity{
 		KontenTarget:   req.KontenTarget,
 		Status:         req.Status,
 		DevisiID:       req.DevisiID,
+		UserIDPembuat:  req.UserIDPembuat,
 		UserIDPenerima: req.UserIDPenerima,
 		Due_Date:       req.Due_Date,
 		Proofs:         req.Proofs,
+	}
+}
+
+func TargetReqPenerimaToEntity(req TargetReqPenerima) target.TargetEntity {
+	return target.TargetEntity{
+		Status: req.Status,
+		Proofs: req.Proofs,
 	}
 }

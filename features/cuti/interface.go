@@ -9,14 +9,30 @@ type CutiEntity struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    time.Time
-	TipeCuti     string
+	TipeCuti     string `validate:"required"`
 	Status       string
-	JumlahCuti   int
+	JumlahCuti   int `validate:"required"`
 	BatasanCuti  int
-	Description  string
-	Persetujuan  time.Time
-	StartCuti    time.Time
-	EndCuti      time.Time
-	UrlPendukung string
+	Description  string `validate:"required"`
+	Persetujuan  string
+	StartCuti    string
+	EndCuti      string
+	UrlPendukung string `validate:"required"`
 	UserID       string
+	User         UserEntity
+}
+
+type UserEntity struct {
+	ID   string
+	Name string
+}
+
+type CutiDataInterface interface {
+	Insert(input CutiEntity) error
+	SelectAllKaryawan(idUser string) ([]CutiEntity, error)
+	SelectAll() ([]CutiEntity, error)
+}
+type CutiServiceInterface interface {
+	Add(input CutiEntity) error
+	Get(idUser string) ([]CutiEntity, error)
 }

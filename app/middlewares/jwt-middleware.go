@@ -1,4 +1,4 @@
-package middleware
+package middlewares
 
 import (
 	"be_golang/klp3/app/config"
@@ -36,16 +36,14 @@ func CreateToken(userId string, userRole string) (string, error) {
 	return token.SignedString([]byte(config.JWT_SECRRET))
 }
 
-func ExtractToken(e echo.Context) *ClaimsToken {
+func ExtractToken(e echo.Context) (string,string,string) {
 	user := e.Get("user").(*jwt.Token)
-	var data ClaimsToken
-	if !user.Valid {
-		return nil
+	if user.Valid {
+		claims := user.Claims.(jwt.MapClaims)
+		userId := claims["id"].(string)
+		role:=claims["role"].(string)
+		email:=claims["emails"].(string)
+		return userId,role,email
 	}
-	claims := user.Claims.(jwt.MapClaims)
-	data.Emails = claims["emails"].(string)
-	data.ID = claims["id"].(string)
-	data.Role = claims["role"].(string)
-	data.Token = user.Raw
-	return &data
+	return "","",""
 }

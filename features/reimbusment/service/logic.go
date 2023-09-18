@@ -2,6 +2,8 @@ package service
 
 import (
 	"be_golang/klp3/features/reimbusment"
+	usernodejs "be_golang/klp3/features/userNodejs"
+
 	"errors"
 
 	"github.com/go-playground/validator/v10"
@@ -11,79 +13,53 @@ type ReimbursementService struct {
 	reimbursmentService reimbusment.ReimbusmentDataInterface
 	validate            *validator.Validate
 }
-func (service *ReimbursementService) EditAdmin(status string,userID string,UserAdmin string,id string) error {
-	dataUser,errUser:=service.reimbursmentService.SelectUser(UserAdmin)
-	if errUser != nil{
-		return errUser
-	}
-	dataUserA,errUserA:=service.reimbursmentService.SelectUser(userID)
-	if errUserA != nil{
-		return errUserA
-	}
-
-	if dataUser.Devisi=="manager"{
-		if dataUserA.Devisi =="C-Level"{
-			return errors.New("tidak dapak approve C-Level, hanya dapat approve di N-1")
-		}
-		if dataUserA.Devisi =="HR"{
-			return errors.New("tidak dapak approve HR, hanya dapat approve di N-1")
-		}
-		if dataUserA.Devisi =="manager"{
-			return errors.New("tidak dapak approve manager, hanya dapat approve di N-1")
-		}
-		errUpdate:=service.reimbursmentService.UpdateStatusByManager(status,userID,id)
-		if errUpdate != nil{
-			return errUpdate
-		}
-
-	}else if dataUser.Devisi=="lead"{
-		if dataUserA.Devisi =="C-Level"{
-			return errors.New("tidak dapak approve C-Level, hanya dapat approve di N-1")
-		}
-		if dataUserA.Devisi =="HR"{
-			return errors.New("tidak dapak approve HR, hanya dapat approve di N-1")
-		}
-		if dataUserA.Devisi =="manager"{
-			return errors.New("tidak dapak approve manager, hanya dapat approve di N-1")
-		}
-		if dataUserA.Devisi =="lead"{
-			return errors.New("tidak dapak approve lead, hanya dapat approve di N-1")
-		}		
-		errUpdate:=service.reimbursmentService.UpdateStatusByManager(status,userID,id)
-		if errUpdate != nil{
-			return errUpdate
-		}
-
-	}else if dataUser.Devisi=="HR"{
-		if dataUserA.Devisi =="HR"{
-			return errors.New("tidak dapak approve HR, hanya dapat approve di N-1")
-		}
-		if dataUserA.Devisi =="C-Level"{
-			return errors.New("tidak dapak approve C-Level, hanya dapat approve di N-1")
-		}
-		errUpdate:=service.reimbursmentService.UpdateStatusByHR(status,userID,id)
-		if errUpdate != nil{
-			return errUpdate
-		}		
-	}else if dataUser.Devisi=="C-Level"{
-		errUpdate:=service.reimbursmentService.UpdateStatusByHR(status,userID,id)
-		if errUpdate != nil{
-			return errUpdate
-		}	
-	}else{
-		return errors.New("selain HR dan manager, anda tidak dapat merubah status")
-	}
-	return nil
-}
 
 // Edit implements reimbusment.ReimbusmentServiceInterface.
-func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,id string) error {
-	errUpdate:=service.reimbursmentService.UpdateUser(input,input.UserID,id)
-	if errUpdate != nil{
-		return errUpdate
+func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity, id string,idUser string) error {
+	dataUser,errUser:=usernodejs.GetByIdUser(idUser)
+	if errUser !=nil{
+		return errors.New("failed get user by id")
 	}
 
-	return nil
+	batasan,errBatasan:=service.reimbursmentService.SelectById(id)
+	if errBatasan != nil{
+		return errBatasan
+	}
+	if input.Nominal > batasan{
+		return errors.New("nominal tidak boleh melebihi batasan reimbursment")
+	}
+	if dataUser.Jabatan =="karyawan"{
+		if input.BatasanReimburs != 0{
+			return errors.New("karyawan tidak berhak mengedit batasan reimbursement, harap berkonsultasi dengan atasan")
+		}
+		if input.Persetujuan != ""{
+			return errors.New("hanya HR yang bisa approve final")
+		}
+		if input.Status != ""{
+			return errors.New("hanya Manager yang bisa approve")
+		}
+		input.UserID=idUser
+		err:=service.reimbursmentService.UpdateKaryawan(input,id)
+		if err != nil{
+			return err
+		}
+		return nil
+	}else if dataUser.Jabatan == "manager"{
+		if input.Persetujuan != ""{
+			return errors.New("hanya hr yang bisa approve final")
+		}
+		err:=service.reimbursmentService.Update(input,id)
+		if err != nil{
+			return err
+		}
+		return nil
+	}else{
+		err:=service.reimbursmentService.Update(input,id)
+		if err != nil{
+			return err
+		}
+		return nil
+	}
 }
 
 // Add implements reimbusment.ReimbusmentServiceInterface.
@@ -92,11 +68,10 @@ func (service *ReimbursementService) Add(input reimbusment.ReimbursementEntity) 
 	if errValidate != nil {
 		return errors.New("error validate, data deskripsi, nominal, tipe reimbusment required")
 	}
-	_, errUser := service.reimbursmentService.SelectUser(input.UserID)
-	if errUser != nil {
-		return errors.New("user not found")
+	if input.Nominal > 5000000{
+		return errors.New("pengajuan reimbursement tidak boleh melebihi Rp. 5.000.000")
 	}
-	_, errInsert := service.reimbursmentService.Insert(input)
+	errInsert := service.reimbursmentService.Insert(input)
 	if errInsert != nil {
 		return errInsert
 	}

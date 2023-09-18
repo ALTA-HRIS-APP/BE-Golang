@@ -16,21 +16,20 @@ type TargetEntity struct {
 	UserIDPenerima string `validate:"required"`
 	Due_Date       string `validate:"required"`
 	Proofs         string
-	// User           UserEntity
 }
 
 type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	// SelectAll(userID uint) ([]CoreTarget, error)
-	// Select(projectId uint, userID uint) (CoreTarget, error)
-	// Update(projectId uint, userID uint, projectData CoreTarget) error
-	// Delete(projectId uint, userID uint) error
+	SelectAll(userID string) ([]TargetEntity, error)
+	Select(targetID string, userID string) (TargetEntity, error)
+	Update(targetID string, userID string, targetData TargetEntity) error
+	Delete(targetID string, userID string) error
 }
 
 type TargetServiceInterface interface {
-	Create(input TargetEntity) error
-	// GetAll(userID uint) ([]CoreTarget, error)
-	// GetById(userID uint, projectId uint) (CoreTarget, error)
-	// UpdateById(projectId uint, userID uint, projectData CoreTarget) error
-	// DeleteById(projectId uint, userID uint) error
+	Create(input TargetEntity) (string, error)
+	GetAll(userID string) ([]TargetEntity, error)
+	GetById(targetID string, userID string) (TargetEntity, error)
+	UpdateById(targetID string, userID string, targetData TargetEntity) error
+	DeleteById(targetID string, userID string) error
 }

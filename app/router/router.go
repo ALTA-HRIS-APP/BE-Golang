@@ -1,7 +1,10 @@
 package router
 
 import (
-	"be_golang/klp3/app/middleware"
+	"be_golang/klp3/app/middlewares"
+	dataC "be_golang/klp3/features/cuti/data"
+	handlerC "be_golang/klp3/features/cuti/handler"
+	serviceC "be_golang/klp3/features/cuti/service"
 	dataR "be_golang/klp3/features/reimbusment/data"
 	handlerR "be_golang/klp3/features/reimbusment/handler"
 	serviceR "be_golang/klp3/features/reimbusment/service"
@@ -19,15 +22,22 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	serviceRes := serviceR.New(dataRes)
 	handlerRes := handlerR.New(serviceRes)
 
-	c.POST("/reimbursments", handlerRes.Add)
-	c.PUT("/reimbursments/:id_reimbusherment", handlerRes.Edit)
+	c.POST("/reimbursements", handlerRes.Add, middlewares.JWTMiddleware())
+	c.PUT("/reimbursements/:id_reimbursement", handlerRes.Edit, middlewares.JWTMiddleware())
+
+	dataCuti := dataC.New(db)
+	serviceCuti := serviceC.New(dataCuti)
+	handlerCuti := handlerC.New(serviceCuti)
+
+	c.POST("/cutis", handlerCuti.AddCuti, middlewares.JWTMiddleware())
+	c.GET("/cutis", handlerCuti.GetAll, middlewares.JWTMiddleware())
 
 	targetRepo := _targetRepo.New(db)
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)
-	c.POST("/targets", targetHandlerAPI.CreateTarget, middleware.JWTMiddleware())
-	// e.GET("/targets", targetHandlerAPI.GetAllTarget, middlewares.JWTMiddleware())
-	// e.GET("/targets/:target_id", targetHandlerAPI.GetTargetById, middlewares.JWTMiddleware())
-	// e.PUT("/targets/:target_id", targetHandlerAPI.UpdateTargetById, middlewares.JWTMiddleware())
-	// e.DELETE("/targets/:target_id", targetHandlerAPI.DeleteTargetById, middlewares.JWTMiddleware())
+	c.POST("/user/:user_id/targets", targetHandlerAPI.CreateTarget, middlewares.JWTMiddleware())
+	c.GET("/targcts", targetHandlerAPI.GetAllTarget, middlewares.JWTMiddleware())
+	c.GET("/targets/:target_id", targetHandlerAPI.GetTargetById, middlewares.JWTMiddleware())
+	c.PUT("/targets/:target_id", targetHandlerAPI.UpdateTargetById, middlewares.JWTMiddleware())
+	c.DELETE("/targets/:target_id", targetHandlerAPI.DeleteTargetById, middlewares.JWTMiddleware())
 }

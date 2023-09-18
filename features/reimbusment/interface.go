@@ -32,16 +32,14 @@ type UserEntity struct{
 }
 
 type ReimbusmentDataInterface interface{
-	Insert(input ReimbursementEntity)(string,error)
-	SelectUser(UserID string)(UserEntity,error)
-	UpdateUser(input ReimbursementEntity,idUser string,id string)error
-	UpdateStatusByManager(status string,idUser string,id string)(error)
-	UpdateStatusByHR(status string,idUser string,id string)(error)
+	Insert(input ReimbursementEntity)(error)
+	UpdateKaryawan(input ReimbursementEntity,id string)(error)
+	Update(input ReimbursementEntity,id string)(error)
+	SelectById(id string)(int,error)
+
 }
 
 type ReimbusmentServiceInterface interface{
 	Add(input ReimbursementEntity)(error)
-	Edit(input ReimbursementEntity,id string)(error)
-	EditAdmin(status string,userID string,userIDAdmin string,id string)(error)
-
+	Edit(input ReimbursementEntity,id string,idUser string)(error)
 }
