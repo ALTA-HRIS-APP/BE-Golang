@@ -13,6 +13,105 @@ type CutiService struct {
 	validate    *validator.Validate
 }
 
+// Edit implements cuti.CutiServiceInterface.
+func (service *CutiService) Edit(input cuti.CutiEntity, id string, idUser string) error {
+	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	if errUser != nil {
+		return errors.New("user not found")
+	}
+	if input.TipeCuti == "melahirkan" {
+		if input.JumlahCuti > 90 {
+			return errors.New("cuti melahirkan maksimal 90 hari")
+		}
+
+	} else if input.TipeCuti == "hari raya" {
+		if input.JumlahCuti > 7 {
+			return errors.New("cuti hari raya maksimal 7 hari")
+		}
+
+	} else {
+		if input.JumlahCuti > 12 {
+			return errors.New("cuti tahunan maksimal 12 hari")
+		}
+
+	}
+	dataCuti, errCuti := service.cutiService.SelectById(id)
+	if errCuti != nil {
+		return errCuti
+	}
+	dataUserPengaju, errPengaju := usernodejs.GetByIdUser(dataCuti.UserID)
+	if errPengaju != nil {
+		return errors.New("UserPengaju not found")
+	}
+	if dataUser.Jabatan == "karyawan" {
+		if input.Status != "" {
+			return errors.New("karyawan tidak boleh edit status")
+		}
+		if input.Persetujuan != "" {
+			return errors.New("karyawan tidak boleh edit persetujuan")
+		}
+		input.UserID = idUser
+		err := service.cutiService.UpdateKaryawan(input, id)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else if dataUser.Jabatan == "manager" {
+		if input.Status != "" {
+			return errors.New("manager tidak boleh edit status")
+		}
+		if dataUserPengaju.Jabatan == "manager" || dataUserPengaju.Jabatan == "hr" || dataUserPengaju.Jabatan == "c-level" {
+			return errors.New("manager hanya berhak approve cuti h-1")
+		}
+		if input.Persetujuan == "reject" {
+			input.Status = "reject"
+			err := service.cutiService.Update(input, id)
+			if err != nil {
+				return err
+			}
+			return nil
+		} else {
+			input.Status = "pending (dalam proses)"
+			err := service.cutiService.Update(input, id)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	} else if dataUser.Jabatan == "hr" {
+		if dataUserPengaju.Jabatan == "hr" || dataUserPengaju.Jabatan == "c-level" {
+			return errors.New("hr hanya berhak approve cuti h-1")
+		}
+		if input.Status != "" {
+			return errors.New("hr tidak boleh edit status")
+		}
+		if dataCuti.Status == "pending" {
+			return errors.New("cuti belum di approve oleh manager,harap hubungi manager yang bersangkutan terlebih dahulu")
+		}
+		if input.Persetujuan == "reject" {
+			input.Status = "reject"
+			err := service.cutiService.Update(input, id)
+			if err != nil {
+				return err
+			}
+			return nil
+		} else {
+			input.Status = "approve"
+			err := service.cutiService.Update(input, id)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	} else {
+		err := service.cutiService.Update(input, id)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
 // Get implements cuti.CutiServiceInterface.
 func (service *CutiService) Get(idUser string) ([]cuti.CutiEntity, error) {
 	dataUser, errUser := usernodejs.GetByIdUser(idUser)

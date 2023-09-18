@@ -14,11 +14,11 @@ type Cuti struct {
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
 	TipeCuti     string         `gorm:"type:enum('melahirkan','hari raya','tahunan');default:'tahunan';column:tipe_cuti"`
-	Status       string
+	Status       string         `gorm:"default:pending"`
 	JumlahCuti   int
 	BatasanCuti  int `gorm:"column:batasan_cuti;default:90"`
 	Description  string
-	Persetujuan  string
+	Persetujuan  string `gorm:"default:pending"`
 	StartCuti    string
 	EndCuti      string
 	UrlPendukung string
@@ -50,7 +50,7 @@ type User struct {
 
 func ModelToPengguna(user Cuti) CutiPengguna {
 	return CutiPengguna{
-		ID:           user.UserID,
+		ID:           user.ID,
 		CreatedAt:    user.CreatedAt,
 		UpdatedAt:    user.UpdatedAt,
 		DeletedAt:    user.DeletedAt,
@@ -69,7 +69,7 @@ func ModelToPengguna(user Cuti) CutiPengguna {
 
 func PengunaToEntity(user CutiPengguna) cuti.CutiEntity {
 	return cuti.CutiEntity{
-		ID:           user.UserID,
+		ID:           user.ID,
 		CreatedAt:    user.CreatedAt,
 		UpdatedAt:    user.UpdatedAt,
 		TipeCuti:     user.TipeCuti,

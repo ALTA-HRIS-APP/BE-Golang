@@ -13,6 +13,43 @@ type CutiData struct {
 	db *gorm.DB
 }
 
+// SelectById implements cuti.CutiDataInterface.
+func (repo *CutiData) SelectById(id string) (cuti.CutiEntity, error) {
+	var inputModel Cuti
+	tx := repo.db.Where("id=?", id).First(&inputModel)
+	if tx.Error != nil {
+		return cuti.CutiEntity{}, errors.New("failed get cuti by id")
+	}
+	output := ModelToEntity(inputModel)
+	return output, nil
+}
+
+// Update implements cuti.CutiDataInterface.
+func (repo *CutiData) Update(input cuti.CutiEntity, id string) error {
+	inputModel := EntityToModel(input)
+	tx := repo.db.Model(&Cuti{}).Where("id=?", id).Updates(inputModel)
+	if tx.Error != nil {
+		return errors.New("failed update cuti by id")
+	}
+	if tx.RowsAffected == 0 {
+		return errors.New("row not affected")
+	}
+	return nil
+}
+
+// UpdateKaryawan implements cuti.CutiDataInterface.
+func (repo *CutiData) UpdateKaryawan(input cuti.CutiEntity, id string) error {
+	inputModel := EntityToModel(input)
+	tx := repo.db.Model(&Cuti{}).Where("id=? and user_id=?", id, input.UserID).Updates(inputModel)
+	if tx.Error != nil {
+		return errors.New("failed update cuti by id")
+	}
+	if tx.RowsAffected == 0 {
+		return errors.New("row not affected")
+	}
+	return nil
+}
+
 // SelectAll implements cuti.CutiDataInterface.
 func (repo *CutiData) SelectAll() ([]cuti.CutiEntity, error) {
 	var inputModel []Cuti
@@ -74,8 +111,10 @@ func (repo *CutiData) SelectAllKaryawan(idUser string) ([]cuti.CutiEntity, error
 
 	var cutiEntity []cuti.CutiEntity
 	for _, value := range cutiPengguna {
-		value.User = User(userEntity)
-		cutiEntity = append(cutiEntity, PengunaToEntity(value))
+		if value.UserID == userEntity.ID {
+			value.User = User(userEntity)
+			cutiEntity = append(cutiEntity, PengunaToEntity(value))
+		}
 	}
 	return cutiEntity, nil
 }
