@@ -100,6 +100,9 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 		if input.Persetujuan != ""{
 			return errors.New("karyawan tidak boleh mengedit persetujuan")
 		}
+		if input.BatasanReimburs != 0{
+			return errors.New("karyawan tidak boleh mengedit batas reimbursement")
+		}
 		input.UserID = idUser
 		err:=service.reimbursmentService.UpdateKaryawan(input,id)
 		if err != nil{
@@ -177,6 +180,9 @@ func (service *ReimbursementService) Add(input reimbusment.ReimbursementEntity) 
 	}
 	if input.Persetujuan != ""{
 		return errors.New("tidak dapat menambah persetujuan saat create reimbursement")
+	}
+	if input.BatasanReimburs != 0{
+		return errors.New("tidak dapat menambah batas reimbursement saat create reimbursement, biarkan default")
 	}
 	errInsert := service.reimbursmentService.Insert(input)
 	if errInsert != nil {
