@@ -9,18 +9,15 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/WAYANPUTRIYANTI1502_1/HRIS/1.0.2
   - url: http://54.198.234.61
+  - url: https://hris.belanjalagiyuk.shop/
 
 tags:
-  - name: Absensi
-    description: operation about absensi
-  - name: Target
-    description: operation about target
   - name: Reimbursment
     description: operation about reimbursment
   - name: Cuti
     description: operation about cuti
 paths:
-  /reimbursments:
+  /reimbursements:
     post:
       tags:
         - Reimbursment
@@ -78,46 +75,15 @@ paths:
           $ref: "#/components/responses/responseNotFound"
         "500":
           $ref: "#/components/responses/responseFailedInternal"
-  /reimbursments/{id_reimbusherment}:
+  /reimbursements/{id_reimbursement}:
     put:
       tags:
         - Reimbursment
-      summary: update reimbursment untuk manager
+      summary: update reimbursment
       security:
         - JWTAuth: []
       parameters:
-        - name: id_reimbusherment
-          description: contain id of the reimbursment
-          required: true
-          in: path
-          schema:
-            type: string
-            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/update_reimbursment_manager"
-
-      responses:
-        "200":
-          $ref: "#/components/responses/responseSuccess"
-        "400":
-          $ref: "#/components/responses/responseBadRequest"
-        "404":
-          $ref: "#/components/responses/responseNotFound"
-        "500":
-          $ref: "#/components/responses/responseFailedInternal"
-  /reimbursments/{id_reimbusherments}:
-    put:
-      tags:
-        - Reimbursment
-      summary: create reimbursment untuk user karyawan
-      security:
-        - JWTAuth: []
-      parameters:
-        - name: id_reimbusherments
+        - name: id_reimbursement
           description: contain id of the reimbursment
           required: true
           in: path
@@ -139,36 +105,7 @@ paths:
           $ref: "#/components/responses/responseNotFound"
         "500":
           $ref: "#/components/responses/responseFailedInternal"
-  /reimbursments/{id_reimbursment}:
-    put:
-      tags:
-        - Reimbursment
-      summary: update reimbursment untuk manager
-      security:
-        - JWTAuth: []
-      parameters:
-        - name: id_reimbursment
-          description: contain id of the reimbursment
-          required: true
-          in: path
-          schema:
-            type: string
-            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/update_reimbursment_HR"
-      responses:
-        "200":
-          $ref: "#/components/responses/responseSuccess"
-        "400":
-          $ref: "#/components/responses/responseBadRequest"
-        "404":
-          $ref: "#/components/responses/responseNotFound"
-        "500":
-          $ref: "#/components/responses/responseFailedInternal"
+
     get:
       tags:
         - Reimbursment
@@ -176,7 +113,7 @@ paths:
       security:
         - JWTAuth: []
       parameters:
-        - name: id_reimbursment
+        - name: id_reimbursement
           description: contain id of the reimbursment
           required: true
           in: path
@@ -199,7 +136,7 @@ paths:
       security:
         - JWTAuth: []
       parameters:
-        - name: id_reimbursment
+        - name: id_reimbursement
           description: contain id of the reimbursment
           required: true
           in: path
@@ -215,6 +152,30 @@ paths:
           $ref: "#/components/responses/responseNotFound"
         "500":
           $ref: "#/components/responses/responseFailedInternal"
+
+  /cutis:
+    post:
+      tags:
+        - Cuti
+      summary: create cuti
+      security:
+        - JWTAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/create_cuti"
+      responses:
+        "201":
+          $ref: "#/components/responses/responseSuccessCreate"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+
 #==================================#
 # component
 #==================================#
@@ -232,18 +193,52 @@ components:
       properties:
         tipe:
           type: string
+          description: "example: operation"
         cash_out_date:
           type: string
+          description: "example: 18-06-2023"
         nominal:
           type: integer
+          description: "example: 10000"
         description:
           type: string
+          description: "example: peralatan kantor"
         image:
           type: string
           format: binary
           description: "allowed file extension: jpg, png, jpeg"
+
+    create_cuti:
+      type: object
+      properties:
+        tipe_cuti:
+          type: string
+          description: "example: melahirkan"
         status:
           type: string
+          description: "example: reject"
+        jumlah_cuti:
+          type: integer
+          description: "example: 18"
+        batasan_cuti:
+          type: string
+          description: "example: 90"
+        description:
+          type: string
+          description: "example: cuti melahirkan"
+        persetujuan:
+          type: string
+          description: "example: reject"
+        start_cuti:
+          type: string
+          description: "example: 10-09-2023"
+        end_cuti:
+          type: string
+          description: "example: 28-09-2023"
+        image:
+          type: string
+          format: binary
+          description: "allowed file extension: jpg, png, jpeg"
 
     update_reimbursment_karyawan:
       type: object
@@ -252,35 +247,24 @@ components:
           type: string
         cash_out_date:
           type: string
+          description: "example: 18-09-2023"
         nominal:
           type: integer
+          description: "example: 10000"
         description:
           type: string
+          description: "example: peralatan kantor"
+        status:
+          type: string
+          description: "example: approve"
+        persetujuan:
+          type: string
+          description: "example: approve"
         image:
           type: string
           format: binary
           description: "allowed file extension: jpg, png, jpeg"
 
-    update_reimbursment_manager:
-      description: khusus untuk update approve oleh manager
-      type: object
-      properties:
-        user_id:
-          type: string
-          example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
-        status:
-          type: string
-          example: "approve"
-    update_reimbursment_HR:
-      description: khusus untuk update approve oleh HR
-      type: object
-      properties:
-        user_id:
-          type: string
-          example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
-        persetujuan:
-          type: string
-          example: "approve"
   responses:
     responseSuccess:
       description: failed
