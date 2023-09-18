@@ -175,7 +175,22 @@ paths:
           $ref: "#/components/responses/responseNotFound"
         "500":
           $ref: "#/components/responses/responseFailedInternal"
-
+    get:
+      tags:
+        - Cuti
+      description: read all cuti
+      summary: get all cuti
+      security:
+        - JWTAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/responseGetAllCuti"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
 #==================================#
 # component
 #==================================#
@@ -406,6 +421,62 @@ components:
                     description: "sewa hotel"
                     image: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
                     status: "pending"
+    responseGetAllCuti:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int64
+                example: 200
+              message:
+                type: string
+                example: "success get all cuti"
+              data:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    tipe_cuti:
+                      type: string
+                    status:
+                      type: string
+                    jumlah_cuti:
+                      type: integer
+                    description:
+                      type: integer
+                    persetujuan:
+                      type: string
+                    url_pendukung:
+                      type: string
+                    user_id:
+                      type: string
+                example:
+                  - id: "0bab9e2b-dc1c-4d95-aece-06e9e28707d4"
+                    name: "Sandi Gunawan"
+                    tipe_cuti: "tahunan"
+                    status: "pending"
+                    jumlah_cuti: 23
+                    description: "cuti tahunan"
+                    persetujuan: "pending"
+                    url_pendukung: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                    user_id: "0bab9e2b-dc1c-4d95-aece-06e9e28707d1"
+                  - id: "0bab9e2b-dc1c-4d95-aece-06e9e28707d4"
+                    name: "Sandi Gunawan"
+                    tipe_cuti: "tahunan"
+                    status: "pending"
+                    jumlah_cuti: 23
+                    description: "cuti tahunan"
+                    persetujuan: "pending"
+                    url_pendukung: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                    user_id: "0bab9e2b-dc1c-4d95-aece-06e9e28707d1"
+
     responseBadRequest:
       description: failed
       content:
