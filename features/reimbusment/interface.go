@@ -37,7 +37,7 @@ type ReimbusmentDataInterface interface{
 	Insert(input ReimbursementEntity)(error)
 	UpdateKaryawan(input ReimbursementEntity,id string)(error)
 	Update(input ReimbursementEntity,id string)(error)
-	SelectById(id string)(int,error)
+	SelectById(id string)(ReimbursementEntity,error)
 	SelectAllKaryawan(idUser string,param QueryParams)(int64,[]ReimbursementEntity,error)
 	SelectAll(param QueryParams)(int64,[]ReimbursementEntity,error)
 	Delete(id string)error

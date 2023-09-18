@@ -5,6 +5,7 @@ import (
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -138,19 +139,20 @@ func (repo *ReimbusmentData) UpdateKaryawan(input reimbusment.ReimbursementEntit
 		return errors.New("update data reimbursment error, hanya boleh mengedit reimbursment sendiri")
 	}
 	if tx.RowsAffected == 0 {
-		return errors.New("row not affected")
+		return errors.New("row not affected, hanya dapat mengedit reimbursement sendiri")
 	}
 	return nil
 }
 
 // SelectById implements reimbusment.ReimbusmentDataInterface.
-func (repo *ReimbusmentData) SelectById(id string) (int, error) {
+func (repo *ReimbusmentData) SelectById(id string) (reimbusment.ReimbursementEntity, error) {
 	var inputModel Reimbursement
 	tx := repo.db.Where("id=?", id).First(&inputModel)
 	if tx.Error != nil {
-		return 0, errors.New("error get batasan reimbursment")
+		return reimbusment.ReimbursementEntity{}, errors.New("error get batasan reimbursment")
 	}
-	return inputModel.BatasanReimburs, nil
+	output:=ModelToEntity(inputModel)
+	return output, nil
 }
 
 // Update implements reimbusment.ReimbusmentDataInterface.
@@ -160,6 +162,8 @@ func (repo *ReimbusmentData) Update(input reimbusment.ReimbursementEntity, id st
 	if tx.Error != nil {
 		return errors.New("update data reimbursment")
 	}
+	fmt.Println("input admin",input)
+	fmt.Println("input model",inputModel)
 	if tx.RowsAffected == 0 {
 		return errors.New("row not affected")
 	}
