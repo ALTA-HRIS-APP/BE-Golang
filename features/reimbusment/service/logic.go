@@ -110,6 +110,9 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 		if dataUserPengaju.Jabatan =="manager" || dataUserPengaju.Jabatan=="c-level" || dataUserPengaju.Jabatan=="hr"{
 			return errors.New("manager hanya bisa approve reimbursement karyawan")
 		}
+		if input.Status != ""{
+			return errors.New("manager tidak boleh mengedit status")
+		}
 		if input.Persetujuan =="reject"{
 			input.Status ="reject"
 			err:=service.reimbursmentService.Update(input,id)
@@ -128,6 +131,9 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 	}else if dataUser.Jabatan == "hr"{
 		if dataReimbursement.Status =="pending"{
 			return errors.New("harus disetujui oleh manager dulu, harap hubungi manager yang bersangkutan")
+		}
+		if input.Status != ""{
+			return errors.New("hr tidak boleh mengedit status")
 		}
 		if dataUserPengaju.Jabatan=="hr" || dataUserPengaju.Jabatan=="c-level"{
 			return errors.New("hanya bisa approve reimbursement karyawan dan manager")
