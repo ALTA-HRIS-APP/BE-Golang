@@ -46,10 +46,6 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 			if param.Page == int(total_pages) {
 				nextPage = false
 			}
-			count_lebih:=count/int64(param.Page)
-			if count_lebih <int64(param.ItemsPerPage){
-				nextPage=false
-			}
 		}
 		return nextPage, dataReim, nil
 	} else {
@@ -65,10 +61,6 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 
 			if param.Page == int(total_pages) {
 				nextPage = false
-			}
-			count_lebih:=count/int64(param.Page)
-			if count_lebih <int64(param.ItemsPerPage){
-				nextPage=false
 			}
 		}
 		return nextPage, dataReim, nil
