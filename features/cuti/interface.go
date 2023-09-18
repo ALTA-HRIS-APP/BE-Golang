@@ -31,8 +31,12 @@ type CutiDataInterface interface {
 	Insert(input CutiEntity) error
 	SelectAllKaryawan(idUser string) ([]CutiEntity, error)
 	SelectAll() ([]CutiEntity, error)
+	SelectById(id string) (CutiEntity, error)
+	UpdateKaryawan(input CutiEntity, id string) error
+	Update(input CutiEntity, id string) error
 }
 type CutiServiceInterface interface {
 	Add(input CutiEntity) error
 	Get(idUser string) ([]CutiEntity, error)
+	Edit(input CutiEntity, id string, idUser string) error
 }

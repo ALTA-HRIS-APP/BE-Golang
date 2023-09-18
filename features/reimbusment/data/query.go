@@ -17,8 +17,8 @@ type ReimbusmentData struct {
 // Delete implements reimbusment.ReimbusmentDataInterface.
 func (repo *ReimbusmentData) Delete(id string) error {
 	var inputModel Reimbursement
-	tx:=repo.db.Where("id=?",id).Delete(&inputModel)
-	if tx.Error != nil{
+	tx := repo.db.Where("id=?", id).Delete(&inputModel)
+	if tx.Error != nil {
 		return errors.New("delete error reimbursement")
 	}
 	if tx.RowsAffected == 0 {
@@ -151,7 +151,7 @@ func (repo *ReimbusmentData) SelectById(id string) (reimbusment.ReimbursementEnt
 	if tx.Error != nil {
 		return reimbusment.ReimbursementEntity{}, errors.New("error get batasan reimbursment")
 	}
-	output:=ModelToEntity(inputModel)
+	output := ModelToEntity(inputModel)
 	return output, nil
 }
 
@@ -162,8 +162,8 @@ func (repo *ReimbusmentData) Update(input reimbusment.ReimbursementEntity, id st
 	if tx.Error != nil {
 		return errors.New("update data reimbursment")
 	}
-	fmt.Println("input admin",input)
-	fmt.Println("input model",inputModel)
+	fmt.Println("input admin", input)
+	fmt.Println("input model", inputModel)
 	if tx.RowsAffected == 0 {
 		return errors.New("row not affected")
 	}
