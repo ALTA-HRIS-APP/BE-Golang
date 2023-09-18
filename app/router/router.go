@@ -36,7 +36,7 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)
 	c.POST("/user/:user_id/targets", targetHandlerAPI.CreateTarget, middlewares.JWTMiddleware())
-	c.GET("/targcts", targetHandlerAPI.GetAllTarget, middlewares.JWTMiddleware())
+	c.GET("/targets", targetHandlerAPI.GetAllTarget, middlewares.JWTMiddleware())
 	c.GET("/targets/:target_id", targetHandlerAPI.GetTargetById, middlewares.JWTMiddleware())
 	c.PUT("/targets/:target_id", targetHandlerAPI.UpdateTargetById, middlewares.JWTMiddleware())
 	c.DELETE("/targets/:target_id", targetHandlerAPI.DeleteTargetById, middlewares.JWTMiddleware())

@@ -5,7 +5,6 @@ import (
 	"be_golang/klp3/features/target"
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
-	"fmt"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -34,43 +33,42 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 		log.Printf("Error binding data: %s", err.Error())
 		return helper.FailedRequest(c, "error bind data", nil)
 	}
-
+	//mengecek user id dari get by id user id api node js
 	responseUser, err := usernodejs.GetByIdUser(userID)
 	if err != nil {
 		log.Printf("Error get detail user: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
+	//mengisi user id pembuat dengan user id ang login
+	newTarget.UserIDPembuat = userID
 
-	// buat logic lagi
-	// link, err := helper.UploadImage(c)
-	// if err != nil {
-	// 	log.Printf("Error link: %s", err.Error())
-	// 	return helper.FailedRequest(c, err.Error(), nil)
-	// }
-
-	// Gabungkan ID pengguna dengan data target
-	// newTarget.Proofs = link
-
-	//CEK devisi
+	//mengisi divisi id dengan divisi user yang login
 	newTarget.DevisiID = responseUser.DevisiID
 
 	//user id penerima -> dari param yang dikasi fe jadi dari node js
 	idParam := c.Param("user_id")
 	newTarget.UserIDPenerima = idParam
 
+	//mengisi proof dengan link dari cloudnary
+	if newTarget.Proofs != "" {
+		link, err := helper.UploadImage(c)
+		if err != nil {
+			log.Printf("Error link: %s", err.Error())
+			return helper.FailedRequest(c, err.Error(), nil)
+		}
+		newTarget.Proofs = link
+	}
+
 	//mappingg dari request to EntityTarget
 	input := TargetRequestToEntity(newTarget)
-	input.UserIDPembuat = userID
-	fmt.Println(userID)
-
-	result, err := h.targetService.Create(input)
+	targetID, err := h.targetService.Create(input)
 	if err != nil {
 		log.Printf("Error creating target: %s", err.Error())
 		return helper.InternalError(c, "error insert data", err.Error())
 	}
-
+	input.ID = targetID
 	// Mapping create target to Target Response
-	resultResponse := EntityToResponse(result)
+	resultResponse := EntityToResponse(input)
 	// Kirim respon JSON
 	log.Println("Target created successfully")
 	return helper.SuccessCreate(c, "success create target", resultResponse)
