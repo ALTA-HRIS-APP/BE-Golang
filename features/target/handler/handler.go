@@ -13,11 +13,13 @@ import (
 
 type targetHandler struct {
 	targetService target.TargetServiceInterface
+	userRepo      target.ExternalAPINodejs
 }
 
-func New(service target.TargetServiceInterface) *targetHandler {
+func New(service target.TargetServiceInterface, externalApi target.ExternalAPINodejs) *targetHandler {
 	return &targetHandler{
 		targetService: service,
+		userRepo:      externalApi,
 	}
 }
 
@@ -27,24 +29,25 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 	// helper.PrettyPrint(user)
 	log.Println("UserID: ", userID)
 
-	newTarget := TargetRequest{}
-	//mendapatkan data yang dikirim oleh FE melalui request
-	err := c.Bind(&newTarget)
-	if err != nil {
-		log.Printf("Error binding data: %s", err.Error())
-		return helper.FailedRequest(c, "error bind data", nil)
-	}
 	//mengecek user id dari get by id user id api node js
-	responseUser, err := usernodejs.GetByIdUser(userID)
+	userProfile, err := h.userRepo.GetByIdUser(userID)
 	if err != nil {
 		log.Printf("Error get detail user: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
+	newTarget := TargetRequest{}
+	//mendapatkan data yang dikirim oleh FE melalui request
+	err = c.Bind(&newTarget)
+	if err != nil {
+		log.Printf("Error binding data: %s", err.Error())
+		return helper.FailedRequest(c, "Failed to bind data", nil)
+	}
+
 	//mengisi user id pembuat dengan user id ang login
 	newTarget.UserIDPembuat = userID
 
 	//mengisi divisi id dengan divisi user yang login
-	newTarget.DevisiID = responseUser.DevisiID
+	newTarget.DevisiID = userProfile.DevisiID
 
 	//user id penerima -> dari param yang dikasi fe jadi dari node js
 	idParam := c.Param("user_id")
@@ -52,27 +55,27 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 
 	//mengisi proof dengan link dari cloudnary
 	if newTarget.Proofs != "" {
-		link, err := helper.UploadImage(c)
+		cloudnaryLink, err := helper.UploadImage(c)
 		if err != nil {
-			log.Printf("Error link: %s", err.Error())
+			log.Printf("Error uploading image to Cloudinary: %s", err.Error())
 			return helper.FailedRequest(c, err.Error(), nil)
 		}
-		newTarget.Proofs = link
+		newTarget.Proofs = cloudnaryLink
 	}
 
 	//mappingg dari request to EntityTarget
-	input := TargetRequestToEntity(newTarget)
-	targetID, err := h.targetService.Create(input)
+	targetInput := TargetRequestToEntity(newTarget)
+	targetID, err := h.targetService.Create(targetInput)
 	if err != nil {
 		log.Printf("Error creating target: %s", err.Error())
-		return helper.InternalError(c, "error insert data", err.Error())
+		return helper.InternalError(c, "Failed to insert data", err.Error())
 	}
-	input.ID = targetID
+	targetInput.ID = targetID
 	// Mapping create target to Target Response
-	resultResponse := EntityToResponse(input)
+	responseTarget := EntityToResponse(targetInput)
 	// Kirim respon JSON
 	log.Println("Target created successfully")
-	return helper.SuccessCreate(c, "success create target", resultResponse)
+	return helper.SuccessCreate(c, "success create target", responseTarget)
 }
 
 func (h *targetHandler) GetAllTarget(c echo.Context) error {

@@ -2,7 +2,7 @@ package service
 
 import (
 	"be_golang/klp3/features/target"
-	usernodejs "be_golang/klp3/features/userNodejs"
+
 	"errors"
 	"log"
 
@@ -11,48 +11,55 @@ import (
 
 type targetService struct {
 	targetRepo target.TargetDataInterface
+	userRepo   target.ExternalAPINodejs
 	validate   *validator.Validate
 }
 
-func New(repo target.TargetDataInterface) target.TargetServiceInterface {
+func New(repo target.TargetDataInterface, externalAPI target.ExternalAPINodejs) target.TargetServiceInterface {
 	return &targetService{
 		targetRepo: repo,
 		validate:   validator.New(),
+		userRepo:   externalAPI,
 	}
 }
 
 // Create implements target.TargetServiceInterface.
 func (s *targetService) Create(input target.TargetEntity) (string, error) {
-	userPembuat, err := usernodejs.GetByIdUser(input.UserIDPembuat)
+	userPembuat, err := s.userRepo.GetByIdUser(input.UserIDPembuat)
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
+		log.Printf("Error getting user details for the creator: %s", err.Error())
 		return "", err
 	}
-	userPenerima, err := usernodejs.GetByIdUser(input.UserIDPenerima)
+	userPenerima, err := s.userRepo.GetByIdUser(input.UserIDPenerima)
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
+		log.Printf("Error getting user details for the receiver: %s", err.Error())
 		return "", err
 	}
 	err = s.validate.Struct(input)
 	if err != nil {
-		log.Printf("Error validate: %s", err.Error())
-		return "", errors.New("error validate, konten target, due date required")
+		log.Printf("Validation error: %s", err.Error())
+		return "", errors.New("validation error, content target and due date are required")
 	}
+
+	log.Printf("Creator's role: %s", userPembuat.Jabatan)
 
 	if userPembuat.Jabatan == "c-level" {
 		if userPenerima.Jabatan != "karyawan" && userPenerima.Jabatan != "manager" {
-			return "", errors.New("c-level hanya bisa membuat target untuk karyawan atau manager")
+			return "", errors.New("c-level can only create targets for karyawan or manager")
 		}
 	}
 
 	if userPembuat.Jabatan == "manager" {
 		if userPenerima.Jabatan != "karyawan" {
-			return "", errors.New("manager hanya bisa membuat target untuk karyawan")
+			return "", errors.New("managers can only create targets for karyawan")
+		}
+		if userPenerima.Devisi != userPembuat.Devisi {
+			return "", errors.New("only create targets for same devisi")
 		}
 	}
 
 	if userPembuat.Jabatan != "c-level" && userPembuat.Jabatan != "manager" {
-		return "", errors.New("jabatan Anda tidak memiliki izin untuk membuat target")
+		return "", errors.New("your role does not have permission to create targets")
 	}
 
 	targetID, err := s.targetRepo.Insert(input)
@@ -70,7 +77,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	nextPage := true
 
 	// Dapatkan peran pengguna
-	user, err := usernodejs.GetByIdUser(userID)
+	user, err := s.userRepo.GetByIdUser(userID)
 	if err != nil {
 		return false, nil, err
 	}
@@ -82,7 +89,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
+	userTarget, err := s.userRepo.GetByIdUser(existingTarget.UserIDPenerima)
 	if err != nil {
 		return false, nil, err
 	}
@@ -140,7 +147,7 @@ func (s *targetService) GetById(targetID string, userID string) (target.TargetEn
 // UpdateById implements target.TargetServiceInterface.
 func (s *targetService) UpdateById(targetID string, userID string, targetData target.TargetEntity) error {
 	// Dapatkan peran pengguna
-	user, err := usernodejs.GetByIdUser(userID)
+	user, err := s.userRepo.GetByIdUser(userID)
 	if err != nil {
 		return err
 	}
@@ -152,7 +159,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
+	userTarget, err := s.userRepo.GetByIdUser(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}
@@ -195,7 +202,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 // DeleteById implements target.TargetServiceInterface.
 func (s *targetService) DeleteById(targetID string, userID string) error {
 	// Dapatkan peran pengguna
-	user, err := usernodejs.GetByIdUser(userID)
+	user, err := s.userRepo.GetByIdUser(userID)
 	if err != nil {
 		return err
 	}
@@ -207,7 +214,7 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
+	userTarget, err := s.userRepo.GetByIdUser(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}
