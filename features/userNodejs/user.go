@@ -19,7 +19,7 @@ func LoginUser(login Login)(string,error){
 		return "",err
 	}
 		
-	request,_:=http.NewRequest("POST","http://project2.otixx.online/login",bytes.NewBuffer(jsonData))
+	request,_:=http.NewRequest("POST","http://pintu2.otixx.online/login",bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type","application/json")
 	client:=&http.Client{}
 	response,err:=client.Do(request)
@@ -42,7 +42,7 @@ func LoginUser(login Login)(string,error){
 }
 
 func GetProfil(token string)(Pengguna,error){
-	url := "http://project2.otixx.online/profile"
+	url := "http://pintu2.otixx.online/profile"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
@@ -77,7 +77,7 @@ func GetProfil(token string)(Pengguna,error){
 }
 
 func GetAllUser() ([]Pengguna, error) {
-	response, err := http.Get("http://project2.otixx.online/user")
+	response, err := http.Get("http://pintu2.otixx.online/user")
 	if err != nil {
 		fmt.Printf("the HTTP request failed with error %s\n", err)
 	} else {
@@ -98,7 +98,7 @@ func GetAllUser() ([]Pengguna, error) {
 }
 
 func GetByIdUser(idUser string) (Pengguna, error) {
-	url := fmt.Sprintf("http://project2.otixx.online/user/%s", idUser)
+	url := fmt.Sprintf("http://pintu2.otixx.online/user/%s", idUser)
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Printf("the HTTP request failed with error %s\n", err)
