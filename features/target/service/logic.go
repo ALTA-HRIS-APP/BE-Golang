@@ -152,7 +152,39 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 
 // DeleteById implements target.TargetServiceInterface.
 func (s *targetService) DeleteById(targetID string, userID string) error {
-	err := s.targetRepo.Delete(targetID, userID)
+	// Dapatkan peran pengguna
+	user, err := usernodejs.GetByIdUser(userID)
+	if err != nil {
+		return err
+	}
+
+	// Dapatkan target yang akan diperbarui
+	existingTarget, err := s.targetRepo.Select(targetID, userID)
+	if err != nil {
+		return err
+	}
+
+	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
+	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
+	if err != nil {
+		return err
+	}
+
+	// Inisialisasi variabel yang menunjukkan apakah pembaruan diizinkan
+	allowedToDelete := false
+
+	if user.Jabatan == "c-level" {
+		allowedToDelete = true
+	}
+	if user.Jabatan == "manager" && userTarget.Jabatan == "karyawan" {
+		allowedToDelete = true
+	}
+
+	// Periksa izin pembaruan
+	if !allowedToDelete {
+		return errors.New("anda tidak memiliki izin untuk mengedit target ini")
+	}
+	err = s.targetRepo.Delete(targetID, userID)
 	if err != nil {
 		return err
 	}
