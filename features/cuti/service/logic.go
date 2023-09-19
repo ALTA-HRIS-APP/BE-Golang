@@ -13,6 +13,15 @@ type CutiService struct {
 	validate    *validator.Validate
 }
 
+// Delete implements cuti.CutiServiceInterface.
+func (service *CutiService) Delete(id string) error {
+	err := service.cutiService.Delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Edit implements cuti.CutiServiceInterface.
 func (service *CutiService) Edit(input cuti.CutiEntity, id string, idUser string) error {
 	dataUser, errUser := usernodejs.GetByIdUser(idUser)
@@ -135,12 +144,16 @@ func (service *CutiService) Get(idUser string) ([]cuti.CutiEntity, error) {
 
 // Add implements cuti.CutiServiceInterface.
 func (service *CutiService) Add(input cuti.CutiEntity) error {
+	const MaxCutiMelahirkan = 90
+	const MaxCutiSakit = 3
+	const MaxCutiHariRaya = 7
+	const MaxCutiTahunan = 12
 	errValidate := service.validate.Struct(input)
 	if errValidate != nil {
 		return errors.New("validate error")
 	}
 	if input.TipeCuti == "melahirkan" {
-		if input.JumlahCuti > 90 {
+		if input.JumlahCuti > MaxCutiMelahirkan {
 			return errors.New("cuti melahirkan maksimal 90 hari")
 		}
 		err := service.cutiService.Insert(input)
@@ -149,8 +162,17 @@ func (service *CutiService) Add(input cuti.CutiEntity) error {
 		}
 		return nil
 
+	} else if input.TipeCuti == "sakit" {
+		if input.JumlahCuti > MaxCutiSakit {
+			return errors.New("cuti sakit maksimal 3 hari")
+		}
+		err := service.cutiService.Insert(input)
+		if err != nil {
+			return err
+		}
+		return nil
 	} else if input.TipeCuti == "hari raya" {
-		if input.JumlahCuti > 7 {
+		if input.JumlahCuti > MaxCutiHariRaya {
 			return errors.New("cuti hari raya maksimal 7 hari")
 		}
 		err := service.cutiService.Insert(input)
@@ -158,8 +180,9 @@ func (service *CutiService) Add(input cuti.CutiEntity) error {
 			return err
 		}
 		return nil
+
 	} else {
-		if input.JumlahCuti > 12 {
+		if input.JumlahCuti > MaxCutiTahunan {
 			return errors.New("cuti tahunan maksimal 12 hari")
 		}
 		err := service.cutiService.Insert(input)

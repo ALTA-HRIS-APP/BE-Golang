@@ -21,5 +21,5 @@ func main() {
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
 	router.InitRouter(e, mysql)
-	e.Logger.Fatal(e.Start(":1515"))
+	e.Logger.Fatal(e.Start(":80"))
 }
