@@ -105,7 +105,7 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	qParam.SearchStatus = searchStatus
 
 	userID, _, _ := middlewares.ExtractToken(c)
-	count, data, nextPage, err := h.targetService.GetAll(userID, qParam)
+	_, data, err := h.targetService.GetAll(userID, qParam)
 
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
@@ -115,12 +115,8 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	for _, v := range data {
 		targetsResponse = append(targetsResponse, EntityToResponse(v))
 	}
-	response := map[string]interface{}{
-		"totalData": count,
-		"data":      targetsResponse,
-		"nextPage":  nextPage,
-	}
-	return helper.Success(c, "get all target successfully", response)
+
+	return helper.Success(c, "get all target successfully", targetsResponse)
 }
 
 func (h *targetHandler) GetTargetById(c echo.Context) error {
