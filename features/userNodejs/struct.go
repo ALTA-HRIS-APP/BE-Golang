@@ -70,24 +70,6 @@ type Data struct {
 	} `json:"meta"`
 }
 
-func ByteToResponseById(pengguna Pengguna) Pengguna {
-	return Pengguna{
-		ID:          pengguna.ID,
-		NamaLengkap: pengguna.NamaLengkap,
-		Surel:       pengguna.Surel,
-		NoHP:        pengguna.NoHP,
-		Jabatan:     pengguna.Jabatan,
-		KataSandi:   pengguna.KataSandi,
-		Status:      pengguna.Status,
-		CreatedAt:   pengguna.CreatedAt,
-		UpdatedAt:   pengguna.UpdatedAt,
-		DevisiID:    pengguna.DevisiID,
-		RoleID:      pengguna.RoleID,
-		Devisi:      Devisipe(pengguna.Devisi),
-		Role:        Rolepe(pengguna.Role),
-	}
-}
-
 func ByteToResponse(pengguna Pengguna) Pengguna {
 	return Pengguna{
 		ID:          pengguna.ID,

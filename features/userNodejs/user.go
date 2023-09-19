@@ -12,14 +12,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var url_base = "http://project2.otixx.online"
+
 func LoginUser(login Login)(string,error){
 
 	jsonData, err := json.Marshal(login)
 	if err != nil {		
 		return "",err
 	}
-		
-	request,_:=http.NewRequest("POST","http://project2.otixx.online/login",bytes.NewBuffer(jsonData))
+	link:=fmt.Sprintf("%s/login",url_base)
+	request,_:=http.NewRequest("POST",link,bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type","application/json")
 	client:=&http.Client{}
 	response,err:=client.Do(request)
@@ -42,8 +44,8 @@ func LoginUser(login Login)(string,error){
 }
 
 func GetProfil(token string)(Pengguna,error){
-	url := "http://project2.otixx.online/profile"
-	req, err := http.NewRequest("GET", url, nil)
+	link:= fmt.Sprintf("%s/profile",url_base)
+	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return Pengguna{},err
@@ -77,7 +79,8 @@ func GetProfil(token string)(Pengguna,error){
 }
 
 func GetAllUser() ([]Pengguna, error) {
-	response, err := http.Get("http://project2.otixx.online/user")
+	link:= fmt.Sprintf("%s/user",url_base)
+	response, err := http.Get(link)
 	if err != nil {
 		fmt.Printf("the HTTP request failed with error %s\n", err)
 	} else {
@@ -98,8 +101,8 @@ func GetAllUser() ([]Pengguna, error) {
 }
 
 func GetByIdUser(idUser string) (Pengguna, error) {
-	url := fmt.Sprintf("http://project2.otixx.online/user/%s", idUser)
-	response, err := http.Get(url)
+	link:= fmt.Sprintf("%s/user/%s",url_base,idUser)
+	response, err := http.Get(link)
 	if err != nil {
 		fmt.Printf("the HTTP request failed with error %s\n", err)
 	} else {
