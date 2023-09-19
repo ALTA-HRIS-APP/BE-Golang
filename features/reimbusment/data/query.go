@@ -36,6 +36,7 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
+		fmt.Println("offset",offset)
 		if param.SearchName != "" {
 			query = query.Where("description like ?", "%"+param.SearchName+"%")
 		}
@@ -66,10 +67,12 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 	for _, value := range dataUser {
 		userEntity = append(userEntity, UserToEntity(value))
 	}
+	fmt.Println("user entity",userEntity)
 	var reimbushPengguna []ReimbursementPengguna
 	for _, value := range inputModel {
 		reimbushPengguna = append(reimbushPengguna, ModelToPengguna(value))
 	}
+	fmt.Println("reimb",reimbushPengguna)
 	var reimbushEntity []reimbusment.ReimbursementEntity
 	for i := 0; i < len(userEntity); i++ {
 		for j := 0; j < len(reimbushPengguna); j++ {
@@ -79,6 +82,7 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 			}
 		}
 	}
+	fmt.Println("reimbursement user",reimbushEntity)
 	return total_reimbursement, reimbushEntity, nil
 }
 
