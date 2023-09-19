@@ -94,6 +94,14 @@ func (handler *CutiHandler) GetAll(c echo.Context) error {
 	}
 	return helper.Success(c, "get all cuti successfully", response)
 }
+func (handler *CutiHandler) Delete(c echo.Context) error {
+	id := c.Param("id_cuti")
+	err := handler.cutiHandler.Delete(id)
+	if err != nil {
+		return helper.InternalError(c, err.Error(), nil)
+	}
+	return helper.SuccessWithOutData(c, "success delete cuti")
+}
 
 func New(handler cuti.CutiServiceInterface) *CutiHandler {
 	return &CutiHandler{
