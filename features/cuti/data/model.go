@@ -13,10 +13,10 @@ type Cuti struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	TipeCuti     string         `gorm:"type:enum('melahirkan','hari raya','tahunan');default:'tahunan';column:tipe_cuti"`
+	TipeCuti     string         `gorm:"type:enum('melahirkan','sakit', 'hari raya','tahunan');default:'tahunan';column:tipe_cuti"`
 	Status       string
 	JumlahCuti   int
-	BatasanCuti  int `gorm:"column:batasan_cuti;default:90"`
+	BatasanCuti  int `gorm:"column:batasan_cuti;default:112"`
 	Description  string
 	Persetujuan  string
 	StartCuti    string
