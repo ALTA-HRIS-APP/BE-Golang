@@ -16,15 +16,8 @@ type ReimbursementRequest struct {
 	Persetujuan     string `json:"persetujuan" form:"persetujuan"`
 	UrlBukti        string `json:"url_bukti" form:"url_bukti"`
 	UserID          string `json:"user_id" form:"user_id"`
-	User            UserRequest `json:"user,omitempty"`
 }
 
-type UserRequest struct {
-	ID     string `json:"id" form:"id"`
-	Name   string `json:"name" form:"name"`
-	Role   string `json:"role" form:"role"`
-	Devisi string `json:"devisi" form:"devisi"`
-}
 
 type LoginReguest struct{
 	Email string `json:"email"`
@@ -49,15 +42,6 @@ func RequestToEntity(user ReimbursementRequest)reimbusment.ReimbursementEntity{
 		Persetujuan:     user.Persetujuan,
 		UrlBukti:        user.UrlBukti,
 		UserID:          user.UserID,
-		User:           UserRequestToEntity(user.User),
 	}
 }
 
-func UserRequestToEntity(user UserRequest)reimbusment.UserEntity{
-	return reimbusment.UserEntity{
-		ID:     user.ID,
-		Name:   user.Name,
-		Role:   user.Role,
-		Devisi: user.Devisi,
-	}
-}
