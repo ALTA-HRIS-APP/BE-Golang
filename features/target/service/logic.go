@@ -64,14 +64,56 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 	return targetID, nil
 }
 
-// GetAll implements target.TargetServiceInterface.
 func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
 	var total_page int64
+	var targetID string
 	nextPage := true
+
+	// Dapatkan peran pengguna
+	user, err := usernodejs.GetByIdUser(userID)
+	if err != nil {
+		return false, nil, err
+	}
+
+	// Dapatkan target yang akan diperbarui
+	existingTarget, err := s.targetRepo.Select(targetID, userID)
+	if err != nil {
+		return false, nil, err
+	}
+
+	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
+	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
+	if err != nil {
+		return false, nil, err
+	}
+
+	// Inisialisasi variabel yang menunjukkan apakah pembaruan diizinkan
+	allowedToRead := false
+	if user.Jabatan == "c-level" {
+		allowedToRead = true
+	}
+
+	if user.Jabatan == "manager" {
+		if existingTarget.UserIDPenerima == userID {
+			allowedToRead = true
+		}
+		if userTarget.Jabatan == "karyawan" {
+			allowedToRead = true
+		}
+	}
+	if user.Jabatan == "karyawan" {
+		if existingTarget.UserIDPenerima == userID {
+			allowedToRead = true
+		}
+	}
+	// Periksa izin pembaruan
+	if !allowedToRead {
+		return false, nil, errors.New("anda tidak memiliki izin untuk melihat target ini")
+	}
 
 	count, data, err := s.targetRepo.SelectAll(userID, param)
 	if err != nil {
-		return true, nil, err
+		return false, nil, err
 	}
 	if param.ExistOtherPage {
 		total_page = count / int64(param.LimitPerPage)
