@@ -9,6 +9,7 @@ import (
 	handlerR "be_golang/klp3/features/reimbusment/handler"
 	serviceR "be_golang/klp3/features/reimbusment/service"
 
+	"be_golang/klp3/features/externalapi"
 	_targetRepo "be_golang/klp3/features/target/data"
 	_targetHandler "be_golang/klp3/features/target/handler"
 	_targetService "be_golang/klp3/features/target/service"
@@ -35,7 +36,8 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.GET("/cutis", handlerCuti.GetAll, middlewares.JWTMiddleware())
 	c.PUT("/cutis/:id_cuti", handlerCuti.Edit, middlewares.JWTMiddleware())
 
-	targetRepo := _targetRepo.New(db)
+	externalAPI := externalapi.NewExternalData(BaseURL)
+	targetRepo := _targetRepo.New(db, externalAPI)
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)
 	c.POST("/user/:user_id/targets", targetHandlerAPI.CreateTarget, middlewares.JWTMiddleware())
@@ -43,4 +45,8 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.GET("/targets/:target_id", targetHandlerAPI.GetTargetById, middlewares.JWTMiddleware())
 	c.PUT("/targets/:target_id", targetHandlerAPI.UpdateTargetById, middlewares.JWTMiddleware())
 	c.DELETE("/targets/:target_id", targetHandlerAPI.DeleteTargetById, middlewares.JWTMiddleware())
+}
+
+func NewExternalData(s string) {
+	panic("unimplemented")
 }

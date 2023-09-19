@@ -13,13 +13,11 @@ import (
 
 type targetHandler struct {
 	targetService target.TargetServiceInterface
-	userRepo      target.ExternalAPINodejs
 }
 
-func New(service target.TargetServiceInterface, externalApi target.ExternalAPINodejs) *targetHandler {
+func New(service target.TargetServiceInterface) *targetHandler {
 	return &targetHandler{
 		targetService: service,
-		userRepo:      externalApi,
 	}
 }
 
@@ -30,7 +28,7 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 	log.Println("UserID: ", userID)
 
 	//mengecek user id dari get by id user id api node js
-	userProfile, err := h.userRepo.GetByIdUser(userID)
+	userProfile, err := h.targetService.GetUserByIDFromExternalAPI(userID)
 	if err != nil {
 		log.Printf("Error get detail user: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)

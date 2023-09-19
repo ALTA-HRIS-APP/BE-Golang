@@ -1,6 +1,7 @@
 package target
 
 import (
+	externalapi "be_golang/klp3/features/externalAPI"
 	"time"
 )
 
@@ -31,6 +32,7 @@ type TargetDataInterface interface {
 	Select(targetID string, userID string) (TargetEntity, error)
 	Update(targetID string, userID string, targetData TargetEntity) error
 	Delete(targetID string, userID string) error
+	GetUserByIDFromExternalAPI(idUser string) (externalapi.Pengguna, error)
 }
 
 type TargetServiceInterface interface {
@@ -39,4 +41,5 @@ type TargetServiceInterface interface {
 	GetById(targetID string, userID string) (TargetEntity, error)
 	UpdateById(targetID string, userID string, targetData TargetEntity) error
 	DeleteById(targetID string, userID string) error
+	GetUserByIDFromExternalAPI(idUser string) (externalapi.Pengguna, error)
 }

@@ -1,7 +1,9 @@
 package service
 
 import (
+	externalapi "be_golang/klp3/features/externalAPI"
 	"be_golang/klp3/features/target"
+	usernodejs "be_golang/klp3/features/userNodejs"
 
 	"errors"
 	"log"
@@ -11,26 +13,33 @@ import (
 
 type targetService struct {
 	targetRepo target.TargetDataInterface
-	userRepo   target.ExternalAPINodejs
 	validate   *validator.Validate
 }
 
-func New(repo target.TargetDataInterface, externalAPI target.ExternalAPINodejs) target.TargetServiceInterface {
+func New(repo target.TargetDataInterface) target.TargetServiceInterface {
 	return &targetService{
 		targetRepo: repo,
 		validate:   validator.New(),
-		userRepo:   externalAPI,
 	}
+}
+
+func (s *targetService) GetUserByIDFromExternalAPI(idUser string) (externalapi.Pengguna, error) {
+	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data targetRepo
+	user, err := s.targetRepo.GetUserByIDFromExternalAPI(idUser)
+	if err != nil {
+		return externalapi.Pengguna{}, err
+	}
+	return user, nil
 }
 
 // Create implements target.TargetServiceInterface.
 func (s *targetService) Create(input target.TargetEntity) (string, error) {
-	userPembuat, err := s.userRepo.GetByIdUser(input.UserIDPembuat)
+	userPembuat, err := s.targetRepo.GetUserByIDFromExternalAPI(input.UserIDPembuat)
 	if err != nil {
 		log.Printf("Error getting user details for the creator: %s", err.Error())
 		return "", err
 	}
-	userPenerima, err := s.userRepo.GetByIdUser(input.UserIDPenerima)
+	userPenerima, err := s.targetRepo.GetUserByIDFromExternalAPI(input.UserIDPenerima)
 	if err != nil {
 		log.Printf("Error getting user details for the receiver: %s", err.Error())
 		return "", err
@@ -77,7 +86,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	nextPage := true
 
 	// Dapatkan peran pengguna
-	user, err := s.userRepo.GetByIdUser(userID)
+	user, err := usernodejs.GetByIdUser(userID)
 	if err != nil {
 		return false, nil, err
 	}
@@ -89,7 +98,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := s.userRepo.GetByIdUser(existingTarget.UserIDPenerima)
+	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
 	if err != nil {
 		return false, nil, err
 	}
@@ -147,7 +156,7 @@ func (s *targetService) GetById(targetID string, userID string) (target.TargetEn
 // UpdateById implements target.TargetServiceInterface.
 func (s *targetService) UpdateById(targetID string, userID string, targetData target.TargetEntity) error {
 	// Dapatkan peran pengguna
-	user, err := s.userRepo.GetByIdUser(userID)
+	user, err := usernodejs.GetByIdUser(userID)
 	if err != nil {
 		return err
 	}
@@ -159,7 +168,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := s.userRepo.GetByIdUser(existingTarget.UserIDPenerima)
+	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}
@@ -202,7 +211,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 // DeleteById implements target.TargetServiceInterface.
 func (s *targetService) DeleteById(targetID string, userID string) error {
 	// Dapatkan peran pengguna
-	user, err := s.userRepo.GetByIdUser(userID)
+	user, err := usernodejs.GetByIdUser(userID)
 	if err != nil {
 		return err
 	}
@@ -214,7 +223,7 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := s.userRepo.GetByIdUser(existingTarget.UserIDPenerima)
+	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}

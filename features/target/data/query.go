@@ -1,6 +1,7 @@
 package data
 
 import (
+	externalapi "be_golang/klp3/features/externalAPI"
 	"be_golang/klp3/features/target"
 	"be_golang/klp3/helper"
 	"errors"
@@ -10,13 +11,25 @@ import (
 )
 
 type targetQuery struct {
-	db *gorm.DB
+	db          *gorm.DB
+	externalAPI externalapi.ExternalDataInterface
 }
 
-func New(database *gorm.DB) target.TargetDataInterface {
+func New(database *gorm.DB, externalAPI externalapi.ExternalDataInterface) target.TargetDataInterface {
 	return &targetQuery{
-		db: database,
+		db:          database,
+		externalAPI: externalAPI,
 	}
+}
+
+func (r *targetQuery) GetUserByIDFromExternalAPI(idUser string) (externalapi.Pengguna, error) {
+	// Panggil metode GetUserByID dari externalAPI
+	user, err := r.externalAPI.GetByIdUser(idUser)
+	if err != nil {
+		return externalapi.Pengguna{}, err
+	}
+
+	return user, nil
 }
 
 // Insert implements target.TargetDataInterface.
