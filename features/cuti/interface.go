@@ -34,9 +34,11 @@ type CutiDataInterface interface {
 	SelectById(id string) (CutiEntity, error)
 	UpdateKaryawan(input CutiEntity, id string) error
 	Update(input CutiEntity, id string) error
+	Delete(id string) error
 }
 type CutiServiceInterface interface {
 	Add(input CutiEntity) error
 	Get(idUser string) ([]CutiEntity, error)
 	Edit(input CutiEntity, id string, idUser string) error
+	Delete(id string) error
 }
