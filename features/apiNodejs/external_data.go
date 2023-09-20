@@ -1,4 +1,4 @@
-package externalapi
+package apinodejs
 
 import (
 	"bytes"

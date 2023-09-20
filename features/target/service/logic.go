@@ -1,7 +1,7 @@
 package service
 
 import (
-	externalapi "be_golang/klp3/features/externalapi"
+	apinodejs "be_golang/klp3/features/apiNodejs"
 	"be_golang/klp3/features/target"
 	usernodejs "be_golang/klp3/features/userNodejs"
 
@@ -23,12 +23,12 @@ func New(repo target.TargetDataInterface) target.TargetServiceInterface {
 	}
 }
 
-func (s *targetService) GetUserByIDFromExternalAPI(idUser string) (externalapi.Pengguna, error) {
+func (s *targetService) GetUserByIDFromExternalAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data targetRepo
 	user, err := s.targetRepo.GetUserByIDFromExternalAPI(idUser)
 	if err != nil {
 		log.Printf("Error consume api in service: %s", err.Error())
-		return externalapi.Pengguna{}, err
+		return apinodejs.Pengguna{}, err
 	}
 	log.Println("consume api in service successfully")
 	return user, nil

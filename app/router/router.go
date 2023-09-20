@@ -9,7 +9,7 @@ import (
 	handlerR "be_golang/klp3/features/reimbusment/handler"
 	serviceR "be_golang/klp3/features/reimbusment/service"
 
-	"be_golang/klp3/features/externalapi"
+	apinodejs "be_golang/klp3/features/apiNodejs"
 	_targetRepo "be_golang/klp3/features/target/data"
 	_targetHandler "be_golang/klp3/features/target/handler"
 	_targetService "be_golang/klp3/features/target/service"
@@ -36,7 +36,7 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.GET("/cutis", handlerCuti.GetAll, middlewares.JWTMiddleware())
 	c.PUT("/cutis/:id_cuti", handlerCuti.Edit, middlewares.JWTMiddleware())
 
-	externalAPI := externalapi.NewExternalData("http://project2.otixx.online")
+	externalAPI := apinodejs.NewExternalData("http://project2.otixx.online")
 	targetRepo := _targetRepo.New(db, externalAPI)
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)

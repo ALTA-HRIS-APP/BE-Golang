@@ -1,7 +1,7 @@
 package data
 
 import (
-	"be_golang/klp3/features/externalapi"
+	apinodejs "be_golang/klp3/features/apiNodejs"
 	"be_golang/klp3/features/target"
 	"be_golang/klp3/helper"
 	"errors"
@@ -12,22 +12,22 @@ import (
 
 type targetQuery struct {
 	db          *gorm.DB
-	externalAPI externalapi.ExternalDataInterface
+	externalAPI apinodejs.ExternalDataInterface
 }
 
-func New(database *gorm.DB, externalAPI externalapi.ExternalDataInterface) target.TargetDataInterface {
+func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
 	return &targetQuery{
 		db:          database,
 		externalAPI: externalAPI,
 	}
 }
 
-func (r *targetQuery) GetUserByIDFromExternalAPI(idUser string) (externalapi.Pengguna, error) {
+func (r *targetQuery) GetUserByIDFromExternalAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByID dari externalAPI
 	user, err := r.externalAPI.GetUserByID(idUser)
 	if err != nil {
 		log.Printf("Error consume api user: %s", err.Error())
-		return externalapi.Pengguna{}, err
+		return apinodejs.Pengguna{}, err
 	}
 	log.Println("consume api successfully")
 	return user, nil
