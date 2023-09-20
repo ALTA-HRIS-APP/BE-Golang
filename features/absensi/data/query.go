@@ -6,8 +6,8 @@ import (
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
+	"fmt"
 	"log"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -99,6 +99,7 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
+		fmt.Println("offset", offset)
 		if param.SearchName != "" {
 			query = query.Where("description like ?", "%"+param.SearchName+"%")
 		}
@@ -117,9 +118,6 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 		return 0, nil, errors.New("error get all absensi")
 	}
 
-	// Tambahkan kode untuk mendapatkan tanggal sekarang
-	now := time.Now()
-
 	dataPengguna, errUser := usernodejs.GetAllUser()
 	if errUser != nil {
 		return 0, nil, errUser
@@ -132,19 +130,17 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 	for _, value := range dataUser {
 		userEntity = append(userEntity, UserToEntity(value))
 	}
+	fmt.Println("user entity", userEntity)
 	var absensiPengguna []AbsensiPengguna
 	for _, value := range inputModel {
 		absensiPengguna = append(absensiPengguna, ModelToPengguna(value))
 	}
+	fmt.Println("reimb", absensiPengguna)
 	var absensiEntity []absensi.AbsensiEntity
 	for i := 0; i < len(userEntity); i++ {
 		for j := 0; j < len(absensiPengguna); j++ {
 			if userEntity[i].ID == absensiPengguna[j].UserID {
 				absensiPengguna[j].User = User(userEntity[i])
-
-				// Setel tanggal sekarang ke absensiEntity
-				absensiPengguna[j].TanggalSekarang = now
-
 				absensiEntity = append(absensiEntity, PenggunaToEntity(absensiPengguna[j]))
 			}
 		}
