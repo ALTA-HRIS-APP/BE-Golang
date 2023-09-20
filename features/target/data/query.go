@@ -113,28 +113,28 @@ func (r *targetQuery) Select(targetID string) (target.TargetEntity, error) {
 }
 
 // Update implements target.TargetDataInterface.
-func (r *targetQuery) Update(targetID string, userID string, targetData target.TargetEntity) error {
+func (r *targetQuery) Update(targetID string, targetData target.TargetEntity) error {
 	var target Target
-	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).First(&target)
-	log.Printf("Error read id: %s", tx.Error)
+	tx := r.db.Where("id = ?", targetID).First(&target)
+	log.Printf("Error reading target by id: %s", tx.Error)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when read target")
+		log.Println("No rows affected when reading target")
 		return errors.New("target not found")
 	}
 
-	//Mapping Entity Target to Model
+	// Mapping Entity Target to Model
 	updatedTarget := MapEntityToModel(targetData)
 
-	// Lakukan pembaruan data proyek dalam database
+	// Perform the update of project data in the database
 	tx = r.db.Model(&target).Updates(updatedTarget)
 	if tx.Error != nil {
-		log.Printf("Error update target: %s", tx.Error)
+		log.Printf("Error updating target: %s", tx.Error)
 		return errors.New(tx.Error.Error() + " failed to update data")
 	}
-	log.Println("Update target successfully")
+	log.Println("Target updated successfully")
 	return nil
 }
 
