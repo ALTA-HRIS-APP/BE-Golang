@@ -131,6 +131,9 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 		}
 		return nil
 	} else if dataUser.Jabatan == "manager" {
+		if dataUser.Devisi != dataUserPengaju.Devisi {
+			return errors.New("manager tidak dapat approve karyawan devisi lain")
+		}
 		if dataUserPengaju.Jabatan == "manager" || dataUserPengaju.Jabatan == "c-level" || dataUserPengaju.Jabatan == "hr" {
 			return errors.New("manager hanya bisa approve reimbursement karyawan")
 		}
