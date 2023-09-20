@@ -256,7 +256,7 @@ paths:
         - JWTAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/responseGetAllTarget"
+          $ref: "#/components/responses/responseGetAllTargets"
         "400":
           $ref: "#/components/responses/responseBadRequest"
         "404":
@@ -265,7 +265,7 @@ paths:
           $ref: "#/components/responses/responseFailedInternal"
 
   /targets/{target_id}:
-  get:
+    get:
       tags:
         - Target
       summary: target get by id
@@ -403,7 +403,7 @@ components:
           type: string
           format: binary
           description: "allowed file extension: jpg, png, jpeg"
-    
+
     create_target:
       type: object
       properties:
@@ -415,14 +415,14 @@ components:
           description: "example: not-completed"
         divisi_id:
           type: integer
-          description: "example: ......" ...
+          description: "example: ......"
         user_id_pembuat:
           type: string
-          description: "example: ......." ...
+          description: "example: ......."
         user_id_penerima:
           type: string
-          description: "example: ......" ...
-        due_date: 
+          description: "example: ......"
+        due_date:
           type: string
           description: "example: 19-09-2023"
         image:
@@ -493,7 +493,7 @@ components:
               "data":
                 type: object
                 example: null
-                
+
     responseGetByIdReimbursment:
       description: success
       content:
@@ -633,24 +633,24 @@ components:
                     proofs:
                       type: string
                 example:
-                  - id: ""
+                  - id: "1759b423-1cbe-4c4a-bb27-612237b00259"
                     konten_target: ""
                     status: "not-completed"
-                    devisi_id: ""
-                    user_id_pembuat: ""
-                    user_id_penerima: ""
-                    proofs: ""
-                    user_id: ""
-                  - id: ""
+                    devisi_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                    user_id_pembuat: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                    user_id_penerima: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                    proofs: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                    user_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                  - id: "1759b423-1cbe-4c4a-bb27-612237b00259"
                     konten_target: ""
                     status: "not-completed"
-                    devisi_id: ""
-                    user_id_pembuat: ""
-                    user_id_penerima: ""
-                    proofs: ""
-                    user_id: ""
-                    
-     responseGetAllCuti:
+                    devisi_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                    user_id_pembuat: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                    user_id_penerima: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                    proofs: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
+                    user_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
+
+    responseGetAllCuti:
       description: success
       content:
         application/json:
@@ -705,7 +705,6 @@ components:
                     persetujuan: "pending"
                     url_pendukung: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
                     user_id: "0bab9e2b-dc1c-4d95-aece-06e9e28707d1"
-
 
     responseBadRequest:
       description: failed
