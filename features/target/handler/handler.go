@@ -123,15 +123,21 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	return helper.Success(c, "Get all targets successfully", targetsResponse)
 }
 
+// GetTargetById retrieves target details by its ID.
 func (h *targetHandler) GetTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := h.targetService.GetUserByIDAPI(userID)
+
+	// Get user details
+	_, err := h.targetService.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error getting user details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
+
 	idParam := c.Param("target_id")
-	result, err := h.targetService.GetById(idParam, apiUser.ID)
+
+	// Get target details and check if the user has permission to access it
+	result, err := h.targetService.GetById(idParam, userID)
 	if err != nil {
 		log.Printf("Error getting target details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
@@ -141,7 +147,6 @@ func (h *targetHandler) GetTargetById(c echo.Context) error {
 	log.Println("Get target by ID successfully")
 	return helper.Found(c, "Success getting target details", resultResponse)
 }
-
 func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
 	apiUser, err := h.targetService.GetUserByIDAPI(userID)
@@ -183,19 +188,26 @@ func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 	return helper.Success(c, "target updated successfully", resultResponse)
 }
 
+// DeleteTargetById handles the deletion of a target by its ID.
 func (h *targetHandler) DeleteTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := h.targetService.GetUserByIDAPI(userID)
+
+	// Get user details
+	_, err := h.targetService.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error getting user details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
+
 	idParam := c.Param("target_id")
-	_, err = h.targetService.GetById(idParam, apiUser.ID)
+
+	// Check if the target exists and is allowed to be deleted
+	err = h.targetService.DeleteById(idParam, userID)
 	if err != nil {
-		log.Printf("Error getting target details: %s", err.Error())
+		log.Printf("Error deleting target: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
+
 	log.Println("Target deleted successfully")
 	return helper.Success(c, "Target deleted successfully", nil)
 }
