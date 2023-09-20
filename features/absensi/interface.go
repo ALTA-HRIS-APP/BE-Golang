@@ -1,6 +1,7 @@
 package absensi
 
 import (
+	apinodejs "be_golang/klp3/features/apiNodejs"
 	"time"
 )
 
@@ -36,6 +37,7 @@ type AbsensiDataInterface interface {
 	Update(input AbsensiEntity, idUser string, id string) error
 	SelectById(absensiID string, userID string) (AbsensiEntity, error)
 	SelectAll(param QueryParams) (int64, []AbsensiEntity, error)
+	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
 }
 
 type AbsensiServiceInterface interface {
@@ -43,4 +45,5 @@ type AbsensiServiceInterface interface {
 	Add(idUser string) error
 	Edit(idUser string, id string) error
 	GetById(absensiID string, userID string) (AbsensiEntity, error)
+	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
 }

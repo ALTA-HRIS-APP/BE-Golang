@@ -24,6 +24,7 @@ import (
 )
 
 func InitRouter(c *echo.Echo, db *gorm.DB) {
+	externalAPI := apinodejs.NewExternalData("http://project2.otixx.online")
 	dataRes := dataR.New(db)
 	serviceRes := serviceR.New(dataRes)
 	handlerRes := handlerR.New(serviceRes)
@@ -39,18 +40,17 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 
 	c.POST("/cutis", handlerCuti.AddCuti, middlewares.JWTMiddleware())
 	c.GET("/cutis", handlerCuti.GetAll, middlewares.JWTMiddleware())
+	c.PUT("/cutis/:id_cuti", handlerCuti.Edit, middlewares.JWTMiddleware())
 
-	dataAbsensi := dataA.New(db)
+	dataAbsensi := dataA.New(db, externalAPI)
 	serviceAbsensi := serviceA.New(dataAbsensi)
 	handlerAbsensi := handlerA.New(serviceAbsensi)
 
-	c.POST("/absensis", handlerAbsensi.Add)
-	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit)
-	c.GET("/absensis", handlerAbsensi.GetAllAbsensi)
-	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById)
-	c.PUT("/cutis/:id_cuti", handlerCuti.Edit, middlewares.JWTMiddleware())
+	c.POST("/absensis", handlerAbsensi.Add, middlewares.JWTMiddleware())
+	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit, middlewares.JWTMiddleware())
+	c.GET("/absensis", handlerAbsensi.GetAllAbsensi, middlewares.JWTMiddleware())
+	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById, middlewares.JWTMiddleware())
 
-	externalAPI := apinodejs.NewExternalData("http://project2.otixx.online")
 	targetRepo := _targetRepo.New(db, externalAPI)
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)

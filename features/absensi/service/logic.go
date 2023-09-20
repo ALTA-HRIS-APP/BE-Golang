@@ -2,8 +2,10 @@ package service
 
 import (
 	"be_golang/klp3/features/absensi"
+	apinodejs "be_golang/klp3/features/apiNodejs"
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"errors"
+	"log"
 	"strconv"
 	"time"
 
@@ -13,6 +15,18 @@ import (
 type AbsensiService struct {
 	absensiService absensi.AbsensiDataInterface
 	validate       *validator.Validate
+}
+
+// GetUserByIDAPI implements absensi.AbsensiServiceInterface
+func (service *AbsensiService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
+	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data absensiRepo
+	user, err := service.absensiService.GetUserByIDAPI(idUser)
+	if err != nil {
+		log.Printf("Error consume api in service: %s", err.Error())
+		return apinodejs.Pengguna{}, err
+	}
+	log.Println("consume api in service successfully")
+	return user, nil
 }
 
 // GetById implements absensi.AbsensiServiceInterface
@@ -154,38 +168,6 @@ func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bo
 
 	}
 }
-
-// // Add implements absensi.AbsensiServiceInterface
-// func (service *AbsensiService) Add(input absensi.AbsensiEntity) error {
-// 	errValidate := service.validate.Struct(input)
-// 	if errValidate != nil {
-// 		return errors.New("validate error")
-// 	}
-
-// 	// Tanggal dan waktu awal dalam format time.Time
-// 	tanggalWaktuAwal := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), time.Now().Hour(), time.Now().Minute(), 0, 0, time.UTC)
-
-// 	// Membuat objek time.Date baru
-// 	tanggalWaktuBaru := time.Date(
-// 		tanggalWaktuAwal.Year(),
-// 		tanggalWaktuAwal.Month(),
-// 		tanggalWaktuAwal.Day(),
-// 		tanggalWaktuAwal.Hour(),
-// 		tanggalWaktuAwal.Minute(),
-// 		tanggalWaktuAwal.Second(),
-// 		tanggalWaktuAwal.Nanosecond(),
-// 		time.UTC,
-// 	)
-
-// 	// Menghitung keterlambatan
-// 	waktuSeharusnyaMasuk := time.Date(tanggalWaktuAwal.Year(), tanggalWaktuAwal.Month(), tanggalWaktuAwal.Day(), 7, 30, 0, 0, time.UTC)
-// 	selisih := tanggalWaktuBaru.Sub(waktuSeharusnyaMasuk)
-// 	keterlambatan := selisih.Minutes()
-
-// 	fmt.Printf("Waktu Baru: %s\n", tanggalWaktuBaru)
-// 	fmt.Printf("Keterlambatan: %.2f menit\n", keterlambatan)
-// 	return nil
-// }
 
 func New(service absensi.AbsensiDataInterface) absensi.AbsensiServiceInterface {
 	return &AbsensiService{
