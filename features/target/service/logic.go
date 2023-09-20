@@ -88,7 +88,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	}
 
 	// Get the target to be updated
-	existingTarget, err := s.targetRepo.Select(targetID, userID)
+	existingTarget, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		log.Printf("Error selecting target: %s", err.Error())
 		return false, nil, err
@@ -152,7 +152,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 
 // GetById implements target.TargetServiceInterface.
 func (s *targetService) GetById(targetID string, userID string) (target.TargetEntity, error) {
-	result, err := s.targetRepo.Select(targetID, userID)
+	result, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		log.Printf("Error selecting target by ID: %s", err.Error())
 		return target.TargetEntity{}, err
@@ -170,7 +170,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 	}
 
 	// Dapatkan target yang akan diperbarui
-	existingTarget, err := s.targetRepo.Select(targetID, userID)
+	existingTarget, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 
 // DeleteById implements target.TargetServiceInterface.
 func (s *targetService) DeleteById(targetID string, userID string) error {
-	// Dapatkan peran pengguna
+	//Dapatkan peran pengguna
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error getting user details: %s", err.Error())
@@ -226,7 +226,7 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 	}
 
 	// Dapatkan target yang akan diperbarui
-	existingTarget, err := s.targetRepo.Select(targetID, userID)
+	existingTarget, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		log.Printf("Error selecting target for deletion: %s", err.Error())
 		return err

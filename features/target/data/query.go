@@ -94,10 +94,10 @@ func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, 
 }
 
 // Select implements target.TargetDataInterface.
-func (r *targetQuery) Select(targetID string, userID string) (target.TargetEntity, error) {
+func (r *targetQuery) Select(targetID string) (target.TargetEntity, error) {
 	var targetData Target
 
-	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).First(&targetData)
+	tx := r.db.Where("id = ?", targetID).First(&targetData)
 	if tx.Error != nil {
 		log.Printf("Error reading target: %s", tx.Error)
 		return target.TargetEntity{}, tx.Error
