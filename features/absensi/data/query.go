@@ -17,23 +17,22 @@ type absensiQuery struct {
 	externalAPI apinodejs.ExternalDataInterface
 }
 
-// GetUserByIDAPI implements absensi.AbsensiDataInterface
-func (repo *absensiQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
-	// Panggil metode GetUserByID dari externalAPI
-	user, err := repo.externalAPI.GetUserByID(idUser)
+// SelectUserById implements absensi.AbsensiDataInterface
+func (*absensiQuery) SelectUserById(idUser string) (absensi.PenggunaEntity, error) {
+	data, err := usernodejs.GetByIdUser(idUser)
 	if err != nil {
-		log.Printf("Error consume api user: %s", err.Error())
-		return apinodejs.Pengguna{}, err
+		return absensi.PenggunaEntity{}, err
 	}
-	log.Println("consume api successfully")
-	return user, nil
+	dataUser := UserNodeJskePengguna(data)
+	dataEntity := UserPenggunaToEntity(dataUser)
+	return dataEntity, nil
 }
 
 // SelectById implements absensi.AbsensiDataInterface
-func (repo *absensiQuery) SelectById(absensiID string, userID string) (absensi.AbsensiEntity, error) {
+func (repo *absensiQuery) SelectById(absensiID string) (absensi.AbsensiEntity, error) {
 	var absensiData Absensi
 
-	tx := repo.db.Where("id = ? AND user_id = ?", absensiID, userID).First(&absensiData)
+	tx := repo.db.Where("id = ?", absensiID).First(&absensiData)
 	if tx.Error != nil {
 		log.Printf("Error read absensi: %s", tx.Error)
 		return absensi.AbsensiEntity{}, tx.Error
@@ -46,6 +45,18 @@ func (repo *absensiQuery) SelectById(absensiID string, userID string) (absensi.A
 	coreAbsensi := ModelToEntity(absensiData)
 	log.Println("Read absensi successfully")
 	return coreAbsensi, nil
+}
+
+// GetUserByIDAPI implements absensi.AbsensiDataInterface
+func (repo *absensiQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
+	// Panggil metode GetUserByID dari externalAPI
+	user, err := repo.externalAPI.GetUserByID(idUser)
+	if err != nil {
+		log.Printf("Error consume api user: %s", err.Error())
+		return apinodejs.Pengguna{}, err
+	}
+	log.Println("consume api successfully")
+	return user, nil
 }
 
 // Insert implements absensi.AbsensiDataInterface

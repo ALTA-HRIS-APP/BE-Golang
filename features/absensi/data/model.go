@@ -25,6 +25,12 @@ type User struct {
 	Name string
 }
 
+type Pengguna struct {
+	ID          string
+	NamaLengkap string
+	Jabatan     string
+}
+
 type AbsensiPengguna struct {
 	ID              string
 	CreatedAt       time.Time
@@ -37,6 +43,14 @@ type AbsensiPengguna struct {
 	JamKeluar       string
 	User            User
 	TanggalSekarang time.Time
+}
+
+func UserNodeJskePengguna(pengguna usernodejs.Pengguna) Pengguna {
+	return Pengguna{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Jabatan:     pengguna.Jabatan,
+	}
 }
 
 func EntityToModel(absen absensi.AbsensiEntity) Absensi {
@@ -61,6 +75,14 @@ func ModelToEntity(user Absensi) absensi.AbsensiEntity {
 		JamMasuk:       user.JamMasuk,
 		JamKeluar:      user.JamKeluar,
 		User:           absensi.UserEntity{},
+	}
+}
+
+func UserPenggunaToEntity(pengguna Pengguna) absensi.PenggunaEntity {
+	return absensi.PenggunaEntity{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Jabatan:     pengguna.Jabatan,
 	}
 }
 

@@ -3,7 +3,6 @@ package service
 import (
 	"be_golang/klp3/features/absensi"
 	apinodejs "be_golang/klp3/features/apiNodejs"
-	usernodejs "be_golang/klp3/features/userNodejs"
 	"errors"
 	"log"
 	"strconv"
@@ -17,6 +16,15 @@ type AbsensiService struct {
 	validate       *validator.Validate
 }
 
+// GetById implements absensi.AbsensiServiceInterface
+func (service *AbsensiService) GetById(absensiID string) (absensi.AbsensiEntity, error) {
+	result, err := service.absensiService.SelectById(absensiID)
+	if err != nil {
+		return absensi.AbsensiEntity{}, err
+	}
+	return result, nil
+}
+
 // GetUserByIDAPI implements absensi.AbsensiServiceInterface
 func (service *AbsensiService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data absensiRepo
@@ -27,15 +35,6 @@ func (service *AbsensiService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna
 	}
 	log.Println("consume api in service successfully")
 	return user, nil
-}
-
-// GetById implements absensi.AbsensiServiceInterface
-func (service *AbsensiService) GetById(absensiID string, userID string) (absensi.AbsensiEntity, error) {
-	result, err := service.absensiService.SelectById(absensiID, userID)
-	if err != nil {
-		return absensi.AbsensiEntity{}, err
-	}
-	return result, nil
 }
 
 // Add implements absensi.AbsensiServiceInterface
@@ -120,17 +119,19 @@ func (service *AbsensiService) Edit(idUser string, id string) error {
 func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bool, []absensi.AbsensiEntity, error) {
 	var total_pages int64
 	nextPage := true
-	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	dataUser, errUser := service.absensiService.SelectUserById(idUser)
 	if errUser != nil {
 		return true, nil, errors.New("error get data user")
 	}
-
 	if dataUser.Jabatan == "karyawan" {
 		count, dataReim, errReim := service.absensiService.SelectAllKaryawan(idUser, param)
 		if errReim != nil {
 			return true, nil, errReim
 		}
-		if param.IsClassDashboard {
+		if count == 0 {
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0 {
 			total_pages = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
 				total_pages += 1
@@ -139,8 +140,8 @@ func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bo
 			if param.Page == int(total_pages) {
 				nextPage = false
 			}
-			count_lebih := count / int64(param.Page)
-			if count_lebih < int64(param.ItemsPerPage) {
+
+			if dataReim == nil {
 				nextPage = false
 			}
 		}
@@ -150,7 +151,10 @@ func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bo
 		if errReim != nil {
 			return true, nil, errReim
 		}
-		if param.IsClassDashboard {
+		if count == 0 {
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0 {
 			total_pages = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
 				total_pages += 1
@@ -159,8 +163,7 @@ func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bo
 			if param.Page == int(total_pages) {
 				nextPage = false
 			}
-			count_lebih := count / int64(param.Page)
-			if count_lebih < int64(param.ItemsPerPage) {
+			if dataReim == nil {
 				nextPage = false
 			}
 		}
