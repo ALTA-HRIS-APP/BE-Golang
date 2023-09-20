@@ -225,13 +225,21 @@ paths:
         "500":
           $ref: "#/components/responses/responseFailedInternal"
 
-  /targets:
+  /user/{user_id}/targets:
     post:
       tags:
         - Target
       summary: create target
       security:
         - JWTAuth: []
+      parameters:
+        - name: user_id
+          description: contain id of the user
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
       requestBody:
         required: true
         content:
@@ -247,6 +255,7 @@ paths:
           $ref: "#/components/responses/responseNotFound"
         "500":
           $ref: "#/components/responses/responseFailedInternal"
+  /targets:
     get:
       tags:
         - Target
