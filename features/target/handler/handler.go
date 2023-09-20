@@ -177,18 +177,20 @@ func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 	// Kirim respon JSON
 	return helper.Success(c, "target updated successfully", resultResponse)
 }
+
 func (h *targetHandler) DeleteTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
 	apiUser, err := usernodejs.GetByIdUser(userID)
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
+		log.Printf("Error getting user details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
 	idParam := c.Param("target_id")
 	_, err = h.targetService.GetById(idParam, apiUser.ID)
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
+		log.Printf("Error getting target details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
-	return helper.Success(c, "target deleted successfully", nil)
+	log.Println("Target deleted successfully")
+	return helper.Success(c, "Target deleted successfully", nil)
 }
