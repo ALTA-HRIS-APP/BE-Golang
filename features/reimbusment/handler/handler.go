@@ -115,6 +115,16 @@ func (handler *ReimbusmentHandler) GetAll(c echo.Context) error {
 	return helper.SuccessGetAll(c, "get all reimbursement successfully", response, bol)
 }
 
+func (handler *ReimbusmentHandler)GetById(c echo.Context)error{
+	id := c.Param("id_reimbursement")
+	data,err:=handler.reimbushmentHandler.GetReimbusherById(id)
+	if err != nil {
+		return helper.InternalError(c, err.Error(), nil)
+	}
+	response:=EntityToResponse(data)
+	return helper.Success(c,"success get by id reimbursement",response)
+}
+
 func (handler *ReimbusmentHandler) Delete(c echo.Context) error {
 	id := c.Param("id_reimbursement")
 	err := handler.reimbushmentHandler.Delete(id)

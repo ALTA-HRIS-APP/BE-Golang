@@ -107,11 +107,34 @@ paths:
           $ref: "#/components/responses/responseNotFound"
         "500":
           $ref: "#/components/responses/responseFailedInternal"
+    get:
+      tags:
+        - Reimbursment
+      summary: reimbursment get by id
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: id_reimbursement
+          description: contain id of the reimbursment
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "651993b3-fac0-4b92-9ea0-8cba4b66f7e5"
+      responses:
+        "200":
+          $ref: "#/components/responses/responseGetByIdReimbursment"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
 
     delete:
       tags:
         - Reimbursment
-      summary: reimbursment get by id
+      summary: reimbursment delete by id
       security:
         - JWTAuth: []
       parameters:
