@@ -28,7 +28,7 @@ type QueryParam struct {
 }
 type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	SelectAll(userID string, param QueryParam) (int64, []TargetEntity, error)
+	SelectAll(param QueryParam) (int64, []TargetEntity, error)
 	Select(targetID string) (TargetEntity, error)
 	Update(targetID string, targetData TargetEntity) error
 	Delete(targetID string) error

@@ -107,14 +107,14 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	} else {
 		qParam.Page = 1
 	}
-	searchKonten := c.QueryParam("searchKonten")
+	searchKonten := c.QueryParam("search_konten")
 	qParam.SearchKonten = searchKonten
 
-	searchStatus := c.QueryParam("searchStatus")
+	searchStatus := c.QueryParam("search_status")
 	qParam.SearchStatus = searchStatus
 
 	userID, _, _ := middlewares.ExtractToken(c)
-	_, data, err := h.targetService.GetAll(userID, qParam)
+	nextPage, data, err := h.targetService.GetAll(userID, qParam)
 
 	if err != nil {
 		log.Printf("Internal server error: %s", err.Error())
@@ -127,7 +127,10 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	}
 
 	log.Println("Get all targets successfully")
-	return helper.Success(c, "Get all targets successfully", targetsResponse)
+	return helper.Success(c, "Get all targets successfully", map[string]interface{}{
+		"targets":  targetsResponse,
+		"nextPage": nextPage,
+	})
 }
 
 // GetTargetById retrieves target details by its ID.

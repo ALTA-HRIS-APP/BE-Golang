@@ -58,20 +58,20 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 }
 
 // SelectAll implements target.TargetDataInterface.
-func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.TargetEntity, error) {
 	// Initialize variables
 	var inputModel []Target
 	var totalTarget int64
 
 	// Initial query
-	query := r.db.Where("user_id = ?", userID)
+	query := r.db
 
 	// Handle searching by description if provided
 	if param.SearchKonten != "" {
-		query = query.Where("description like ?", "%"+param.SearchKonten+"%")
+		query = query.Where("konten_target like ?", "%"+param.SearchKonten+"%")
 	}
 	if param.SearchStatus != "" {
-		query = query.Where("description like ?", "%"+param.SearchStatus+"%")
+		query = query.Where("status like ?", "%"+param.SearchStatus+"%")
 	}
 
 	// Handle special condition for class dashboard

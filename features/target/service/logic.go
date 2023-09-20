@@ -77,59 +77,52 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 
 func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
 	var totalPage int64
-	var targetID string
+	// var targetID string
 	nextPage := true
 
-	// Get user's role
-	user, err := s.targetRepo.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
-		return false, nil, err
-	}
+	// // Get user's role
+	// user, err := s.targetRepo.GetUserByIDAPI(userID)
+	// if err != nil {
+	// 	log.Printf("Error getting user details: %s", err.Error())
+	// 	return false, nil, err
+	// }
 
-	// Get the target to be updated
-	existingTarget, err := s.targetRepo.Select(targetID)
-	if err != nil {
-		log.Printf("Error selecting target: %s", err.Error())
-		return false, nil, err
-	}
+	// // Initialize a variable indicating whether reading is allowed
+	// allowedToRead := false
+	// allowedToRead := false
+	// if user.Jabatan == "c-level" {
+	// 	allowedToRead = true
+	// } else if user.Jabatan == "manager" {
+	// 	// Managers can view their own targets and targets of employees in the same division
+	// 	existingTarget, err := s.targetRepo.Select(targetID) // Mendapatkan data existingTarget berdasarkan targetID
+	// 	if err != nil {
+	// 		log.Printf("Error selecting target: %s", err.Error())
+	// 		return false, nil, err
+	// 	}
 
-	// Get the user with ID corresponding to existingTarget.UserIDPenerima
-	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
-	if err != nil {
-		log.Printf("Error getting user details for the target recipient: %s", err.Error())
-		return false, nil, err
-	}
+	// 	if existingTarget.UserIDPenerima == userID || (existingTarget.Jabatan == "karyawan" && existingTarget.Devisi == user.Devisi) {
+	// 		allowedToRead = true
+	// 	}
+	// } else if user.Jabatan == "karyawan" {
+	// 	// Employees can only view their own targets
+	// 	existingTarget, err := s.targetRepo.Select(targetID) // Mendapatkan data existingTarget berdasarkan targetID
+	// 	if err != nil {
+	// 		log.Printf("Error selecting target: %s", err.Error())
+	// 		return false, nil, err
+	// 	}
 
-	// Initialize a variable indicating whether reading is allowed
-	allowedToRead := false
-
-	if user.Jabatan == "c-level" {
-		allowedToRead = true
-	}
-
-	if user.Jabatan == "manager" {
-		if existingTarget.UserIDPenerima == userID {
-			allowedToRead = true
-		}
-		if userTarget.Jabatan == "karyawan" && userTarget.Devisi == user.Devisi {
-			allowedToRead = true
-		}
-	}
-
-	if user.Jabatan == "karyawan" {
-		if existingTarget.UserIDPenerima == userID {
-			allowedToRead = true
-		}
-	}
+	// 	if existingTarget.UserIDPenerima == userID {
+	// 		allowedToRead = true
+	// 	}
+	// }
 
 	// Check reading permission
-	if !allowedToRead {
-		log.Println("You do not have permission to view this target.")
-		return false, nil, errors.New("you do not have permission to view this target")
-	}
+	// if !allowedToRead {
+	// 	log.Println("You do not have permission to view this target.")
+	// 	return false, nil, errors.New("you do not have permission to view this target")
+	// }
 
-	count, data, err := s.targetRepo.SelectAll(userID, param)
+	count, data, err := s.targetRepo.SelectAll(param)
 	if err != nil {
 		log.Printf("Error selecting all targets: %s", err.Error())
 		return false, nil, err
