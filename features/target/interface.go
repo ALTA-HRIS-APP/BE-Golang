@@ -33,6 +33,7 @@ type TargetDataInterface interface {
 	Update(targetID string, targetData TargetEntity) error
 	Delete(targetID string) error
 	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
+	SelectAllKaryawan(idUser string, param QueryParam) (int64, []TargetEntity, error)
 }
 
 type TargetServiceInterface interface {
