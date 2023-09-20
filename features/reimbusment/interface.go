@@ -54,4 +54,5 @@ type ReimbusmentServiceInterface interface{
 	Edit(input ReimbursementEntity,id string,idUser string)(error)
 	Get(idUser string,param QueryParams)(bool,[]ReimbursementEntity,error)
 	Delete(id string)error
+	GetReimbusherById(id string)(ReimbursementEntity,error)
 }
