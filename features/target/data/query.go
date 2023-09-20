@@ -1,7 +1,7 @@
 package data
 
 import (
-	externalapi "be_golang/klp3/features/externalAPI"
+	externalapi "be_golang/klp3/features/externalapi"
 	"be_golang/klp3/features/target"
 	"be_golang/klp3/helper"
 	"errors"
@@ -24,11 +24,12 @@ func New(database *gorm.DB, externalAPI externalapi.ExternalDataInterface) targe
 
 func (r *targetQuery) GetUserByIDFromExternalAPI(idUser string) (externalapi.Pengguna, error) {
 	// Panggil metode GetUserByID dari externalAPI
-	user, err := r.externalAPI.GetByIdUser(idUser)
+	user, err := r.externalAPI.GetUserByID(idUser)
 	if err != nil {
+		log.Printf("Error consume api user: %s", err.Error())
 		return externalapi.Pengguna{}, err
 	}
-
+	log.Println("consume api successfully")
 	return user, nil
 }
 

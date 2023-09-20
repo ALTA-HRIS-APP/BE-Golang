@@ -1,7 +1,7 @@
 package target
 
 import (
-	externalapi "be_golang/klp3/features/externalAPI"
+	externalapi "be_golang/klp3/features/externalapi"
 	"time"
 )
 

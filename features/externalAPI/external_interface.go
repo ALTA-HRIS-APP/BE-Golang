@@ -129,6 +129,6 @@ type ExternalDataInterface interface {
 	LoginUser(login Login) (string, error)
 	GetProfile(token string) (Pengguna, error)
 	GetAllUser() ([]Pengguna, error)
-	GetByIdUser(idUser string) (Pengguna, error)
+	GetUserByID(idUser string) (Pengguna, error)
 	// Metode lainnya untuk mengakses API eksternal
 }
