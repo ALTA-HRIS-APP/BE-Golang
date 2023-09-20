@@ -32,7 +32,7 @@ type TargetDataInterface interface {
 	Select(targetID string, userID string) (TargetEntity, error)
 	Update(targetID string, userID string, targetData TargetEntity) error
 	Delete(targetID string, userID string) error
-	GetUserByIDFromExternalAPI(idUser string) (apinodejs.Pengguna, error)
+	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
 }
 
 type TargetServiceInterface interface {
@@ -41,5 +41,5 @@ type TargetServiceInterface interface {
 	GetById(targetID string, userID string) (TargetEntity, error)
 	UpdateById(targetID string, userID string, targetData TargetEntity) error
 	DeleteById(targetID string, userID string) error
-	GetUserByIDFromExternalAPI(idUser string) (apinodejs.Pengguna, error)
+	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
 }

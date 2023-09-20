@@ -23,9 +23,9 @@ func New(repo target.TargetDataInterface) target.TargetServiceInterface {
 	}
 }
 
-func (s *targetService) GetUserByIDFromExternalAPI(idUser string) (apinodejs.Pengguna, error) {
+func (s *targetService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data targetRepo
-	user, err := s.targetRepo.GetUserByIDFromExternalAPI(idUser)
+	user, err := s.targetRepo.GetUserByIDAPI(idUser)
 	if err != nil {
 		log.Printf("Error consume api in service: %s", err.Error())
 		return apinodejs.Pengguna{}, err
@@ -36,12 +36,12 @@ func (s *targetService) GetUserByIDFromExternalAPI(idUser string) (apinodejs.Pen
 
 // Create implements target.TargetServiceInterface.
 func (s *targetService) Create(input target.TargetEntity) (string, error) {
-	userPembuat, err := s.targetRepo.GetUserByIDFromExternalAPI(input.UserIDPembuat)
+	userPembuat, err := s.targetRepo.GetUserByIDAPI(input.UserIDPembuat)
 	if err != nil {
 		log.Printf("Error getting user details for the creator: %s", err.Error())
 		return "", err
 	}
-	userPenerima, err := s.targetRepo.GetUserByIDFromExternalAPI(input.UserIDPenerima)
+	userPenerima, err := s.targetRepo.GetUserByIDAPI(input.UserIDPenerima)
 	if err != nil {
 		log.Printf("Error getting user details for the receiver: %s", err.Error())
 		return "", err
@@ -54,15 +54,9 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 
 	log.Printf("Creator's role: %s", userPembuat.Jabatan)
 
-	if userPembuat.Jabatan == "c-level" {
-		if userPenerima.Jabatan != "karyawan" && userPenerima.Jabatan != "manager" {
-			return "", errors.New("c-level can only create targets for karyawan or manager")
-		}
-	}
-
 	if userPembuat.Jabatan == "manager" {
 		if userPenerima.Jabatan != "karyawan" {
-			return "", errors.New("managers can only create targets for karyawan")
+			return "", errors.New("your role does not have permission to create targets")
 		}
 		if userPenerima.Devisi != userPembuat.Devisi {
 			return "", errors.New("only create targets for same devisi")
