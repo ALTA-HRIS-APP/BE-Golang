@@ -73,15 +73,16 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 
 // Edit implements reimbusment.ReimbusmentServiceInterface.
 func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity, id string, idUser string) error {
-	dataUser,errUser:=usernodejs.GetByIdUser(idUser)
+
+	dataUser,errUser:=service.reimbursmentService.SelectUserById(idUser)
 	if errUser != nil{
 		return errors.New("error get user")
-	}
+	}	
 	dataReimbursement,errBatas:=service.reimbursmentService.SelectById(id)
 	if errBatas != nil{
 		return errBatas
 	}
-	dataUserPengaju,errUserPengaju:=usernodejs.GetByIdUser(dataReimbursement.UserID)
+	dataUserPengaju,errUserPengaju:=service.reimbursmentService.SelectUserById(dataReimbursement.UserID)
 	if errUserPengaju != nil{
 		return errors.New("error get user pengaju")
 	}

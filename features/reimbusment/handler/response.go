@@ -27,6 +27,7 @@ func EntityToResponse(user reimbusment.ReimbursementEntity) ReimbursementRespons
 		Description:     user.Description,
 		Status:          user.Status,
 		BatasanReimburs: user.BatasanReimburs,
+		Date: 			 user.Date,
 		Nominal:         user.Nominal,
 		Tipe:            user.Tipe,
 		Persetujuan:     user.Persetujuan,
