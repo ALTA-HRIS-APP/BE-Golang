@@ -49,7 +49,8 @@ type User struct{
 type Pengguna struct{
 	ID          string    
 	NamaLengkap string    
-	Jabatan     string    	
+	Jabatan     string 
+	Devisi 		string   	
 }
 
 func UserNodeJskePengguna(pengguna usernodejs.Pengguna)Pengguna{
@@ -57,6 +58,7 @@ func UserNodeJskePengguna(pengguna usernodejs.Pengguna)Pengguna{
 		ID:          pengguna.ID,
 		NamaLengkap: pengguna.NamaLengkap,
 		Jabatan:     pengguna.Jabatan,
+		Devisi: 	 pengguna.Devisi.Nama,
 	}
 }
 func UserPenggunaToEntity(pengguna Pengguna)reimbusment.PenggunaEntity{
@@ -64,6 +66,7 @@ func UserPenggunaToEntity(pengguna Pengguna)reimbusment.PenggunaEntity{
 		ID:          pengguna.ID,
 		NamaLengkap: pengguna.NamaLengkap,
 		Jabatan:     pengguna.Jabatan,
+		Devisi: 	 pengguna.Devisi,
 	}
 }
 
