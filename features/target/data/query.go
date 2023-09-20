@@ -1,7 +1,7 @@
 package data
 
 import (
-	externalapi "be_golang/klp3/features/externalapi"
+	"be_golang/klp3/features/externalapi"
 	"be_golang/klp3/features/target"
 	"be_golang/klp3/helper"
 	"errors"
