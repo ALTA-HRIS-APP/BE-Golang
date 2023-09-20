@@ -3,7 +3,6 @@ package service
 import (
 	apinodejs "be_golang/klp3/features/apiNodejs"
 	"be_golang/klp3/features/target"
-	usernodejs "be_golang/klp3/features/userNodejs"
 
 	"errors"
 	"log"
@@ -77,30 +76,34 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 }
 
 func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
-	var total_page int64
+	var totalPage int64
 	var targetID string
 	nextPage := true
 
-	// Dapatkan peran pengguna
-	user, err := usernodejs.GetByIdUser(userID)
+	// Get user's role
+	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
+		log.Printf("Error getting user details: %s", err.Error())
 		return false, nil, err
 	}
 
-	// Dapatkan target yang akan diperbarui
+	// Get the target to be updated
 	existingTarget, err := s.targetRepo.Select(targetID, userID)
 	if err != nil {
+		log.Printf("Error selecting target: %s", err.Error())
 		return false, nil, err
 	}
 
-	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
+	// Get the user with ID corresponding to existingTarget.UserIDPenerima
+	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
 	if err != nil {
+		log.Printf("Error getting user details for the target recipient: %s", err.Error())
 		return false, nil, err
 	}
 
-	// Inisialisasi variabel yang menunjukkan apakah pembaruan diizinkan
+	// Initialize a variable indicating whether reading is allowed
 	allowedToRead := false
+
 	if user.Jabatan == "c-level" {
 		allowedToRead = true
 	}
@@ -109,34 +112,41 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 		if existingTarget.UserIDPenerima == userID {
 			allowedToRead = true
 		}
-		if userTarget.Jabatan == "karyawan" {
+		if userTarget.Jabatan == "karyawan" && userTarget.Devisi == user.Devisi {
 			allowedToRead = true
 		}
 	}
+
 	if user.Jabatan == "karyawan" {
 		if existingTarget.UserIDPenerima == userID {
 			allowedToRead = true
 		}
 	}
-	// Periksa izin pembaruan
+
+	// Check reading permission
 	if !allowedToRead {
-		return false, nil, errors.New("anda tidak memiliki izin untuk melihat target ini")
+		log.Println("You do not have permission to view this target.")
+		return false, nil, errors.New("you do not have permission to view this target")
 	}
 
 	count, data, err := s.targetRepo.SelectAll(userID, param)
 	if err != nil {
+		log.Printf("Error selecting all targets: %s", err.Error())
 		return false, nil, err
 	}
+
 	if param.ExistOtherPage {
-		total_page = count / int64(param.LimitPerPage)
+		totalPage = count / int64(param.LimitPerPage)
 		if count%int64(param.LimitPerPage) != 0 {
-			total_page += 1
+			totalPage += 1
 		}
 
-		if param.Page == int(total_page) {
+		if param.Page == int(totalPage) {
 			nextPage = false
 		}
 	}
+
+	log.Println("Targets read successfully")
 	return nextPage, data, nil
 }
 
@@ -144,15 +154,17 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 func (s *targetService) GetById(targetID string, userID string) (target.TargetEntity, error) {
 	result, err := s.targetRepo.Select(targetID, userID)
 	if err != nil {
+		log.Printf("Error selecting target by ID: %s", err.Error())
 		return target.TargetEntity{}, err
 	}
+	log.Println("Target retrieved successfully")
 	return result, nil
 }
 
 // UpdateById implements target.TargetServiceInterface.
 func (s *targetService) UpdateById(targetID string, userID string, targetData target.TargetEntity) error {
 	// Dapatkan peran pengguna
-	user, err := usernodejs.GetByIdUser(userID)
+	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
 		return err
 	}
@@ -164,7 +176,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
-	userTarget, err := usernodejs.GetByIdUser(existingTarget.UserIDPenerima)
+	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}

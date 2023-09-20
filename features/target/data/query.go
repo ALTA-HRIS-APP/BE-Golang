@@ -59,14 +59,14 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 
 // SelectAll implements target.TargetDataInterface.
 func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, []target.TargetEntity, error) {
-	// Inisialisasi variabel
+	// Initialize variables
 	var inputModel []Target
 	var totalTarget int64
 
-	// Query awal
+	// Initial query
 	query := r.db.Where("user_id = ?", userID)
 
-	// Handle pencarian berdasarkan nama jika diberikan
+	// Handle searching by description if provided
 	if param.SearchKonten != "" {
 		query = query.Where("description like ?", "%"+param.SearchKonten+"%")
 	}
@@ -74,23 +74,23 @@ func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, 
 		query = query.Where("description like ?", "%"+param.SearchStatus+"%")
 	}
 
-	// Handle kondisi khusus untuk dashboard kelas
+	// Handle special condition for class dashboard
 	if param.ExistOtherPage {
 		offset := (param.Page - 1) * param.LimitPerPage
 		query = query.Offset(offset).Limit(param.LimitPerPage)
 	}
 
-	// Eksekusi query ke database
+	// Execute the query on the database
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		return 0, nil, errors.New("failed to get all target")
+		log.Printf("Error retrieving all targets: %s", tx.Error)
+		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
 
 	resultTargetSlice := ListModelToEntity(inputModel)
-	log.Println("Read target successfully")
+	log.Println("Targets read successfully")
 	return totalTarget, resultTargetSlice, nil
-
 }
 
 // Select implements target.TargetDataInterface.
@@ -99,16 +99,16 @@ func (r *targetQuery) Select(targetID string, userID string) (target.TargetEntit
 
 	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).First(&targetData)
 	if tx.Error != nil {
-		log.Printf("Error read target: %s", tx.Error)
+		log.Printf("Error reading target: %s", tx.Error)
 		return target.TargetEntity{}, tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when read target")
+		log.Println("No rows affected when reading target")
 		return target.TargetEntity{}, errors.New("target not found")
 	}
-	//Mapping target to CorePtarget
+	// Mapping target to CoreTarget
 	coreTarget := MapModelToEntity(targetData)
-	log.Println("Read target successfully")
+	log.Println("Target read successfully")
 	return coreTarget, nil
 }
 
