@@ -3,7 +3,6 @@ package handler
 import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/target"
-	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"log"
 	"strconv"
@@ -77,7 +76,7 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 }
 
 func (h *targetHandler) GetAllTarget(c echo.Context) error {
-	// Mengambil ID pengguna dari token JWT yang terkait dengan permintaan
+	// Get user ID from the JWT token associated with the request
 	var qParam target.QueryParam
 	page := c.QueryParam("page")
 	limitPerPage := c.QueryParam("limitPerPage")
@@ -86,14 +85,16 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 		qParam.ExistOtherPage = true
 		limitConv, err := strconv.Atoi(limitPerPage)
 		if err != nil {
-			return helper.FailedRequest(c, "limit item per page not valid", nil)
+			log.Printf("Invalid limit item per page: %s", err.Error())
+			return helper.FailedRequest(c, "Invalid limit item per page", nil)
 		}
 		qParam.LimitPerPage = limitConv
 	}
 	if page != "" {
 		pageConv, err := strconv.Atoi(page)
 		if err != nil {
-			return helper.FailedRequest(c, "page not valid", nil)
+			log.Printf("Invalid page: %s", err.Error())
+			return helper.FailedRequest(c, "Invalid page", nil)
 		}
 		qParam.Page = pageConv
 	} else {
@@ -109,6 +110,7 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	_, data, err := h.targetService.GetAll(userID, qParam)
 
 	if err != nil {
+		log.Printf("Internal server error: %s", err.Error())
 		return helper.InternalError(c, err.Error(), nil)
 	}
 
@@ -117,29 +119,32 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 		targetsResponse = append(targetsResponse, EntityToResponse(v))
 	}
 
-	return helper.Success(c, "get all target successfully", targetsResponse)
+	log.Println("Get all targets successfully")
+	return helper.Success(c, "Get all targets successfully", targetsResponse)
 }
 
 func (h *targetHandler) GetTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := usernodejs.GetByIdUser(userID)
+	apiUser, err := h.targetService.GetUserByIDAPI(userID)
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
+		log.Printf("Error getting user details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
 	idParam := c.Param("target_id")
 	result, err := h.targetService.GetById(idParam, apiUser.ID)
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
+		log.Printf("Error getting target details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
 
 	resultResponse := EntityToResponse(result)
-	return helper.Found(c, "success create target", resultResponse)
+	log.Println("Get target by ID successfully")
+	return helper.Found(c, "Success getting target details", resultResponse)
 }
+
 func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := usernodejs.GetByIdUser(userID)
+	apiUser, err := h.targetService.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error get detail user: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
@@ -180,7 +185,7 @@ func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 
 func (h *targetHandler) DeleteTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := usernodejs.GetByIdUser(userID)
+	apiUser, err := h.targetService.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error getting user details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
