@@ -28,7 +28,7 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 	log.Println("UserID: ", userID)
 
 	//mengecek user id dari get by id user id api node js
-	userProfile, err := h.targetService.GetUserByIDFromExternalAPI(userID)
+	userProfile, err := h.targetService.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error get detail user: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)

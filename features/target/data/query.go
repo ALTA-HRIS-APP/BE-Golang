@@ -22,7 +22,7 @@ func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.
 	}
 }
 
-func (r *targetQuery) GetUserByIDFromExternalAPI(idUser string) (apinodejs.Pengguna, error) {
+func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByID dari externalAPI
 	user, err := r.externalAPI.GetUserByID(idUser)
 	if err != nil {
