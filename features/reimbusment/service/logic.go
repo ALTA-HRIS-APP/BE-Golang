@@ -3,6 +3,7 @@ package service
 import (
 	"be_golang/klp3/features/reimbusment"
 	usernodejs "be_golang/klp3/features/userNodejs"
+	"fmt"
 
 	"errors"
 
@@ -25,6 +26,8 @@ func (service *ReimbursementService) Delete(id string) error {
 
 // Get implements reimbusment.ReimbusmentServiceInterface.
 func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
+	fmt.Println("page",param.Page)
+	fmt.Println("item",param.ItemsPerPage)
 	var total_pages int64
 	nextPage := true
 	dataUser, errUser := usernodejs.GetByIdUser(idUser)
