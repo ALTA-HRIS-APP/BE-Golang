@@ -2,7 +2,6 @@ package service
 
 import (
 	"be_golang/klp3/features/reimbusment"
-	usernodejs "be_golang/klp3/features/userNodejs"
 
 	"errors"
 
@@ -25,19 +24,22 @@ func (service *ReimbursementService) Delete(id string) error {
 
 // Get implements reimbusment.ReimbusmentServiceInterface.
 func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
+
 	var total_pages int64
 	nextPage := true
-	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	dataUser, errUser := service.reimbursmentService.SelectUserById(idUser)
 	if errUser != nil {
 		return true, nil, errors.New("error get data user")
 	}
-
 	if dataUser.Jabatan == "karyawan" {
 		count, dataReim, errReim := service.reimbursmentService.SelectAllKaryawan(idUser, param)
 		if errReim != nil {
 			return true, nil, errReim
 		}
-		if param.IsClassDashboard {
+		if count ==0{
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0{
 			total_pages = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
 				total_pages += 1
@@ -46,9 +48,9 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 			if param.Page == int(total_pages) {
 				nextPage = false
 			}
-			count_lebih:=count/int64(param.Page)
-			if count_lebih <int64(param.ItemsPerPage){
-				nextPage=false
+
+			if dataReim == nil{
+				nextPage = false
 			}
 		}
 		return nextPage, dataReim, nil
@@ -57,7 +59,10 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 		if errReim != nil {
 			return true, nil, errReim
 		}
-		if param.IsClassDashboard {
+		if count ==0{
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0{
 			total_pages = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
 				total_pages += 1
@@ -66,9 +71,8 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 			if param.Page == int(total_pages) {
 				nextPage = false
 			}
-			count_lebih:=count/int64(param.Page)
-			if count_lebih <int64(param.ItemsPerPage){
-				nextPage=false
+			if dataReim == nil{
+				nextPage = false
 			}
 		}
 		return nextPage, dataReim, nil
@@ -78,15 +82,16 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 
 // Edit implements reimbusment.ReimbusmentServiceInterface.
 func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity, id string, idUser string) error {
-	dataUser,errUser:=usernodejs.GetByIdUser(idUser)
+
+	dataUser,errUser:=service.reimbursmentService.SelectUserById(idUser)
 	if errUser != nil{
 		return errors.New("error get user")
-	}
+	}	
 	dataReimbursement,errBatas:=service.reimbursmentService.SelectById(id)
 	if errBatas != nil{
 		return errBatas
 	}
-	dataUserPengaju,errUserPengaju:=usernodejs.GetByIdUser(dataReimbursement.UserID)
+	dataUserPengaju,errUserPengaju:=service.reimbursmentService.SelectUserById(dataReimbursement.UserID)
 	if errUserPengaju != nil{
 		return errors.New("error get user pengaju")
 	}

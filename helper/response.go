@@ -38,6 +38,15 @@ func FailedNotFound(c echo.Context, message string, data any) error{
 	})
 }
 
+func Found(c echo.Context, message string, data any) error{
+	return c.JSON(http.StatusFound, map[string]any{
+		"status":"succes",
+		"message": message,
+		"data": data,
+	})
+}
+
+
 func FailedRequest(c echo.Context,message string, data any) error{
 	return c.JSON(http.StatusBadRequest, map[string]any{
 		"status":"fail",

@@ -14,11 +14,22 @@ type ReimbusmentData struct {
 	db *gorm.DB
 }
 
+// SelectUserById implements reimbusment.ReimbusmentDataInterface.
+func (repo *ReimbusmentData) SelectUserById(idUser string) (reimbusment.PenggunaEntity, error) {
+	data,err:=usernodejs.GetByIdUser(idUser)
+	if err != nil{
+		return reimbusment.PenggunaEntity{},err
+	}
+	dataUser:=UserNodeJskePengguna(data)
+	dataEntity:=UserPenggunaToEntity(dataUser)
+	return dataEntity,nil
+}
+
 // Delete implements reimbusment.ReimbusmentDataInterface.
 func (repo *ReimbusmentData) Delete(id string) error {
 	var inputModel Reimbursement
-	tx:=repo.db.Where("id=?",id).Delete(&inputModel)
-	if tx.Error != nil{
+	tx := repo.db.Where("id=?", id).Delete(&inputModel)
+	if tx.Error != nil {
 		return errors.New("delete error reimbursement")
 	}
 	if tx.RowsAffected == 0 {
@@ -36,6 +47,7 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
+		fmt.Println("offset", offset)
 		if param.SearchName != "" {
 			query = query.Where("description like ?", "%"+param.SearchName+"%")
 		}
@@ -66,10 +78,12 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 	for _, value := range dataUser {
 		userEntity = append(userEntity, UserToEntity(value))
 	}
+	fmt.Println("user entity", userEntity)
 	var reimbushPengguna []ReimbursementPengguna
 	for _, value := range inputModel {
 		reimbushPengguna = append(reimbushPengguna, ModelToPengguna(value))
 	}
+	fmt.Println("reimb", reimbushPengguna)
 	var reimbushEntity []reimbusment.ReimbursementEntity
 	for i := 0; i < len(userEntity); i++ {
 		for j := 0; j < len(reimbushPengguna); j++ {
@@ -151,7 +165,7 @@ func (repo *ReimbusmentData) SelectById(id string) (reimbusment.ReimbursementEnt
 	if tx.Error != nil {
 		return reimbusment.ReimbursementEntity{}, errors.New("error get batasan reimbursment")
 	}
-	output:=ModelToEntity(inputModel)
+	output := ModelToEntity(inputModel)
 	return output, nil
 }
 
@@ -162,8 +176,7 @@ func (repo *ReimbusmentData) Update(input reimbusment.ReimbursementEntity, id st
 	if tx.Error != nil {
 		return errors.New("update data reimbursment")
 	}
-	fmt.Println("input admin",input)
-	fmt.Println("input model",inputModel)
+
 	if tx.RowsAffected == 0 {
 		return errors.New("row not affected")
 	}
