@@ -9,6 +9,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type ClaimsToken struct {
+	Emails string `json:"emails"`
+	ID     string `json:"id"`
+	Role   string `json:"role"`
+	Iat    int    `json:"iat"`
+	Exp    int    `json:"exp"`
+	Token  string `json:"token"`
+}
+
 func JWTMiddleware() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
 		SigningKey:    []byte(config.JWT_SECRRET),

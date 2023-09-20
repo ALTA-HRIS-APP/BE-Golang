@@ -1,4 +1,4 @@
-package usernodejs
+package externalapi
 
 import (
 	"time"
@@ -72,6 +72,24 @@ type Data struct {
 	} `json:"meta"`
 }
 
+func ByteToResponseById(pengguna Pengguna) Pengguna {
+	return Pengguna{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Surel:       pengguna.Surel,
+		NoHP:        pengguna.NoHP,
+		Jabatan:     pengguna.Jabatan,
+		KataSandi:   pengguna.KataSandi,
+		Status:      pengguna.Status,
+		CreatedAt:   pengguna.CreatedAt,
+		UpdatedAt:   pengguna.UpdatedAt,
+		DevisiID:    pengguna.DevisiID,
+		RoleID:      pengguna.RoleID,
+		Devisi:      Devisipe(pengguna.Devisi),
+		Role:        Rolepe(pengguna.Role),
+	}
+}
+
 func ByteToResponse(pengguna Pengguna) Pengguna {
 	return Pengguna{
 		ID:          pengguna.ID,
@@ -105,4 +123,12 @@ func Rolepe(devisi Role) Role {
 		CreatedAt: devisi.CreatedAt,
 		UpdatedAt: devisi.UpdatedAt,
 	}
+}
+
+type ExternalDataInterface interface {
+	LoginUser(login Login) (string, error)
+	GetProfile(token string) (Pengguna, error)
+	GetAllUser() ([]Pengguna, error)
+	GetUserByID(idUser string) (Pengguna, error)
+	// Metode lainnya untuk mengakses API eksternal
 }

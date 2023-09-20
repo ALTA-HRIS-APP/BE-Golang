@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	// api.ApiGetUser()
 	cfg := config.InitConfig()
 	mysql := database.InitMysql(cfg)
 	database.InitialMigration(mysql)
