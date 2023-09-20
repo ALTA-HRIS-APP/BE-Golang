@@ -46,6 +46,26 @@ type User struct{
 	Name 			string	
 }
 
+type Pengguna struct{
+	ID          string    
+	NamaLengkap string    
+	Jabatan     string    	
+}
+
+func UserNodeJskePengguna(pengguna usernodejs.Pengguna)Pengguna{
+	return Pengguna{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Jabatan:     pengguna.Jabatan,
+	}
+}
+func UserPenggunaToEntity(pengguna Pengguna)reimbusment.PenggunaEntity{
+	return reimbusment.PenggunaEntity{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Jabatan:     pengguna.Jabatan,
+	}
+}
 
 func ModelToPengguna(user Reimbursement)ReimbursementPengguna{
 	return ReimbursementPengguna{

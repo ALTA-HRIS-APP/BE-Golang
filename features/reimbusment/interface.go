@@ -25,6 +25,11 @@ type UserEntity struct{
 	ID        		string 
 	Name 			string
 }
+type PenggunaEntity struct{
+	ID          string    `json:"id"`
+	NamaLengkap string    `json:"nama_lengkap"`
+	Jabatan     string    `json:"jabatan"`	
+}
 
 type QueryParams struct {
 	Page            int
@@ -41,6 +46,7 @@ type ReimbusmentDataInterface interface{
 	SelectAllKaryawan(idUser string,param QueryParams)(int64,[]ReimbursementEntity,error)
 	SelectAll(param QueryParams)(int64,[]ReimbursementEntity,error)
 	Delete(id string)error
+	SelectUserById(idUser string)(PenggunaEntity,error)
 }
 
 type ReimbusmentServiceInterface interface{
