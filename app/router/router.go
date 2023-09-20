@@ -5,9 +5,14 @@ import (
 	dataC "be_golang/klp3/features/cuti/data"
 	handlerC "be_golang/klp3/features/cuti/handler"
 	serviceC "be_golang/klp3/features/cuti/service"
+
 	dataR "be_golang/klp3/features/reimbusment/data"
 	handlerR "be_golang/klp3/features/reimbusment/handler"
 	serviceR "be_golang/klp3/features/reimbusment/service"
+
+	dataA "be_golang/klp3/features/absensi/data"
+	handlerA "be_golang/klp3/features/absensi/handler"
+	serviceA "be_golang/klp3/features/absensi/service"
 
 	apinodejs "be_golang/klp3/features/apiNodejs"
 	_targetRepo "be_golang/klp3/features/target/data"
@@ -19,6 +24,7 @@ import (
 )
 
 func InitRouter(c *echo.Echo, db *gorm.DB) {
+	externalAPI := apinodejs.NewExternalData("http://project2.otixx.online")
 	dataRes := dataR.New(db)
 	serviceRes := serviceR.New(dataRes)
 	handlerRes := handlerR.New(serviceRes)
@@ -27,6 +33,7 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.PUT("/reimbursements/:id_reimbursement", handlerRes.Edit, middlewares.JWTMiddleware())
 	c.GET("/reimbursements", handlerRes.GetAll, middlewares.JWTMiddleware())
 	c.DELETE("/reimbursements/:id_reimbursement", handlerRes.Delete, middlewares.JWTMiddleware())
+	c.GET("/reimbursements/:id_reimbursement", handlerRes.GetById, middlewares.JWTMiddleware())
 
 	dataCuti := dataC.New(db)
 	serviceCuti := serviceC.New(dataCuti)
@@ -36,10 +43,19 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.GET("/cutis", handlerCuti.GetAll, middlewares.JWTMiddleware())
 	c.PUT("/cutis/:id_cuti", handlerCuti.Edit, middlewares.JWTMiddleware())
 
-	externalAPI := apinodejs.NewExternalData("http://project2.otixx.online")
+	dataAbsensi := dataA.New(db, externalAPI)
+	serviceAbsensi := serviceA.New(dataAbsensi)
+	handlerAbsensi := handlerA.New(serviceAbsensi)
+
+	c.POST("/absensis", handlerAbsensi.Add, middlewares.JWTMiddleware())
+	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit, middlewares.JWTMiddleware())
+	c.GET("/absensis", handlerAbsensi.GetAllAbsensi, middlewares.JWTMiddleware())
+	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById, middlewares.JWTMiddleware())
+
 	targetRepo := _targetRepo.New(db, externalAPI)
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)
+
 	c.POST("/user/:user_id/targets", targetHandlerAPI.CreateTarget, middlewares.JWTMiddleware())
 	c.GET("/targets", targetHandlerAPI.GetAllTarget, middlewares.JWTMiddleware())
 	c.GET("/targets/:target_id", targetHandlerAPI.GetTargetById, middlewares.JWTMiddleware())

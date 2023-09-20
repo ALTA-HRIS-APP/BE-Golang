@@ -31,7 +31,7 @@ type TargetDataInterface interface {
 	SelectAll(userID string, param QueryParam) (int64, []TargetEntity, error)
 	Select(targetID string, userID string) (TargetEntity, error)
 	Update(targetID string, userID string, targetData TargetEntity) error
-	Delete(targetID string, userID string) error
+	Delete(targetID string) error
 	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
 }
 

@@ -253,7 +253,7 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 		log.Println("You do not have permission to delete this target.")
 		return errors.New("you do not have permission to delete this target")
 	}
-	err = s.targetRepo.Delete(targetID, userID)
+	err = s.targetRepo.Delete(targetID)
 	if err != nil {
 		log.Printf("Error deleting target: %s", err.Error())
 		return err

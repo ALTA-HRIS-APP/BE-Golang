@@ -26,9 +26,10 @@ type UserEntity struct{
 	Name 			string
 }
 type PenggunaEntity struct{
-	ID          string    `json:"id"`
-	NamaLengkap string    `json:"nama_lengkap"`
-	Jabatan     string    `json:"jabatan"`	
+	ID          string   
+	NamaLengkap string    
+	Jabatan     string   
+	Devisi      string 	
 }
 
 type QueryParams struct {
@@ -54,4 +55,5 @@ type ReimbusmentServiceInterface interface{
 	Edit(input ReimbursementEntity,id string,idUser string)(error)
 	Get(idUser string,param QueryParams)(bool,[]ReimbursementEntity,error)
 	Delete(id string)error
+	GetReimbusherById(id string)(ReimbursementEntity,error)
 }

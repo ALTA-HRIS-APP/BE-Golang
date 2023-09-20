@@ -139,9 +139,9 @@ func (r *targetQuery) Update(targetID string, userID string, targetData target.T
 }
 
 // Delete implements target.TargetDataInterface.
-func (r *targetQuery) Delete(targetID string, userID string) error {
+func (r *targetQuery) Delete(targetID string) error {
 	var target Target
-	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).Delete(&target)
+	tx := r.db.Where("id = ?", targetID).Delete(&target)
 	if tx.Error != nil {
 		log.Printf("Error deleting target: %s", tx.Error)
 		return tx.Error
