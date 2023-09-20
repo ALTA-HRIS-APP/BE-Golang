@@ -143,13 +143,13 @@ func (r *targetQuery) Delete(targetID string, userID string) error {
 	var target Target
 	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).Delete(&target)
 	if tx.Error != nil {
-		log.Printf("Error read id: %s", tx.Error)
+		log.Printf("Error deleting target: %s", tx.Error)
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when read target")
+		log.Println("No rows affected when deleting target")
 		return errors.New("target not found")
 	}
-	log.Println("Update target successfully")
+	log.Println("Target deleted successfully")
 	return nil
 }
