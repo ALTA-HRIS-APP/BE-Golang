@@ -5,6 +5,7 @@ import (
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -12,6 +13,25 @@ import (
 
 type absensiQuery struct {
 	db *gorm.DB
+}
+
+// SelectById implements absensi.AbsensiDataInterface
+func (repo *absensiQuery) SelectById(absensiID string, userID string) (absensi.AbsensiEntity, error) {
+	var absensiData Absensi
+
+	tx := repo.db.Where("id = ? AND user_id = ?", absensiID, userID).First(&absensiData)
+	if tx.Error != nil {
+		log.Printf("Error read absensi: %s", tx.Error)
+		return absensi.AbsensiEntity{}, tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		log.Println("No rows affected when read absensi")
+		return absensi.AbsensiEntity{}, errors.New("absensi not found")
+	}
+	//Mapping absensi to CorePabsensi
+	coreAbsensi := ModelToEntity(absensiData)
+	log.Println("Read absensi successfully")
+	return coreAbsensi, nil
 }
 
 // Insert implements absensi.AbsensiDataInterface
@@ -153,17 +173,6 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 		}
 	}
 	return total_absensi, absensiEntity, nil
-}
-
-// SelectById implements absensi.AbsensiDataInterface
-func (repo *absensiQuery) SelectById(id string) (absensi.AbsensiEntity, error) {
-	var inputModel Absensi
-	tx := repo.db.Where("id=?", id).First(&inputModel)
-	if tx.Error != nil {
-		return absensi.AbsensiEntity{}, errors.New("error get batasan reimbursment")
-	}
-	output := ModelToEntity(inputModel)
-	return output, nil
 }
 
 func New(db *gorm.DB) absensi.AbsensiDataInterface {

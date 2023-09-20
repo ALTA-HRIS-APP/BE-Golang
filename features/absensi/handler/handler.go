@@ -3,10 +3,10 @@ package handler
 import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/absensi"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
-	"net/http"
+	"log"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -83,25 +83,20 @@ func (handler *AbsensiHandler) GetAllAbsensi(c echo.Context) error {
 	return helper.SuccessGetAll(c, "get all reimbursement successfully", response, bol)
 }
 
-func (handler *AbsensiHandler) GetById(c echo.Context) error {
-	id := c.Param("id_absensi")
-	idConv, errConv := strconv.Atoi(id)
-	if errConv != nil || idConv <= 0 {
-		return c.JSON(http.StatusBadRequest, helper.FailedNotFound(c, "Invalid absensi ID", nil))
-	}
-
-	// Panggil fungsi service untuk mendapatkan detail absensi berdasarkan ID
-	absensi, err := handler.absensiService.SelectById(strconv.Itoa(idConv))
+func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
+	userID, _, _ := middlewares.ExtractToken(c)
+	apiUser, err := usernodejs.GetByIdUser(userID)
 	if err != nil {
-		if strings.Contains(err.Error(), "validation") {
-			return c.JSON(http.StatusBadRequest, helper.InternalError(c, err.Error(), nil))
-		} else {
-			return c.JSON(http.StatusInternalServerError, helper.InternalError(c, "Error reading data", nil))
-		}
+		log.Printf("Error get detail user: %s", err.Error())
+		return helper.FailedRequest(c, err.Error(), nil)
+	}
+	idParam := c.Param("absensi_id")
+	result, err := handler.absensiService.GetById(idParam, apiUser.ID)
+	if err != nil {
+		log.Printf("Error get detail user: %s", err.Error())
+		return helper.FailedRequest(c, err.Error(), nil)
 	}
 
-	// Mapping data absensi ke dalam respons menggunakan fungsi yang sesuai
-	resultResponse := EntityToResponse(absensi)
-
-	return c.JSON(http.StatusOK, helper.Success(c, "Success reading data", resultResponse))
+	resultResponse := EntityToResponse(result)
+	return helper.Success(c, "success create absensi", resultResponse)
 }

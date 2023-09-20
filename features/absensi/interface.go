@@ -34,7 +34,7 @@ type AbsensiDataInterface interface {
 	SelectAllKaryawan(idUser string, param QueryParams) (int64, []AbsensiEntity, error)
 	Insert(input AbsensiEntity) error
 	Update(input AbsensiEntity, idUser string, id string) error
-	SelectById(id string) (AbsensiEntity, error)
+	SelectById(absensiID string, userID string) (AbsensiEntity, error)
 	SelectAll(param QueryParams) (int64, []AbsensiEntity, error)
 }
 
@@ -42,5 +42,5 @@ type AbsensiServiceInterface interface {
 	Get(idUser string, param QueryParams) (bool, []AbsensiEntity, error)
 	Add(idUser string) error
 	Edit(idUser string, id string) error
-	SelectById(id string) (AbsensiEntity, error)
+	GetById(absensiID string, userID string) (AbsensiEntity, error)
 }

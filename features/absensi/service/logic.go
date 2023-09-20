@@ -15,9 +15,13 @@ type AbsensiService struct {
 	validate       *validator.Validate
 }
 
-// SelectById implements absensi.AbsensiServiceInterface
-func (service *AbsensiService) SelectById(id string) (absensi.AbsensiEntity, error) {
-	return service.absensiService.SelectById(id)
+// GetById implements absensi.AbsensiServiceInterface
+func (service *AbsensiService) GetById(absensiID string, userID string) (absensi.AbsensiEntity, error) {
+	result, err := service.absensiService.SelectById(absensiID, userID)
+	if err != nil {
+		return absensi.AbsensiEntity{}, err
+	}
+	return result, nil
 }
 
 // Add implements absensi.AbsensiServiceInterface

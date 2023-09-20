@@ -41,5 +41,5 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.POST("/absensis", handlerAbsensi.Add)
 	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit)
 	c.GET("/absensis", handlerAbsensi.GetAllAbsensi)
-	c.GET("/absensis/:id_absensi", handlerAbsensi.GetById)
+	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById)
 }
