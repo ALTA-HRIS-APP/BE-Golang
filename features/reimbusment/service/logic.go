@@ -2,8 +2,6 @@ package service
 
 import (
 	"be_golang/klp3/features/reimbusment"
-	usernodejs "be_golang/klp3/features/userNodejs"
-	"fmt"
 
 	"errors"
 
@@ -26,27 +24,32 @@ func (service *ReimbursementService) Delete(id string) error {
 
 // Get implements reimbusment.ReimbusmentServiceInterface.
 func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
-	fmt.Println("page",param.Page)
-	fmt.Println("item",param.ItemsPerPage)
+
 	var total_pages int64
 	nextPage := true
-	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	dataUser, errUser := service.reimbursmentService.SelectUserById(idUser)
 	if errUser != nil {
 		return true, nil, errors.New("error get data user")
 	}
-
 	if dataUser.Jabatan == "karyawan" {
 		count, dataReim, errReim := service.reimbursmentService.SelectAllKaryawan(idUser, param)
 		if errReim != nil {
 			return true, nil, errReim
 		}
-		if param.IsClassDashboard {
+		if count ==0{
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0{
 			total_pages = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
 				total_pages += 1
 			}
 
 			if param.Page == int(total_pages) {
+				nextPage = false
+			}
+
+			if dataReim == nil{
 				nextPage = false
 			}
 		}
@@ -56,13 +59,19 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 		if errReim != nil {
 			return true, nil, errReim
 		}
-		if param.IsClassDashboard {
+		if count ==0{
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0{
 			total_pages = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
 				total_pages += 1
 			}
 
 			if param.Page == int(total_pages) {
+				nextPage = false
+			}
+			if dataReim == nil{
 				nextPage = false
 			}
 		}

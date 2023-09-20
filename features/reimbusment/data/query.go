@@ -93,7 +93,6 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 			}
 		}
 	}
-	fmt.Println("reimbursement user", reimbushEntity)
 	return total_reimbursement, reimbushEntity, nil
 }
 
@@ -177,8 +176,7 @@ func (repo *ReimbusmentData) Update(input reimbusment.ReimbursementEntity, id st
 	if tx.Error != nil {
 		return errors.New("update data reimbursment")
 	}
-	fmt.Println("input admin", input)
-	fmt.Println("input model", inputModel)
+
 	if tx.RowsAffected == 0 {
 		return errors.New("row not affected")
 	}
