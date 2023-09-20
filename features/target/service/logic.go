@@ -163,56 +163,60 @@ func (s *targetService) GetById(targetID string, userID string) (target.TargetEn
 
 // UpdateById implements target.TargetServiceInterface.
 func (s *targetService) UpdateById(targetID string, userID string, targetData target.TargetEntity) error {
-	// Dapatkan peran pengguna
+	// Get user information who will perform the update
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
 		return err
 	}
 
-	// Dapatkan target yang akan diperbarui
+	// Get the target to be updated
 	existingTarget, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		return err
 	}
 
-	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
+	// Get information about the target recipient user
 	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}
 
-	// Inisialisasi variabel yang menunjukkan apakah pembaruan diizinkan
+	// Initialize a variable indicating whether the update is allowed
 	allowedToUpdate := false
 
-	// Pemeriksaan peran pengguna
+	// Check permissions based on user role
 	if user.Jabatan == "c-level" {
 		allowedToUpdate = true
 	}
 
 	if user.Jabatan == "manager" {
-		// Pemeriksaan apakah manajer dapat mengedit target karyawan atau target milik diri sendiri
 		if userTarget.Jabatan == "karyawan" || existingTarget.UserIDPenerima == userID {
-			allowedToUpdate = true
+			// Managers can edit employee targets or their own targets
+			// But only if they are in the same division
+			if userTarget.Devisi == user.Devisi {
+				allowedToUpdate = true
+			}
 		}
 	}
 
 	if user.Jabatan == "karyawan" {
-		// Pemeriksaan apakah karyawan dapat mengedit target milik diri sendiri
+		// Employees can only edit their own targets
 		if existingTarget.UserIDPenerima == userID {
 			allowedToUpdate = true
 		}
 	}
 
-	// Periksa izin pembaruan
+	// Check update permission
 	if !allowedToUpdate {
-		return errors.New("anda tidak memiliki izin untuk mengedit target ini")
+		return errors.New("you do not have permission to edit this target")
 	}
 
-	// Lakukan pembaruan hanya jika diizinkan
-	err = s.targetRepo.Update(targetID, userID, targetData)
+	// Perform the update only if allowed
+	err = s.targetRepo.Update(targetID, targetData)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
