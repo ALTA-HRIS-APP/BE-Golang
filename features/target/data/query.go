@@ -15,13 +15,6 @@ type targetQuery struct {
 	externalAPI apinodejs.ExternalDataInterface
 }
 
-func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
-	return &targetQuery{
-		db:          database,
-		externalAPI: externalAPI,
-	}
-}
-
 func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByID dari externalAPI
 	user, err := r.externalAPI.GetUserByID(idUser)
@@ -31,6 +24,13 @@ func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) 
 	}
 	log.Println("consume api successfully")
 	return user, nil
+}
+
+func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
+	return &targetQuery{
+		db:          database,
+		externalAPI: externalAPI,
+	}
 }
 
 // Insert implements target.TargetDataInterface.
@@ -78,6 +78,40 @@ func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.Target
 	if param.ExistOtherPage {
 		offset := (param.Page - 1) * param.LimitPerPage
 		query = query.Offset(offset).Limit(param.LimitPerPage)
+	}
+
+	// Execute the query on the database
+	tx := query.Find(&inputModel)
+	if tx.Error != nil {
+		log.Printf("Error retrieving all targets: %s", tx.Error)
+		return 0, nil, errors.New("failed to get all targets")
+	}
+	totalTarget = tx.RowsAffected
+
+	resultTargetSlice := ListModelToEntity(inputModel)
+	log.Println("Targets read successfully")
+	return totalTarget, resultTargetSlice, nil
+}
+
+// SelectAllKaryawan implements target.TargetDataInterface.
+func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+	var inputModel []Target
+	var totalTarget int64
+
+	query := r.db
+
+	// Handle searching by description if provided
+	if param.SearchKonten != "" {
+		query = query.Where("user_id = ? AND konten_target LIKE ?", idUser, "%"+param.SearchKonten+"%")
+	}
+	if param.SearchStatus != "" {
+		query = query.Where("user_id = ? AND status LIKE ?", idUser, "%"+param.SearchStatus+"%")
+	}
+
+	// Special condition for class dashboard
+	if param.ExistOtherPage {
+		offset := (param.Page - 1) * param.LimitPerPage
+		query = query.Where("user_id = ?", idUser).Offset(int(offset)).Limit(param.LimitPerPage)
 	}
 
 	// Execute the query on the database

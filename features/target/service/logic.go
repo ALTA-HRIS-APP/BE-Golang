@@ -77,69 +77,66 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 
 func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
 	var totalPage int64
-	// var targetID string
 	nextPage := true
 
-	// // Get user's role
-	// user, err := s.targetRepo.GetUserByIDAPI(userID)
-	// if err != nil {
-	// 	log.Printf("Error getting user details: %s", err.Error())
-	// 	return false, nil, err
-	// }
-
-	// // Initialize a variable indicating whether reading is allowed
-	// allowedToRead := false
-	// allowedToRead := false
-	// if user.Jabatan == "c-level" {
-	// 	allowedToRead = true
-	// } else if user.Jabatan == "manager" {
-	// 	// Managers can view their own targets and targets of employees in the same division
-	// 	existingTarget, err := s.targetRepo.Select(targetID) // Mendapatkan data existingTarget berdasarkan targetID
-	// 	if err != nil {
-	// 		log.Printf("Error selecting target: %s", err.Error())
-	// 		return false, nil, err
-	// 	}
-
-	// 	if existingTarget.UserIDPenerima == userID || (existingTarget.Jabatan == "karyawan" && existingTarget.Devisi == user.Devisi) {
-	// 		allowedToRead = true
-	// 	}
-	// } else if user.Jabatan == "karyawan" {
-	// 	// Employees can only view their own targets
-	// 	existingTarget, err := s.targetRepo.Select(targetID) // Mendapatkan data existingTarget berdasarkan targetID
-	// 	if err != nil {
-	// 		log.Printf("Error selecting target: %s", err.Error())
-	// 		return false, nil, err
-	// 	}
-
-	// 	if existingTarget.UserIDPenerima == userID {
-	// 		allowedToRead = true
-	// 	}
-	// }
-
-	// Check reading permission
-	// if !allowedToRead {
-	// 	log.Println("You do not have permission to view this target.")
-	// 	return false, nil, errors.New("you do not have permission to view this target")
-	// }
-
-	count, data, err := s.targetRepo.SelectAll(param)
+	// Get user's role
+	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
-		log.Printf("Error selecting all targets: %s", err.Error())
+		log.Printf("Error getting user details: %s", err.Error())
 		return false, nil, err
 	}
 
-	if param.ExistOtherPage {
-		totalPage = count / int64(param.LimitPerPage)
-		if count%int64(param.LimitPerPage) != 0 {
-			totalPage += 1
+	var data []target.TargetEntity
+	if user.Jabatan == "karyawan" {
+		// Karyawan can only view their own targets
+		count, karyawanData, err := s.targetRepo.SelectAllKaryawan(userID, param)
+		if err != nil {
+			log.Printf("Error selecting all targets: %s", err.Error())
+			return false, nil, err
 		}
-
-		if param.Page == int(totalPage) {
+		if count == 0 {
 			nextPage = false
 		}
-	}
+		data = karyawanData
+		if param.ExistOtherPage {
+			totalPage = count / int64(param.LimitPerPage)
+			if count%int64(param.LimitPerPage) != 0 {
+				totalPage += 1
+			}
 
-	log.Println("Targets read successfully")
+			if param.Page == int(totalPage) {
+				nextPage = false
+			}
+			if data == nil {
+				nextPage = false
+			}
+		}
+	} else {
+		count, allData, err := s.targetRepo.SelectAll(param)
+		if err != nil {
+			log.Printf("Error selecting all targets: %s", err.Error())
+			return false, nil, err
+		}
+		if count == 0 {
+			nextPage = false
+		}
+		data = allData
+		if param.ExistOtherPage {
+			totalPage = count / int64(param.LimitPerPage)
+			if count%int64(param.LimitPerPage) != 0 {
+				totalPage += 1
+			}
+
+			if param.Page == int(totalPage) {
+				nextPage = false
+			}
+			if data == nil {
+				nextPage = false
+			}
+		}
+		log.Println("Targets read successfully")
+		return nextPage, data, nil
+	}
 	return nextPage, data, nil
 }
 
