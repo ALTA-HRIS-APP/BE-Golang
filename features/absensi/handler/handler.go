@@ -69,7 +69,7 @@ func (handler *AbsensiHandler) GetAll(c echo.Context) error {
 	}
 
 	// Hanya memproses pencarian dan filter berdasarkan tanggal
-	tanggal := c.QueryParam("created_at as tanggal")
+	tanggal := c.QueryParam("created_at")
 	qparams.SerachTanggal = tanggal
 
 	idUser, _, _ := middlewares.ExtractToken(c)
