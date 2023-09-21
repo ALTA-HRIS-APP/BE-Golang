@@ -100,9 +100,18 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
 		fmt.Println("offset", offset)
+
+		// Ubah kueri SQL untuk pencarian berdasarkan nama_lengkap
 		if param.SearchName != "" {
-			query = query.Where("nama_lengkap like ?", "%"+param.SearchName+"%")
+			query = query.Joins("JOIN pengguna ON absensi.user_id = pengguna.id").
+				Where("pengguna.nama_lengkap LIKE ?", "%"+param.SearchName+"%")
 		}
+
+		// Tambahkan kondisi untuk filter berdasarkan tanggal_sekarang
+		if param.SerachTanggal != "" {
+			query = query.Where("tanggal_sekarang = ?", param.SerachTanggal)
+		}
+
 		tx := query.Find(&inputModel)
 		if tx.Error != nil {
 			return 0, nil, errors.New("failed get all absensi")
@@ -110,9 +119,18 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 		total_absensi = tx.RowsAffected
 		query = query.Offset(offset).Limit(param.ItemsPerPage)
 	}
-	if param.SearchName != "" {
-		query = query.Where("nama_lengkap like ?", "%"+param.SearchName+"%")
+
+	// Ubah kueri SQL untuk pencarian berdasarkan nama_lengkap
+	if param.SearchName != "" && !param.IsClassDashboard {
+		query = query.Joins("JOIN pengguna ON absensi.user_id = pengguna.id").
+			Where("pengguna.nama_lengkap LIKE ?", "%"+param.SearchName+"%")
 	}
+
+	// Tambahkan kondisi untuk filter berdasarkan tanggal
+	if param.SerachTanggal != "" && !param.IsClassDashboard {
+		query = query.Where("tanggal_sekarang = ?", param.SerachTanggal)
+	}
+
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
 		return 0, nil, errors.New("error get all absensi")
@@ -158,7 +176,9 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
 		if param.SearchName != "" {
-			query = query.Where("user_id=? and nama_lengkap like ?", idUser, "%"+param.SearchName+"%")
+			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SearchName+"%")
+		} else {
+			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SerachTanggal+"%")
 		}
 		tx := query.Find(&inputModel)
 		if tx.Error != nil {
@@ -166,13 +186,16 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 		}
 		total_absensi = tx.RowsAffected
 		query = query.Offset(offset).Limit(param.ItemsPerPage)
-	}
-	if param.SearchName != "" {
-		query = query.Where("user_id=? and nama_lengkap like ?", idUser, "%"+param.SearchName+"%")
-	}
-	tx := query.Find(&inputModel)
-	if tx.Error != nil {
-		return 0, nil, errors.New("error get all absensi karyawan")
+	} else {
+		if param.SearchName != "" {
+			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SearchName+"%")
+		} else {
+			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SerachTanggal+"%")
+		}
+		tx := query.Find(&inputModel)
+		if tx.Error != nil {
+			return 0, nil, errors.New("error get all absensi karyawan")
+		}
 	}
 
 	dataUser, errUser := usernodejs.GetByIdUser(idUser)
@@ -186,7 +209,7 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 	for _, value := range inputModel {
 		absensiPengguna = append(absensiPengguna, ModelToPengguna(value))
 	}
-	fmt.Println("absensi pengguna ",absensiPengguna[0].UserID)
+	fmt.Println("absensi pengguna ", absensiPengguna[0].UserID)
 	var absensiEntity []absensi.AbsensiEntity
 	for _, value := range absensiPengguna {
 		if value.UserID == userEntity.ID {

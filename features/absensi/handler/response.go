@@ -30,7 +30,7 @@ func EntityToResponse(user absensi.AbsensiEntity) AbsensiResponse {
 		OverTimeKeluar:  user.OverTimePulang,
 		JamMasuk:        user.JamMasuk,
 		JamKeluar:       user.JamKeluar,
-		TanggalSekarang: user.TanggalSekarang.Format("2006-01-02"),
+		TanggalSekarang: user.CreatedAt.Format("2006-01-02"),
 		CreatedAt:       user.CreatedAt.Format("15:04:05.000"),
 		UpdateAt:        user.UpdatedAt.Format("15:04:05.000"),
 		UserID:          user.UserID,
