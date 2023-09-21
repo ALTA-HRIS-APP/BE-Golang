@@ -118,10 +118,7 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	}
 
 	log.Println("Get all targets successfully")
-	return helper.Success(c, "Get all targets successfully", map[string]interface{}{
-		"targets":  targetsResponse,
-		"nextPage": nextPage,
-	})
+	return helper.SuccessGetAll(c, "get all target successfully", targetsResponse, nextPage)
 }
 
 // GetTargetById retrieves target details by its ID.

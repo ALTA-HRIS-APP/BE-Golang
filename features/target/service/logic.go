@@ -20,24 +20,6 @@ func New(repo target.TargetDataInterface) target.TargetServiceInterface {
 	}
 }
 
-// func (s *targetService) GetUserByIDAPI(idUser string) (target.PenggunaEntity, error) {
-// 	// Panggil metode GetUserByIDAPI dari lapisan data targetRepo
-// 	user, err := s.targetRepo.GetUserByIDAPI(idUser)
-// 	if err != nil {
-// 		log.Printf("Error consume api in service: %s", err.Error())
-// 		return target.PenggunaEntity{}, err
-// 	}
-
-// 	// Konversi dari target.PenggunaEntity ke usernodejs.Pengguna
-// 	userNodejs := data.UserEntityToUserNodeJs(user)
-
-// 	// Gunakan fungsi konversi dari lapisan data
-// 	dataUser := data.UserNodeJsToPengguna(userNodejs)
-// 	dataUserEntity := data.UserPenggunaToEntity(dataUser)
-// 	log.Println("consume api successfully")
-// 	return dataUserEntity, nil
-// }
-
 // Create implements target.TargetServiceInterface.
 func (s *targetService) Create(input target.TargetEntity) (string, error) {
 	userPembuat, err := s.targetRepo.GetUserByIDAPI(input.UserIDPembuat)
@@ -88,7 +70,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error getting user details: %s", err.Error())
-		return false, nil, err
+		return true, nil, err
 	}
 
 	var data []target.TargetEntity
@@ -96,8 +78,8 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 		// Karyawan can only view their own targets
 		count, karyawanData, err := s.targetRepo.SelectAllKaryawan(userID, param)
 		if err != nil {
-			log.Printf("Error selecting all targets: %s", err.Error())
-			return false, nil, err
+			log.Printf("Error selecting all targets for karyawan: %s", err.Error())
+			return true, nil, err
 		}
 		if count == 0 {
 			nextPage = false
@@ -120,11 +102,19 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 		count, allData, err := s.targetRepo.SelectAll(param)
 		if err != nil {
 			log.Printf("Error selecting all targets: %s", err.Error())
-			return false, nil, err
+			return true, nil, err
 		}
 		if count == 0 {
 			nextPage = false
 		}
+		// // Check division access
+		// for _, targetPenerima := range allData {
+		// 	if user.Devisi != targetPenerima.DevisiID { // Replace 'Division' with the actual field that stores the division in 'target.TargetEntity'
+		// 		// User does not have access to this target
+		// 		continue
+		// 	}
+		// 	data = append(data, targetPenerima)
+		// }
 		data = allData
 		if param.ExistOtherPage {
 			totalPage = count / int64(param.LimitPerPage)
@@ -139,9 +129,13 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 				nextPage = false
 			}
 		}
-		log.Println("Targets read successfully")
-		return nextPage, data, nil
 	}
+
+	// Debugging: Print user's role and total count of targets
+	log.Printf("User Role: %s", user.Jabatan)
+	log.Printf("Total Count of Targets: %d", len(data))
+
+	log.Println("Targets read successfully")
 	return nextPage, data, nil
 }
 

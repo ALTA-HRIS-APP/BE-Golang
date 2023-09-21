@@ -98,20 +98,25 @@ func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.Target
 	for _, v := range dataPengguna {
 		dataUser = append(dataUser, PenggunaToUser(v))
 	}
+	fmt.Println("dataUser after retrieval:", dataUser)
+
 	var userEntity []target.UserEntity
 	for _, v := range dataUser {
 		userEntity = append(userEntity, UserToEntity(v))
 	}
-	fmt.Println("user entity", userEntity)
+	fmt.Println("userEntity after mapping:", userEntity)
+
 	var targetPengguna []TargetPengguna
 	for _, v := range inputModel {
 		targetPengguna = append(targetPengguna, ModelToPengguna(v))
 	}
-	fmt.Println("target", targetPengguna)
+	fmt.Println("targetPengguna after mapping:", targetPengguna)
+
 	var targetEntity []target.TargetEntity
 	for i := 0; i < len(userEntity); i++ {
 		for j := 0; j < len(targetPengguna); j++ {
-			if userEntity[i].ID == targetPengguna[j].User.ID {
+			if userEntity[i].ID == targetPengguna[j].UserIDPenerima {
+				fmt.Printf("Matching user ID: %s with targetPengguna[%d].User ID Penerima: %s\n", userEntity[i].ID, j, targetPengguna[j].UserIDPenerima)
 				targetPengguna[j].User = User(userEntity[i])
 				targetEntity = append(targetEntity, PenggunaToEntity(targetPengguna[j]))
 			}
@@ -146,7 +151,7 @@ func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) 
 	// Execute the query on the database
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		log.Printf("Error retrieving all targets: %s", tx.Error)
+		log.Printf("Error retrieving all targets for user %s: %s", idUser, tx.Error)
 		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
@@ -161,16 +166,21 @@ func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) 
 	for _, v := range inputModel {
 		targetPengguna = append(targetPengguna, ModelToPengguna(v))
 	}
+
+	fmt.Printf("Number of targets retrieved for user %s: %d\n", idUser, len(targetPengguna))
+
 	var targetEntity []target.TargetEntity
 	for _, v := range targetPengguna {
 		if v.UserIDPenerima == userEntity.ID {
 			v.User = User(userEntity)
 			targetEntity = append(targetEntity, PenggunaToEntity(v))
-		}
 
+			fmt.Printf("Target matched: UserIDPenerima: %s, userEntity.ID: %s\n", v.UserIDPenerima, userEntity.ID)
+		}
 	}
+
 	// resultTargetSlice := ListModelToEntity(inputModel)
-	log.Println("Targets read successfully")
+	log.Println("Targets read successfully for user", idUser)
 	return totalTarget, targetEntity, nil
 }
 
