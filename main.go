@@ -24,5 +24,5 @@ func main() {
 	}))
 
 	router.InitRouter(e, mysql, redis)
-	e.Logger.Fatal(e.Start(":8000"))
+	e.Logger.Fatal(e.Start(":80"))
 }
