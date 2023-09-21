@@ -1,9 +1,7 @@
 package service
 
 import (
-	apinodejs "be_golang/klp3/features/apiNodejs"
 	"be_golang/klp3/features/target"
-
 	"errors"
 	"log"
 
@@ -22,16 +20,23 @@ func New(repo target.TargetDataInterface) target.TargetServiceInterface {
 	}
 }
 
-func (s *targetService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
-	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data targetRepo
-	user, err := s.targetRepo.GetUserByIDAPI(idUser)
-	if err != nil {
-		log.Printf("Error consume api in service: %s", err.Error())
-		return apinodejs.Pengguna{}, err
-	}
-	log.Println("consume api in service successfully")
-	return user, nil
-}
+// func (s *targetService) GetUserByIDAPI(idUser string) (target.PenggunaEntity, error) {
+// 	// Panggil metode GetUserByIDAPI dari lapisan data targetRepo
+// 	user, err := s.targetRepo.GetUserByIDAPI(idUser)
+// 	if err != nil {
+// 		log.Printf("Error consume api in service: %s", err.Error())
+// 		return target.PenggunaEntity{}, err
+// 	}
+
+// 	// Konversi dari target.PenggunaEntity ke usernodejs.Pengguna
+// 	userNodejs := data.UserEntityToUserNodeJs(user)
+
+// 	// Gunakan fungsi konversi dari lapisan data
+// 	dataUser := data.UserNodeJsToPengguna(userNodejs)
+// 	dataUserEntity := data.UserPenggunaToEntity(dataUser)
+// 	log.Println("consume api successfully")
+// 	return dataUserEntity, nil
+// }
 
 // Create implements target.TargetServiceInterface.
 func (s *targetService) Create(input target.TargetEntity) (string, error) {

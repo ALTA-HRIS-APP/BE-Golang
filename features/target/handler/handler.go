@@ -27,15 +27,9 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 	// helper.PrettyPrint(user)
 	log.Println("UserID: ", userID)
 
-	//mengecek user id dari get by id user id api node js
-	userProfile, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
 	newTarget := TargetRequest{}
 	//mendapatkan data yang dikirim oleh FE melalui request
-	err = c.Bind(&newTarget)
+	err := c.Bind(&newTarget)
 	if err != nil {
 		log.Printf("Error binding data: %s", err.Error())
 		return helper.FailedRequest(c, "Failed to bind data", nil)
@@ -43,9 +37,6 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 
 	//mengisi user id pembuat dengan user id ang login
 	newTarget.UserIDPembuat = userID
-
-	//mengisi divisi id dengan divisi user yang login
-	newTarget.DevisiID = userProfile.DevisiID
 
 	//user id penerima -> dari param yang dikasi fe jadi dari node js
 	idParam := c.Param("user_id")
@@ -137,13 +128,6 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 func (h *targetHandler) GetTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
 
-	// Get user details
-	_, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
-
 	idParam := c.Param("target_id")
 
 	// Get target details and check if the user has permission to access it
@@ -160,13 +144,9 @@ func (h *targetHandler) GetTargetById(c echo.Context) error {
 
 func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
+
 	idParam := c.Param("target_id")
-	_, err = h.targetService.GetById(idParam, apiUser.ID)
+	_, err := h.targetService.GetById(idParam, userID)
 	if err != nil {
 		log.Printf("Error getting target details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
@@ -216,17 +196,10 @@ func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 func (h *targetHandler) DeleteTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
 
-	// Get user details
-	_, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
-
 	idParam := c.Param("target_id")
 
 	// Check if the target exists and is allowed to be deleted
-	err = h.targetService.DeleteById(idParam, userID)
+	err := h.targetService.DeleteById(idParam, userID)
 	if err != nil {
 		log.Printf("Error deleting target: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
