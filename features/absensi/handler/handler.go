@@ -22,8 +22,8 @@ func New(service absensi.AbsensiServiceInterface) *AbsensiHandler {
 }
 
 func (handler *AbsensiHandler) Edit(c echo.Context) error {
-	// idUser, _, _ := middlewares.ExtractToken(c)
-	idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
+	idUser, _, _ := middlewares.ExtractToken(c)
+	// idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
 	id := c.Param("id_absensi")
 	err := handler.absensiService.Edit(idUser, id)
 	if err != nil {
@@ -34,8 +34,8 @@ func (handler *AbsensiHandler) Edit(c echo.Context) error {
 }
 
 func (handler *AbsensiHandler) Add(c echo.Context) error {
-	// idUser, _, _ := middlewares.ExtractToken(c)
-	idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
+	idUser, _, _ := middlewares.ExtractToken(c)
+	// idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
 	err := handler.absensiService.Add(idUser)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
@@ -106,6 +106,7 @@ func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
 	resultResponse := AbsensiResponse{
 		ID:              absensiResult.ID,
 		OverTimeMasuk:   absensiResult.OverTimeMasuk,
+		OverTimeKeluar:  absensiResult.OverTimePulang,
 		JamMasuk:        absensiResult.JamMasuk,
 		JamKeluar:       absensiResult.JamKeluar,
 		TanggalSekarang: absensiResult.UpdatedAt.Format("2006-01-02"),
