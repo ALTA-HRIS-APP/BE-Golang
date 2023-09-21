@@ -3,7 +3,6 @@ package service
 import (
 	"be_golang/klp3/features/target"
 	"errors"
-	"log"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -24,21 +23,16 @@ func New(repo target.TargetDataInterface) target.TargetServiceInterface {
 func (s *targetService) Create(input target.TargetEntity) (string, error) {
 	userPembuat, err := s.targetRepo.GetUserByIDAPI(input.UserIDPembuat)
 	if err != nil {
-		log.Printf("Error getting user details for the creator: %s", err.Error())
 		return "", err
 	}
 	userPenerima, err := s.targetRepo.GetUserByIDAPI(input.UserIDPenerima)
 	if err != nil {
-		log.Printf("Error getting user details for the receiver: %s", err.Error())
 		return "", err
 	}
 	err = s.validate.Struct(input)
 	if err != nil {
-		log.Printf("Validation error: %s", err.Error())
 		return "", errors.New("validation error, content target and due date are required")
 	}
-
-	log.Printf("Creator's role: %s", userPembuat.Jabatan)
 
 	if userPembuat.Jabatan == "manager" {
 		if userPenerima.Jabatan != "karyawan" {
@@ -55,10 +49,8 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 
 	targetID, err := s.targetRepo.Insert(input)
 	if err != nil {
-		log.Printf("Error creating target: %s", err.Error())
 		return "", err
 	}
-	log.Println("Target created successfully")
 	return targetID, nil
 }
 
@@ -69,7 +61,6 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	// Get user's role
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
 		return true, nil, err
 	}
 
@@ -78,7 +69,6 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 		// Karyawan can only view their own targets
 		count, karyawanData, err := s.targetRepo.SelectAllKaryawan(userID, param)
 		if err != nil {
-			log.Printf("Error selecting all targets for karyawan: %s", err.Error())
 			return true, nil, err
 		}
 		if count == 0 {
@@ -101,7 +91,6 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	} else {
 		count, allData, err := s.targetRepo.SelectAll(param)
 		if err != nil {
-			log.Printf("Error selecting all targets: %s", err.Error())
 			return true, nil, err
 		}
 		if count == 0 {
@@ -132,10 +121,6 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 	}
 
 	// Debugging: Print user's role and total count of targets
-	log.Printf("User Role: %s", user.Jabatan)
-	log.Printf("Total Count of Targets: %d", len(data))
-
-	log.Println("Targets read successfully")
 	return nextPage, data, nil
 }
 
@@ -143,10 +128,8 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 func (s *targetService) GetById(targetID string, userID string) (target.TargetEntity, error) {
 	result, err := s.targetRepo.Select(targetID)
 	if err != nil {
-		log.Printf("Error selecting target by ID: %s", err.Error())
 		return target.TargetEntity{}, err
 	}
-	log.Println("Target retrieved successfully")
 	return result, nil
 }
 
@@ -214,21 +197,18 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 	//Dapatkan peran pengguna
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
 		return err
 	}
 
 	// Dapatkan target yang akan diperbarui
 	existingTarget, err := s.targetRepo.Select(targetID)
 	if err != nil {
-		log.Printf("Error selecting target for deletion: %s", err.Error())
 		return err
 	}
 
 	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
 	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
 	if err != nil {
-		log.Printf("Error getting user details for the target recipient: %s", err.Error())
 		return err
 	}
 
@@ -243,14 +223,11 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 	}
 
 	if !allowedToDelete {
-		log.Println("You do not have permission to delete this target.")
 		return errors.New("you do not have permission to delete this target")
 	}
 	err = s.targetRepo.Delete(targetID)
 	if err != nil {
-		log.Printf("Error deleting target: %s", err.Error())
 		return err
 	}
-	log.Println("Target deleted successfully")
 	return nil
 }
