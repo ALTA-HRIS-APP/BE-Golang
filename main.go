@@ -4,7 +4,6 @@ import (
 	"be_golang/klp3/app/config"
 	"be_golang/klp3/app/database"
 	"be_golang/klp3/app/router"
-	"log"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -17,8 +16,7 @@ func main() {
 	redis:= database.InitRedis(cfg)
 	database.InitialMigration(mysql)
 	e := echo.New()
-	log.Println("redis main",redis)
-	
+
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
