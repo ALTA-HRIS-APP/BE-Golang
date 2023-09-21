@@ -181,11 +181,12 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 	}
 	pengguna := PenggunaToUser(dataUser)
 	userEntity := UserToEntity(pengguna)
-
+	fmt.Println("user karyawan ",userEntity)
 	var absensiPengguna []AbsensiPengguna
 	for _, value := range inputModel {
 		absensiPengguna = append(absensiPengguna, ModelToPengguna(value))
 	}
+	fmt.Println("absensi pengguna ",absensiPengguna[0].UserID)
 	var absensiEntity []absensi.AbsensiEntity
 	for _, value := range absensiPengguna {
 		if value.UserID == userEntity.ID {
