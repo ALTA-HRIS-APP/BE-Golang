@@ -22,6 +22,12 @@ func (service *AbsensiService) GetById(absensiID string) (absensi.AbsensiEntity,
 	if err != nil {
 		return absensi.AbsensiEntity{}, err
 	}
+	user,errUser:=service.absensiService.SelectUserById(result.UserID)
+	if errUser != nil {
+		return absensi.AbsensiEntity{}, err
+	}
+	result.User.ID=user.ID
+	result.User.Name=user.NamaLengkap
 	return result, nil
 }
 
