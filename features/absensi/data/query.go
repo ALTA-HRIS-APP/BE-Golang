@@ -111,7 +111,7 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 		query = query.Offset(offset).Limit(param.ItemsPerPage)
 	}
 	if param.SearchName != "" {
-		query = query.Where("description like ?", "%"+param.SearchName+"%")
+		query = query.Where("nama_lengkap like ?", "%"+param.SearchName+"%")
 	}
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {

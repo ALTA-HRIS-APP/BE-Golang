@@ -47,10 +47,10 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	serviceAbsensi := serviceA.New(dataAbsensi)
 	handlerAbsensi := handlerA.New(serviceAbsensi)
 
-	c.POST("/absensis", handlerAbsensi.Add)
-	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit)
-	c.GET("/absensis", handlerAbsensi.GetAll)
-	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById)
+	c.POST("/absensis", handlerAbsensi.Add, middlewares.JWTMiddleware())
+	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit, middlewares.JWTMiddleware())
+	c.GET("/absensis", handlerAbsensi.GetAll, middlewares.JWTMiddleware())
+	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById, middlewares.JWTMiddleware())
 
 	targetRepo := _targetRepo.New(db, externalAPI)
 	targetService := _targetService.New(targetRepo)

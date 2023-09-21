@@ -2,12 +2,12 @@ package handler
 
 import (
 	"be_golang/klp3/features/absensi"
-	"time"
 )
 
 type AbsensiResponse struct {
 	ID              string       `json:"id,omitempty"`
 	OverTimeMasuk   string       `json:"overtime_masuk" form:"overtime_masuk"`
+	OverTimeKeluar  string       `json:"overtime_keluar" form:"overtime_keluar"`
 	JamMasuk        string       `json:"jam_masuk" form:"jam_masuk"`
 	JamKeluar       string       `json:"jam_keluar" form:"jam_keluar"`
 	TanggalSekarang string       `json:"tanggal_sekarang" form:"tanggal_sekarang"`
@@ -23,24 +23,16 @@ type UserResponse struct {
 }
 
 func EntityToResponse(user absensi.AbsensiEntity) AbsensiResponse {
-	// Parsing tanggal dan jam dari string
-	createdAt, _ := time.Parse("2006-01-02T15:04:05.000Z", user.CreatedAt.Format("15:04:05.000"))
-	updateAt, _ := time.Parse("2006-01-02T15:04:05.000Z", user.UpdatedAt.Format("15:04:05.000"))
-
-	// Membuat string terpisah untuk tanggal dan jam
-
-	createdTimeStr := createdAt.Format("15:04:05.000")
-	TanggalSekarangg := updateAt.Format("2006-01-02")
-	updateTimeStr := updateAt.Format("15:04:05.000")
 
 	return AbsensiResponse{
 		ID:              user.ID,
 		OverTimeMasuk:   user.OverTimeMasuk,
+		OverTimeKeluar:  user.OverTimePulang,
 		JamMasuk:        user.JamMasuk,
 		JamKeluar:       user.JamKeluar,
-		TanggalSekarang: TanggalSekarangg,
-		CreatedAt:       createdTimeStr,
-		UpdateAt:        updateTimeStr,
+		TanggalSekarang: user.TanggalSekarang.Format("2006-01-02"),
+		CreatedAt:       user.CreatedAt.Format("15:04:05.000"),
+		UpdateAt:        user.UpdatedAt.Format("15:04:05.000"),
 		UserID:          user.UserID,
 		User:            UserEntityToResponse(user.User),
 	}

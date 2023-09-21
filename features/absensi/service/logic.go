@@ -117,59 +117,68 @@ func (service *AbsensiService) Edit(idUser string, id string) error {
 
 // Get implements absensi.AbsensiServiceInterface
 func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bool, []absensi.AbsensiEntity, error) {
-	var total_pages int64
+	var totalPage int64
 	nextPage := true
-	dataUser, errUser := service.absensiService.SelectUserById(idUser)
-	if errUser != nil {
-		return true, nil, errors.New("error get data user")
+
+	// Get user's role
+	user, err := service.absensiService.GetUserByIDAPI(idUser)
+	if err != nil {
+		log.Printf("Error getting user details: %s", err.Error())
+		return false, nil, err
 	}
-	if dataUser.Jabatan == "karyawan" {
-		count, dataReim, errReim := service.absensiService.SelectAllKaryawan(idUser, param)
-		if errReim != nil {
-			return true, nil, errReim
+
+	var data []absensi.AbsensiEntity
+	if user.Jabatan == "karyawan" {
+		// Karyawan can only view their own absensis
+		count, karyawanData, err := service.absensiService.SelectAllKaryawan(idUser, param)
+		if err != nil {
+			log.Printf("Error selecting all absensis: %s", err.Error())
+			return false, nil, err
 		}
 		if count == 0 {
 			nextPage = false
 		}
-		if param.IsClassDashboard || count != 0 {
-			total_pages = count / int64(param.ItemsPerPage)
+		data = karyawanData
+		if param.IsClassDashboard {
+			totalPage = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
-				total_pages += 1
+				totalPage += 1
 			}
 
-			if param.Page == int(total_pages) {
+			if param.Page == int(totalPage) {
 				nextPage = false
 			}
-
-			if dataReim == nil {
+			if data == nil {
 				nextPage = false
 			}
 		}
-		return nextPage, dataReim, nil
 	} else {
-		count, dataReim, errReim := service.absensiService.SelectAll(param)
-		if errReim != nil {
-			return true, nil, errReim
+		count, allData, err := service.absensiService.SelectAll(param)
+		if err != nil {
+			log.Printf("Error selecting all absensis: %s", err.Error())
+			return false, nil, err
 		}
 		if count == 0 {
 			nextPage = false
 		}
-		if param.IsClassDashboard || count != 0 {
-			total_pages = count / int64(param.ItemsPerPage)
+		data = allData
+		if param.IsClassDashboard {
+			totalPage = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
-				total_pages += 1
+				totalPage += 1
 			}
 
-			if param.Page == int(total_pages) {
+			if param.Page == int(totalPage) {
 				nextPage = false
 			}
-			if dataReim == nil {
+			if data == nil {
 				nextPage = false
 			}
 		}
-		return nextPage, dataReim, nil
-
+		log.Println("Absensis read successfully")
+		return nextPage, data, nil
 	}
+	return nextPage, data, nil
 }
 
 func New(service absensi.AbsensiDataInterface) absensi.AbsensiServiceInterface {

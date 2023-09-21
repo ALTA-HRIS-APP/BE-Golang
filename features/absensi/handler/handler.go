@@ -6,7 +6,6 @@ import (
 	"be_golang/klp3/helper"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -108,7 +107,7 @@ func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
 		OverTimeMasuk:   absensiResult.OverTimeMasuk,
 		JamMasuk:        absensiResult.JamMasuk,
 		JamKeluar:       absensiResult.JamKeluar,
-		TanggalSekarang: time.Now().Format("2006-01-02"),
+		TanggalSekarang: absensiResult.TanggalSekarang.Format("2006-01-02"),
 		CreatedAt:       absensiResult.CreatedAt.Format("15:04:05.000"),
 		UpdateAt:        absensiResult.UpdatedAt.Format("15:04:05.000"),
 		UserID:          userResult.ID,

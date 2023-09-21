@@ -15,7 +15,7 @@ type AbsensiEntity struct {
 	OverTimePulang  string
 	JamMasuk        string
 	JamKeluar       string
-	TanggalSekarang string
+	TanggalSekarang time.Time
 	User            UserEntity
 }
 
