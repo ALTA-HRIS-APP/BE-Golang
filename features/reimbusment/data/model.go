@@ -46,11 +46,27 @@ type User struct{
 	Name 			string	
 }
 
+type UserRedis struct{
+	ID          string   `json:"id"` 
+	NamaLengkap string	 `json:"nama_lengkap"`   
+	Jabatan     string   `json:"jabatan"`
+	Devisi 		string 	 `json:"devisi"` 
+}
+
 type Pengguna struct{
 	ID          string    
 	NamaLengkap string    
 	Jabatan     string 
 	Devisi 		string   	
+}
+
+func UserRedisToPengguna(user UserRedis)Pengguna{
+	return Pengguna{
+		ID:          user.ID,
+		NamaLengkap: user.NamaLengkap,
+		Jabatan:     user.Jabatan,
+		Devisi:      user.Devisi,
+	}
 }
 
 func UserNodeJskePengguna(pengguna usernodejs.Pengguna)Pengguna{
