@@ -33,7 +33,7 @@ func RequestToEntity(user AbsensiRequest) absensi.AbsensiEntity {
 		OverTimePulang: user.OverTimeKeluar,
 		JamMasuk:       user.JamMasuk,
 		JamKeluar:      user.JamKeluar,
-		User:           absensi.UserEntity{},
+		User:           UserRequestToEntity(UserRequest(user.User)),
 	}
 }
 
