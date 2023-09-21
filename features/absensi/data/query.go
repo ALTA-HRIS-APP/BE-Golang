@@ -101,7 +101,7 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 		offset := (param.Page - 1) * param.ItemsPerPage
 		fmt.Println("offset", offset)
 		if param.SearchName != "" {
-			query = query.Where("description like ?", "%"+param.SearchName+"%")
+			query = query.Where("nama_lengkap like ?", "%"+param.SearchName+"%")
 		}
 		tx := query.Find(&inputModel)
 		if tx.Error != nil {
@@ -158,7 +158,7 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
 		if param.SearchName != "" {
-			query = query.Where("user_id=? and description like ?", idUser, "%"+param.SearchName+"%")
+			query = query.Where("user_id=? and nama_lengkap like ?", idUser, "%"+param.SearchName+"%")
 		}
 		tx := query.Find(&inputModel)
 		if tx.Error != nil {
@@ -168,7 +168,7 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 		query = query.Offset(offset).Limit(param.ItemsPerPage)
 	}
 	if param.SearchName != "" {
-		query = query.Where("user_id=? and description like ?", idUser, "%"+param.SearchName+"%")
+		query = query.Where("user_id=? and nama_lengkap like ?", idUser, "%"+param.SearchName+"%")
 	}
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
