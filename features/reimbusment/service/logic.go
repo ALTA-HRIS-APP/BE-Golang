@@ -166,14 +166,14 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 			return errors.New("hanya bisa approve reimbursement karyawan dan manager")
 		}
 		if input.Persetujuan == "Rejected" {
-			input.Status = "Done"
+			input.Status = "Rejected"
 			err := service.reimbursmentService.Update(input, id)
 			if err != nil {
 				return err
 			}
 			return nil
 		} else {
-			input.Status = "approve"
+			input.Status = "Done"
 			err := service.reimbursmentService.Update(input, id)
 			if err != nil {
 				return err
