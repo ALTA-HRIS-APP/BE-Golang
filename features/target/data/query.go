@@ -237,6 +237,7 @@ func (r *targetQuery) Delete(targetID string) error {
 		log.Printf("Error deleting target: %s", tx.Error)
 		return tx.Error
 	}
+
 	if tx.RowsAffected == 0 {
 		log.Println("No rows affected when deleting target")
 		return errors.New("target not found")
