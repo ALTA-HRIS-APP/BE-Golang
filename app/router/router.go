@@ -50,7 +50,7 @@ func InitRouter(c *echo.Echo, db *gorm.DB, redis *redis.Client) {
 
 	c.POST("/absensis", handlerAbsensi.Add, middlewares.JWTMiddleware())
 	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit, middlewares.JWTMiddleware())
-	c.GET("/absensis", handlerAbsensi.GetAllAbsensi, middlewares.JWTMiddleware())
+	c.GET("/absensis", handlerAbsensi.GetAll, middlewares.JWTMiddleware())
 	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById, middlewares.JWTMiddleware())
 
 	targetRepo := _targetRepo.New(db)

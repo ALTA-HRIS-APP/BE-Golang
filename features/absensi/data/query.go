@@ -6,8 +6,8 @@ import (
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
+	"fmt"
 	"log"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -17,23 +17,22 @@ type absensiQuery struct {
 	externalAPI apinodejs.ExternalDataInterface
 }
 
-// GetUserByIDAPI implements absensi.AbsensiDataInterface
-func (repo *absensiQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
-	// Panggil metode GetUserByID dari externalAPI
-	user, err := repo.externalAPI.GetUserByID(idUser)
+// SelectUserById implements absensi.AbsensiDataInterface
+func (*absensiQuery) SelectUserById(idUser string) (absensi.PenggunaEntity, error) {
+	data, err := usernodejs.GetByIdUser(idUser)
 	if err != nil {
-		log.Printf("Error consume api user: %s", err.Error())
-		return apinodejs.Pengguna{}, err
+		return absensi.PenggunaEntity{}, err
 	}
-	log.Println("consume api successfully")
-	return user, nil
+	dataUser := UserNodeJskePengguna(data)
+	dataEntity := UserPenggunaToEntity(dataUser)
+	return dataEntity, nil
 }
 
 // SelectById implements absensi.AbsensiDataInterface
-func (repo *absensiQuery) SelectById(absensiID string, userID string) (absensi.AbsensiEntity, error) {
+func (repo *absensiQuery) SelectById(absensiID string) (absensi.AbsensiEntity, error) {
 	var absensiData Absensi
 
-	tx := repo.db.Where("id = ? AND user_id = ?", absensiID, userID).First(&absensiData)
+	tx := repo.db.Where("id = ?", absensiID).First(&absensiData)
 	if tx.Error != nil {
 		log.Printf("Error read absensi: %s", tx.Error)
 		return absensi.AbsensiEntity{}, tx.Error
@@ -46,6 +45,18 @@ func (repo *absensiQuery) SelectById(absensiID string, userID string) (absensi.A
 	coreAbsensi := ModelToEntity(absensiData)
 	log.Println("Read absensi successfully")
 	return coreAbsensi, nil
+}
+
+// GetUserByIDAPI implements absensi.AbsensiDataInterface
+func (repo *absensiQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
+	// Panggil metode GetUserByID dari externalAPI
+	user, err := repo.externalAPI.GetUserByID(idUser)
+	if err != nil {
+		log.Printf("Error consume api user: %s", err.Error())
+		return apinodejs.Pengguna{}, err
+	}
+	log.Println("consume api successfully")
+	return user, nil
 }
 
 // Insert implements absensi.AbsensiDataInterface
@@ -88,6 +99,7 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
+		fmt.Println("offset", offset)
 		if param.SearchName != "" {
 			query = query.Where("description like ?", "%"+param.SearchName+"%")
 		}
@@ -99,15 +111,12 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 		query = query.Offset(offset).Limit(param.ItemsPerPage)
 	}
 	if param.SearchName != "" {
-		query = query.Where("description like ?", "%"+param.SearchName+"%")
+		query = query.Where("nama_lengkap like ?", "%"+param.SearchName+"%")
 	}
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
 		return 0, nil, errors.New("error get all absensi")
 	}
-
-	// Tambahkan kode untuk mendapatkan tanggal sekarang
-	now := time.Now()
 
 	dataPengguna, errUser := usernodejs.GetAllUser()
 	if errUser != nil {
@@ -121,19 +130,17 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 	for _, value := range dataUser {
 		userEntity = append(userEntity, UserToEntity(value))
 	}
+	fmt.Println("user entity", userEntity)
 	var absensiPengguna []AbsensiPengguna
 	for _, value := range inputModel {
 		absensiPengguna = append(absensiPengguna, ModelToPengguna(value))
 	}
+	fmt.Println("reimb", absensiPengguna)
 	var absensiEntity []absensi.AbsensiEntity
 	for i := 0; i < len(userEntity); i++ {
 		for j := 0; j < len(absensiPengguna); j++ {
 			if userEntity[i].ID == absensiPengguna[j].UserID {
 				absensiPengguna[j].User = User(userEntity[i])
-
-				// Setel tanggal sekarang ke absensiEntity
-				absensiPengguna[j].TanggalSekarang = now
-
 				absensiEntity = append(absensiEntity, PenggunaToEntity(absensiPengguna[j]))
 			}
 		}
