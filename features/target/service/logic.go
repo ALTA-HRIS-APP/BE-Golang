@@ -77,7 +77,6 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 
 func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
 	var totalPage int64
-	var targetID string
 	nextPage := true
 
 	// Get user's role
@@ -87,72 +86,63 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 		return false, nil, err
 	}
 
-	// Get the target to be updated
-	existingTarget, err := s.targetRepo.Select(targetID, userID)
-	if err != nil {
-		log.Printf("Error selecting target: %s", err.Error())
-		return false, nil, err
-	}
-
-	// Get the user with ID corresponding to existingTarget.UserIDPenerima
-	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
-	if err != nil {
-		log.Printf("Error getting user details for the target recipient: %s", err.Error())
-		return false, nil, err
-	}
-
-	// Initialize a variable indicating whether reading is allowed
-	allowedToRead := false
-
-	if user.Jabatan == "c-level" {
-		allowedToRead = true
-	}
-
-	if user.Jabatan == "manager" {
-		if existingTarget.UserIDPenerima == userID {
-			allowedToRead = true
-		}
-		if userTarget.Jabatan == "karyawan" && userTarget.Devisi == user.Devisi {
-			allowedToRead = true
-		}
-	}
-
+	var data []target.TargetEntity
 	if user.Jabatan == "karyawan" {
-		if existingTarget.UserIDPenerima == userID {
-			allowedToRead = true
+		// Karyawan can only view their own targets
+		count, karyawanData, err := s.targetRepo.SelectAllKaryawan(userID, param)
+		if err != nil {
+			log.Printf("Error selecting all targets: %s", err.Error())
+			return false, nil, err
 		}
-	}
-
-	// Check reading permission
-	if !allowedToRead {
-		log.Println("You do not have permission to view this target.")
-		return false, nil, errors.New("you do not have permission to view this target")
-	}
-
-	count, data, err := s.targetRepo.SelectAll(userID, param)
-	if err != nil {
-		log.Printf("Error selecting all targets: %s", err.Error())
-		return false, nil, err
-	}
-
-	if param.ExistOtherPage {
-		totalPage = count / int64(param.LimitPerPage)
-		if count%int64(param.LimitPerPage) != 0 {
-			totalPage += 1
-		}
-
-		if param.Page == int(totalPage) {
+		if count == 0 {
 			nextPage = false
 		}
-	}
+		data = karyawanData
+		if param.ExistOtherPage {
+			totalPage = count / int64(param.LimitPerPage)
+			if count%int64(param.LimitPerPage) != 0 {
+				totalPage += 1
+			}
 
-	log.Println("Targets read successfully")
+			if param.Page == int(totalPage) {
+				nextPage = false
+			}
+			if data == nil {
+				nextPage = false
+			}
+		}
+	} else {
+		count, allData, err := s.targetRepo.SelectAll(param)
+		if err != nil {
+			log.Printf("Error selecting all targets: %s", err.Error())
+			return false, nil, err
+		}
+		if count == 0 {
+			nextPage = false
+		}
+		data = allData
+		if param.ExistOtherPage {
+			totalPage = count / int64(param.LimitPerPage)
+			if count%int64(param.LimitPerPage) != 0 {
+				totalPage += 1
+			}
+
+			if param.Page == int(totalPage) {
+				nextPage = false
+			}
+			if data == nil {
+				nextPage = false
+			}
+		}
+		log.Println("Targets read successfully")
+		return nextPage, data, nil
+	}
 	return nextPage, data, nil
 }
 
 // GetById implements target.TargetServiceInterface.
 func (s *targetService) GetById(targetID string, userID string) (target.TargetEntity, error) {
-	result, err := s.targetRepo.Select(targetID, userID)
+	result, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		log.Printf("Error selecting target by ID: %s", err.Error())
 		return target.TargetEntity{}, err
@@ -163,62 +153,66 @@ func (s *targetService) GetById(targetID string, userID string) (target.TargetEn
 
 // UpdateById implements target.TargetServiceInterface.
 func (s *targetService) UpdateById(targetID string, userID string, targetData target.TargetEntity) error {
-	// Dapatkan peran pengguna
+	// Get user information who will perform the update
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
 		return err
 	}
 
-	// Dapatkan target yang akan diperbarui
-	existingTarget, err := s.targetRepo.Select(targetID, userID)
+	// Get the target to be updated
+	existingTarget, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		return err
 	}
 
-	// Dapatkan pengguna dengan ID sesuai existingTarget.UserIDPenerima
+	// Get information about the target recipient user
 	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}
 
-	// Inisialisasi variabel yang menunjukkan apakah pembaruan diizinkan
+	// Initialize a variable indicating whether the update is allowed
 	allowedToUpdate := false
 
-	// Pemeriksaan peran pengguna
+	// Check permissions based on user role
 	if user.Jabatan == "c-level" {
 		allowedToUpdate = true
 	}
 
 	if user.Jabatan == "manager" {
-		// Pemeriksaan apakah manajer dapat mengedit target karyawan atau target milik diri sendiri
 		if userTarget.Jabatan == "karyawan" || existingTarget.UserIDPenerima == userID {
-			allowedToUpdate = true
+			// Managers can edit employee targets or their own targets
+			// But only if they are in the same division
+			if userTarget.Devisi == user.Devisi {
+				allowedToUpdate = true
+			}
 		}
 	}
 
 	if user.Jabatan == "karyawan" {
-		// Pemeriksaan apakah karyawan dapat mengedit target milik diri sendiri
+		// Employees can only edit their own targets
 		if existingTarget.UserIDPenerima == userID {
 			allowedToUpdate = true
 		}
 	}
 
-	// Periksa izin pembaruan
+	// Check update permission
 	if !allowedToUpdate {
-		return errors.New("anda tidak memiliki izin untuk mengedit target ini")
+		return errors.New("you do not have permission to edit this target")
 	}
 
-	// Lakukan pembaruan hanya jika diizinkan
-	err = s.targetRepo.Update(targetID, userID, targetData)
+	// Perform the update only if allowed
+	err = s.targetRepo.Update(targetID, targetData)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 // DeleteById implements target.TargetServiceInterface.
 func (s *targetService) DeleteById(targetID string, userID string) error {
-	// Dapatkan peran pengguna
+	//Dapatkan peran pengguna
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
 		log.Printf("Error getting user details: %s", err.Error())
@@ -226,7 +220,7 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 	}
 
 	// Dapatkan target yang akan diperbarui
-	existingTarget, err := s.targetRepo.Select(targetID, userID)
+	existingTarget, err := s.targetRepo.Select(targetID)
 	if err != nil {
 		log.Printf("Error selecting target for deletion: %s", err.Error())
 		return err

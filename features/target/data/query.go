@@ -15,13 +15,6 @@ type targetQuery struct {
 	externalAPI apinodejs.ExternalDataInterface
 }
 
-func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
-	return &targetQuery{
-		db:          database,
-		externalAPI: externalAPI,
-	}
-}
-
 func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByID dari externalAPI
 
@@ -32,6 +25,13 @@ func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) 
 	}
 	log.Println("consume api successfully")
 	return user, nil
+}
+
+func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
+	return &targetQuery{
+		db:          database,
+		externalAPI: externalAPI,
+	}
 }
 
 // Insert implements target.TargetDataInterface.
@@ -59,20 +59,20 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 }
 
 // SelectAll implements target.TargetDataInterface.
-func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.TargetEntity, error) {
 	// Initialize variables
 	var inputModel []Target
 	var totalTarget int64
 
 	// Initial query
-	query := r.db.Where("user_id = ?", userID)
+	query := r.db
 
 	// Handle searching by description if provided
 	if param.SearchKonten != "" {
-		query = query.Where("description like ?", "%"+param.SearchKonten+"%")
+		query = query.Where("konten_target like ?", "%"+param.SearchKonten+"%")
 	}
 	if param.SearchStatus != "" {
-		query = query.Where("description like ?", "%"+param.SearchStatus+"%")
+		query = query.Where("status like ?", "%"+param.SearchStatus+"%")
 	}
 
 	// Handle special condition for class dashboard
@@ -94,11 +94,45 @@ func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, 
 	return totalTarget, resultTargetSlice, nil
 }
 
+// SelectAllKaryawan implements target.TargetDataInterface.
+func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+	var inputModel []Target
+	var totalTarget int64
+
+	query := r.db
+
+	// Handle searching by description if provided
+	if param.SearchKonten != "" {
+		query = query.Where("user_id = ? AND konten_target LIKE ?", idUser, "%"+param.SearchKonten+"%")
+	}
+	if param.SearchStatus != "" {
+		query = query.Where("user_id = ? AND status LIKE ?", idUser, "%"+param.SearchStatus+"%")
+	}
+
+	// Special condition for class dashboard
+	if param.ExistOtherPage {
+		offset := (param.Page - 1) * param.LimitPerPage
+		query = query.Where("user_id = ?", idUser).Offset(int(offset)).Limit(param.LimitPerPage)
+	}
+
+	// Execute the query on the database
+	tx := query.Find(&inputModel)
+	if tx.Error != nil {
+		log.Printf("Error retrieving all targets: %s", tx.Error)
+		return 0, nil, errors.New("failed to get all targets")
+	}
+	totalTarget = tx.RowsAffected
+
+	resultTargetSlice := ListModelToEntity(inputModel)
+	log.Println("Targets read successfully")
+	return totalTarget, resultTargetSlice, nil
+}
+
 // Select implements target.TargetDataInterface.
-func (r *targetQuery) Select(targetID string, userID string) (target.TargetEntity, error) {
+func (r *targetQuery) Select(targetID string) (target.TargetEntity, error) {
 	var targetData Target
 
-	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).First(&targetData)
+	tx := r.db.Where("id = ?", targetID).First(&targetData)
 	if tx.Error != nil {
 		log.Printf("Error reading target: %s", tx.Error)
 		return target.TargetEntity{}, tx.Error
@@ -114,28 +148,28 @@ func (r *targetQuery) Select(targetID string, userID string) (target.TargetEntit
 }
 
 // Update implements target.TargetDataInterface.
-func (r *targetQuery) Update(targetID string, userID string, targetData target.TargetEntity) error {
+func (r *targetQuery) Update(targetID string, targetData target.TargetEntity) error {
 	var target Target
-	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).First(&target)
-	log.Printf("Error read id: %s", tx.Error)
+	tx := r.db.Where("id = ?", targetID).First(&target)
+	log.Printf("Error reading target by id: %s", tx.Error)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when read target")
+		log.Println("No rows affected when reading target")
 		return errors.New("target not found")
 	}
 
-	//Mapping Entity Target to Model
+	// Mapping Entity Target to Model
 	updatedTarget := MapEntityToModel(targetData)
 
-	// Lakukan pembaruan data proyek dalam database
+	// Perform the update of project data in the database
 	tx = r.db.Model(&target).Updates(updatedTarget)
 	if tx.Error != nil {
-		log.Printf("Error update target: %s", tx.Error)
+		log.Printf("Error updating target: %s", tx.Error)
 		return errors.New(tx.Error.Error() + " failed to update data")
 	}
-	log.Println("Update target successfully")
+	log.Println("Target updated successfully")
 	return nil
 }
 

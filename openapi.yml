@@ -441,22 +441,22 @@ components:
       properties:
         konten_target:
           type: string
-          description: "example: debug code"
+          description: "example: reimbursment pekerja"
         status:
           type: string
           description: "example: not-completed"
         divisi_id:
           type: integer
-          description: "example: ......"
+          description: "example: 68a83bd8-a392-4877-b10f-f0025185"
         user_id_pembuat:
           type: string
-          description: "example: ......."
+          description: "example: 54396f94-07b8-4450-8105-7c"
         user_id_penerima:
           type: string
-          description: "example: ......"
+          description: "example: 27567353-9507-43d3-b08c-e"
         due_date:
           type: string
-          description: "example: 19-09-2023"
+          description: "example: 25-09-2023"
         image:
           type: string
           format: binary
@@ -486,7 +486,33 @@ components:
           type: string
           format: binary
           description: "allowed file extension: jpg, png, jpeg"
-
+    update_reimbursment_karyawan:
+      type: object
+      properties:
+        id:
+          type: string
+        konten_target:
+          type: string
+        status:
+          type: string
+        devisi_id:
+          type: string
+        user_id_pembuat:
+          type: string
+        user_id_penerima:
+          type: string
+        due_date:
+          type: string
+        proofs:
+          type: string
+        example:
+        - id: 0d53eb66-a96b-4c32-8e5e-13158e2006a4
+          konten_target: reimbursment pekerja
+          status: not completed
+          devisi_id: 68a83bd8-a392-4877-b10f-f00251850cb8
+          user_id_pembuat: 54396f94-07b8-4450-8105-7c4472bf8701
+          user_id_penerima: 27567353-9507-43d3-b08c-eea2c8c094fb
+          due_date: 25-09-2023
   responses:
     responseSuccess:
       description: failed
@@ -567,7 +593,48 @@ components:
                   status:
                     type: string
                     example: "pending"
-
+    responseGetByIdTargets:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int64
+                example: 200
+              message:
+                type: string
+                example: "success get all targets"
+              data:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                    konten_target:
+                      type: string
+                    status:
+                      type: string
+                    devisi_id:
+                      type: string
+                    user_id_pembuat:
+                      type: string
+                    user_id_penerima:
+                      type: string
+                    due_date:
+                      type: string
+                    proofs:
+                      type: string
+                example:
+                  - id: 0d53eb66-a96b-4c32-8e5e-13158e2006a4
+                    konten_target: reimbursment pekerja
+                    status: not completed
+                    devisi_id: 68a83bd8-a392-4877-b10f-f00251850cb8
+                    user_id_pembuat: 54396f94-07b8-4450-8105-7c4472bf8701
+                    user_id_penerima: 27567353-9507-43d3-b08c-eea2c8c094fb
+                    due_date: 25-09-2023
     responseGetAllReimbursment:
       description: success
       content:
@@ -665,22 +732,27 @@ components:
                     proofs:
                       type: string
                 example:
-                  - id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    konten_target: ""
-                    status: "not-completed"
-                    devisi_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_pembuat: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_penerima: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    proofs: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
-                    user_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                  - id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    konten_target: ""
-                    status: "not-completed"
-                    devisi_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_pembuat: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_penerima: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    proofs: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
-                    user_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                  - id: 0d53eb66-a96b-4c32-8e5e-13158e2006a4
+                    konten_target: reimbursment pekerja
+                    status: not completed
+                    devisi_id: 68a83bd8-a392-4877-b10f-f00251850cb8
+                    user_id_pembuat: 54396f94-07b8-4450-8105-7c4472bf8701
+                    user_id_penerima: 27567353-9507-43d3-b08c-eea2c8c094fb
+                    due_date: 25-09-2023
+                  - id: 10b28ed5-59dc-4383-ae02-154a2516d40a
+                    konten_target: "Pengelolaan Utang "
+                    status: not completed
+                    devisi_id: b256efa8-56ea-11ee-9bcf-fcc1d3dbd38e
+                    user_id_pembuat: b03afa83-cf52-494b-b3d2-9cd89a4867d5
+                    user_id_penerima: 54396f94-07b8-4450-8105-7c4472bf8701
+                    due_date: 30-09-2023
+                  - id: 473a2b0e-cec1-4ede-abb0-4f3237b0889e
+                    konten_target: gaji karyawan
+                    status: not completed
+                    devisi_id: 68a83bd8-a392-4877-b10f-f00251850cb8
+                    user_id_pembuat: 54396f94-07b8-4450-8105-7c4472bf8701
+                    user_id_penerima: 27567353-9507-43d3-b08c-eea2c8c094fb
+                    due_date: 25-09-2023
 
     responseGetAllCuti:
       description: success

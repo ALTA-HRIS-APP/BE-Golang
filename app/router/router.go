@@ -25,7 +25,7 @@ import (
 )
 
 func InitRouter(c *echo.Echo, db *gorm.DB, redis *redis.Client) {
-	externalAPI := apinodejs.NewExternalData("http://project2.otixx.online")
+	externalAPI := apinodejs.NewExternalData("https://project2.otixx.online")
 	dataRes := dataR.New(db,redis)
 	serviceRes := serviceR.New(dataRes)
 	handlerRes := handlerR.New(serviceRes)
