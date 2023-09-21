@@ -130,12 +130,12 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 	for _, value := range dataUser {
 		userEntity = append(userEntity, UserToEntity(value))
 	}
-	fmt.Println("user entity", userEntity)
+
 	var absensiPengguna []AbsensiPengguna
 	for _, value := range inputModel {
 		absensiPengguna = append(absensiPengguna, ModelToPengguna(value))
 	}
-	fmt.Println("reimb", absensiPengguna)
+
 	var absensiEntity []absensi.AbsensiEntity
 	for i := 0; i < len(userEntity); i++ {
 		for j := 0; j < len(absensiPengguna); j++ {
@@ -186,6 +186,7 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 	for _, value := range inputModel {
 		absensiPengguna = append(absensiPengguna, ModelToPengguna(value))
 	}
+	fmt.Println("absensi pengguna ",absensiPengguna[0].UserID)
 	var absensiEntity []absensi.AbsensiEntity
 	for _, value := range absensiPengguna {
 		if value.UserID == userEntity.ID {

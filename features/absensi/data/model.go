@@ -103,6 +103,7 @@ func PenggunaToEntity(user AbsensiPengguna) absensi.AbsensiEntity {
 		OverTimePulang: user.OverTimePulang,
 		JamMasuk:       user.JamMasuk,
 		JamKeluar:      user.JamKeluar,
+		User: UserToEntity(user.User),
 	}
 }
 
