@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var url_base = "http://project2.otixx.online"
+const url_base = "http://project2.otixx.online"
 
 func LoginUser(login Login) (string, error) {
 

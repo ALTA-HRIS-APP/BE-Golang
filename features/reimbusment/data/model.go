@@ -60,15 +60,6 @@ type Pengguna struct{
 	Devisi 		string   	
 }
 
-func UserRedisToPengguna(user UserRedis)Pengguna{
-	return Pengguna{
-		ID:          user.ID,
-		NamaLengkap: user.NamaLengkap,
-		Jabatan:     user.Jabatan,
-		Devisi:      user.Devisi,
-	}
-}
-
 func UserNodeJskePengguna(pengguna usernodejs.Pengguna)Pengguna{
 	return Pengguna{
 		ID:          pengguna.ID,
