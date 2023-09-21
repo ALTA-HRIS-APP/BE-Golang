@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -101,15 +102,15 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 		offset := (param.Page - 1) * param.ItemsPerPage
 		fmt.Println("offset", offset)
 
-		// Ubah kueri SQL untuk pencarian berdasarkan nama_lengkap
-		if param.SearchName != "" {
-			query = query.Joins("JOIN pengguna ON absensi.user_id = pengguna.id").
-				Where("pengguna.nama_lengkap LIKE ?", "%"+param.SearchName+"%")
-		}
-
 		// Tambahkan kondisi untuk filter berdasarkan tanggal_sekarang
 		if param.SerachTanggal != "" {
-			query = query.Where("tanggal_sekarang = ?", param.SerachTanggal)
+			// Parsing tanggal_sekarang dari format "2006-01-02"
+			parsedDate, err := time.Parse("2006-01-02", param.SerachTanggal)
+			if err != nil {
+				return 0, nil, errors.New("failed to parse tanggal_sekarang")
+			}
+			// Filter data berdasarkan tanggal_sekarang
+			query = query.Where("created_at >= ? AND created_at <= ?", parsedDate, parsedDate.Add(24*time.Hour))
 		}
 
 		tx := query.Find(&inputModel)
@@ -120,15 +121,15 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 		query = query.Offset(offset).Limit(param.ItemsPerPage)
 	}
 
-	// Ubah kueri SQL untuk pencarian berdasarkan nama_lengkap
-	if param.SearchName != "" && !param.IsClassDashboard {
-		query = query.Joins("JOIN pengguna ON absensi.user_id = pengguna.id").
-			Where("pengguna.nama_lengkap LIKE ?", "%"+param.SearchName+"%")
-	}
-
 	// Tambahkan kondisi untuk filter berdasarkan tanggal
 	if param.SerachTanggal != "" && !param.IsClassDashboard {
-		query = query.Where("tanggal_sekarang = ?", param.SerachTanggal)
+		// Parsing tanggal_sekarang dari format "2006-01-02"
+		parsedDate, err := time.Parse("2006-01-02", param.SerachTanggal)
+		if err != nil {
+			return 0, nil, errors.New("failed to parse tanggal_sekarang")
+		}
+		// Filter data berdasarkan tanggal_sekarang
+		query = query.Where("created_at >= ? AND created_at <= ?", parsedDate, parsedDate.Add(24*time.Hour))
 	}
 
 	tx := query.Find(&inputModel)
@@ -175,11 +176,18 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 
 	if param.IsClassDashboard {
 		offset := (param.Page - 1) * param.ItemsPerPage
-		if param.SearchName != "" {
-			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SearchName+"%")
-		} else {
-			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SerachTanggal+"%")
+
+		// Tambahkan kondisi untuk filter berdasarkan tanggal
+		if param.SerachTanggal != "" {
+			// Parsing tanggal dari format "2006-01-02"
+			parsedDate, err := time.Parse("2006-01-02", param.SerachTanggal)
+			if err != nil {
+				return 0, nil, errors.New("failed to parse tanggal")
+			}
+			// Filter data berdasarkan tanggal
+			query = query.Where("user_id=? AND DATE(created_at) = ?", idUser, parsedDate)
 		}
+
 		tx := query.Find(&inputModel)
 		if tx.Error != nil {
 			return 0, nil, errors.New("failed get all absensi")
@@ -187,11 +195,17 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 		total_absensi = tx.RowsAffected
 		query = query.Offset(offset).Limit(param.ItemsPerPage)
 	} else {
-		if param.SearchName != "" {
-			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SearchName+"%")
-		} else {
-			query = query.Where("user_id=? AND tanggal_sekarang LIKE ?", idUser, "%"+param.SerachTanggal+"%")
+		// Tambahkan kondisi untuk filter berdasarkan tanggal
+		if param.SerachTanggal != "" {
+			// Parsing tanggal dari format "2006-01-02"
+			parsedDate, err := time.Parse("2006-01-02", param.SerachTanggal)
+			if err != nil {
+				return 0, nil, errors.New("failed to parse tanggal")
+			}
+			// Filter data berdasarkan tanggal
+			query = query.Where("user_id=? AND DATE(created_at) = ?", idUser, parsedDate)
 		}
+
 		tx := query.Find(&inputModel)
 		if tx.Error != nil {
 			return 0, nil, errors.New("error get all absensi karyawan")
@@ -209,7 +223,7 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 	for _, value := range inputModel {
 		absensiPengguna = append(absensiPengguna, ModelToPengguna(value))
 	}
-	fmt.Println("absensi pengguna ", absensiPengguna[0].UserID)
+
 	var absensiEntity []absensi.AbsensiEntity
 	for _, value := range absensiPengguna {
 		if value.UserID == userEntity.ID {

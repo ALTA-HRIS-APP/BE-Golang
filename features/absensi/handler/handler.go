@@ -68,8 +68,10 @@ func (handler *AbsensiHandler) GetAll(c echo.Context) error {
 		qparams.Page = pageConv
 	}
 
-	searchName := c.QueryParam("searchName")
-	qparams.SearchName = searchName
+	// Hanya memproses pencarian dan filter berdasarkan tanggal
+	tanggal := c.QueryParam("created_at")
+	qparams.SerachTanggal = tanggal
+
 	idUser, _, _ := middlewares.ExtractToken(c)
 	// idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
 	bol, data, err := handler.absensiService.Get(idUser, qparams)
@@ -85,7 +87,6 @@ func (handler *AbsensiHandler) GetAll(c echo.Context) error {
 
 func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	// userID := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
 
 	// Dapatkan data absensi berdasarkan ID
 	idParam := c.Param("id_absensi")
@@ -102,9 +103,10 @@ func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
 
-	// Mapping respons sesuai dengan yang diinginkan
+	// Format respons sesuai dengan yang diinginkan
 	resultResponse := EntityToResponse(absensiResult)
-	resultResponse.UserID = userResult.ID
+	resultResponse.User.ID = userResult.ID
+	resultResponse.User.Name = userResult.NamaLengkap
 
 	return helper.Success(c, "success read absensi", resultResponse)
 }
