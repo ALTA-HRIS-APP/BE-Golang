@@ -1,37 +1,36 @@
 package data
 
 import (
-	apinodejs "be_golang/klp3/features/apiNodejs"
 	"be_golang/klp3/features/target"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
+	"fmt"
 	"log"
 
 	"gorm.io/gorm"
 )
 
 type targetQuery struct {
-	db          *gorm.DB
-	externalAPI apinodejs.ExternalDataInterface
+	db *gorm.DB
 }
 
-func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
+func New(database *gorm.DB) target.TargetDataInterface {
+	return &targetQuery{
+		db: database,
+	}
+}
+func (r *targetQuery) GetUserByIDAPI(idUser string) (target.PenggunaEntity, error) {
 	// Panggil metode GetUserByID dari externalAPI
-
-	user, err := r.externalAPI.GetUserByID(idUser)
+	user, err := usernodejs.GetByIdUser(idUser)
 	if err != nil {
 		log.Printf("Error consume api user: %s", err.Error())
-		return apinodejs.Pengguna{}, err
+		return target.PenggunaEntity{}, err
 	}
+	dataUser := UserNodeJsToPengguna(user)
+	dataUserEntity := UserPenggunaToEntity(dataUser)
 	log.Println("consume api successfully")
-	return user, nil
-}
-
-func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
-	return &targetQuery{
-		db:          database,
-		externalAPI: externalAPI,
-	}
+	return dataUserEntity, nil
 }
 
 // Insert implements target.TargetDataInterface.
@@ -42,7 +41,7 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 		return "", errors.New("failed genereted uuid")
 	}
 
-	newTarget := MapEntityToModel(input)
+	newTarget := EntityToModel(input)
 	newTarget.ID = uuid
 	//simpan ke db
 	tx := r.db.Create(&newTarget)
@@ -88,10 +87,44 @@ func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.Target
 		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
+	dataPengguna, err := usernodejs.GetAllUser()
+	if err != nil {
+		return 0, nil, err
+	}
+	if err != nil {
+		return 0, nil, err
+	}
+	var dataUser []User
+	for _, v := range dataPengguna {
+		dataUser = append(dataUser, PenggunaToUser(v))
+	}
+	fmt.Println("dataUser after retrieval:", dataUser)
 
-	resultTargetSlice := ListModelToEntity(inputModel)
+	var userEntity []target.UserEntity
+	for _, v := range dataUser {
+		userEntity = append(userEntity, UserToEntity(v))
+	}
+	fmt.Println("userEntity after mapping:", userEntity)
+
+	var targetPengguna []TargetPengguna
+	for _, v := range inputModel {
+		targetPengguna = append(targetPengguna, ModelToPengguna(v))
+	}
+	fmt.Println("targetPengguna after mapping:", targetPengguna)
+
+	var targetEntity []target.TargetEntity
+	for i := 0; i < len(userEntity); i++ {
+		for j := 0; j < len(targetPengguna); j++ {
+			if userEntity[i].ID == targetPengguna[j].UserIDPenerima {
+				fmt.Printf("Matching user ID: %s with targetPengguna[%d].User ID Penerima: %s\n", userEntity[i].ID, j, targetPengguna[j].UserIDPenerima)
+				targetPengguna[j].User = User(userEntity[i])
+				targetEntity = append(targetEntity, PenggunaToEntity(targetPengguna[j]))
+			}
+		}
+	}
+	// resultTargetSlice := ListModelToEntity(inputModel)
 	log.Println("Targets read successfully")
-	return totalTarget, resultTargetSlice, nil
+	return totalTarget, targetEntity, nil
 }
 
 // SelectAllKaryawan implements target.TargetDataInterface.
@@ -118,14 +151,37 @@ func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) 
 	// Execute the query on the database
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		log.Printf("Error retrieving all targets: %s", tx.Error)
+		log.Printf("Error retrieving all targets for user %s: %s", idUser, tx.Error)
 		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
+	dataUser, err := usernodejs.GetByIdUser(idUser)
+	if err != nil {
+		return 0, nil, err
+	}
+	pengguna := PenggunaToUser(dataUser)
+	userEntity := UserToEntity(pengguna)
 
-	resultTargetSlice := ListModelToEntity(inputModel)
-	log.Println("Targets read successfully")
-	return totalTarget, resultTargetSlice, nil
+	var targetPengguna []TargetPengguna
+	for _, v := range inputModel {
+		targetPengguna = append(targetPengguna, ModelToPengguna(v))
+	}
+
+	fmt.Printf("Number of targets retrieved for user %s: %d\n", idUser, len(targetPengguna))
+
+	var targetEntity []target.TargetEntity
+	for _, v := range targetPengguna {
+		if v.UserIDPenerima == userEntity.ID {
+			v.User = User(userEntity)
+			targetEntity = append(targetEntity, PenggunaToEntity(v))
+
+			fmt.Printf("Target matched: UserIDPenerima: %s, userEntity.ID: %s\n", v.UserIDPenerima, userEntity.ID)
+		}
+	}
+
+	// resultTargetSlice := ListModelToEntity(inputModel)
+	log.Println("Targets read successfully for user", idUser)
+	return totalTarget, targetEntity, nil
 }
 
 // Select implements target.TargetDataInterface.
@@ -142,7 +198,7 @@ func (r *targetQuery) Select(targetID string) (target.TargetEntity, error) {
 		return target.TargetEntity{}, errors.New("target not found")
 	}
 	// Mapping target to CoreTarget
-	coreTarget := MapModelToEntity(targetData)
+	coreTarget := ModelToEntity(targetData)
 	log.Println("Target read successfully")
 	return coreTarget, nil
 }
@@ -161,7 +217,7 @@ func (r *targetQuery) Update(targetID string, targetData target.TargetEntity) er
 	}
 
 	// Mapping Entity Target to Model
-	updatedTarget := MapEntityToModel(targetData)
+	updatedTarget := EntityToModel(targetData)
 
 	// Perform the update of project data in the database
 	tx = r.db.Model(&target).Updates(updatedTarget)
