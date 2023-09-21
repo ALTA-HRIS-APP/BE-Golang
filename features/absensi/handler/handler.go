@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/absensi"
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
@@ -69,8 +70,8 @@ func (handler *AbsensiHandler) GetAll(c echo.Context) error {
 
 	searchName := c.QueryParam("searchName")
 	qparams.SearchName = searchName
-	// idUser, _, _ := middlewares.ExtractToken(c)
-	idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
+	idUser, _, _ := middlewares.ExtractToken(c)
+	// idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
 	bol, data, err := handler.absensiService.Get(idUser, qparams)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
@@ -83,8 +84,8 @@ func (handler *AbsensiHandler) GetAll(c echo.Context) error {
 }
 
 func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
-	// userID, _, _ := middlewares.ExtractToken(c)
-	userID := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
+	userID, _, _ := middlewares.ExtractToken(c)
+	// userID := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
 
 	// Dapatkan data absensi berdasarkan ID
 	idParam := c.Param("id_absensi")
@@ -107,7 +108,7 @@ func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
 		OverTimeMasuk:   absensiResult.OverTimeMasuk,
 		JamMasuk:        absensiResult.JamMasuk,
 		JamKeluar:       absensiResult.JamKeluar,
-		TanggalSekarang: absensiResult.TanggalSekarang.Format("2006-01-02"),
+		TanggalSekarang: absensiResult.UpdatedAt.Format("2006-01-02"),
 		CreatedAt:       absensiResult.CreatedAt.Format("15:04:05.000"),
 		UpdateAt:        absensiResult.UpdatedAt.Format("15:04:05.000"),
 		UserID:          userResult.ID,
