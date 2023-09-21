@@ -13,6 +13,7 @@ func main() {
 	// api.ApiGetUser()
 	cfg := config.InitConfig()
 	mysql := database.InitMysql(cfg)
+	redis := database.InitRedis(cfg)
 	database.InitialMigration(mysql)
 	e := echo.New()
 
@@ -22,6 +23,6 @@ func main() {
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
 
-	router.InitRouter(e, mysql)
+	router.InitRouter(e, mysql, redis)
 	e.Logger.Fatal(e.Start(":80"))
 }

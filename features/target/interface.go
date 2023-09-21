@@ -1,7 +1,6 @@
 package target
 
 import (
-	apinodejs "be_golang/klp3/features/apiNodejs"
 	"time"
 )
 
@@ -17,8 +16,18 @@ type TargetEntity struct {
 	UserIDPenerima string `validate:"required"`
 	Due_Date       string `validate:"required"`
 	Proofs         string
+	User           UserEntity
 }
-
+type UserEntity struct {
+	ID   string
+	Name string
+}
+type PenggunaEntity struct {
+	ID          string
+	NamaLengkap string
+	Jabatan     string
+	Devisi      string
+}
 type QueryParam struct {
 	Page           int
 	LimitPerPage   int
@@ -28,11 +37,12 @@ type QueryParam struct {
 }
 type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	SelectAll(userID string, param QueryParam) (int64, []TargetEntity, error)
-	Select(targetID string, userID string) (TargetEntity, error)
-	Update(targetID string, userID string, targetData TargetEntity) error
-	Delete(targetID string, userID string) error
-	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
+	SelectAll(param QueryParam) (int64, []TargetEntity, error)
+	Select(targetID string) (TargetEntity, error)
+	Update(targetID string, targetData TargetEntity) error
+	Delete(targetID string) error
+	GetUserByIDAPI(idUser string) (PenggunaEntity, error)
+	SelectAllKaryawan(idUser string, param QueryParam) (int64, []TargetEntity, error)
 }
 
 type TargetServiceInterface interface {
@@ -41,5 +51,5 @@ type TargetServiceInterface interface {
 	GetById(targetID string, userID string) (TargetEntity, error)
 	UpdateById(targetID string, userID string, targetData TargetEntity) error
 	DeleteById(targetID string, userID string) error
-	GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error)
+	// GetUserByIDAPI(idUser string) (PenggunaEntity, error)
 }

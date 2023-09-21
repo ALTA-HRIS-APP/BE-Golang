@@ -5,6 +5,7 @@ import (
 	"be_golang/klp3/features/target"
 	"be_golang/klp3/helper"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -26,15 +27,9 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 	// helper.PrettyPrint(user)
 	log.Println("UserID: ", userID)
 
-	//mengecek user id dari get by id user id api node js
-	userProfile, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
 	newTarget := TargetRequest{}
 	//mendapatkan data yang dikirim oleh FE melalui request
-	err = c.Bind(&newTarget)
+	err := c.Bind(&newTarget)
 	if err != nil {
 		log.Printf("Error binding data: %s", err.Error())
 		return helper.FailedRequest(c, "Failed to bind data", nil)
@@ -43,23 +38,26 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 	//mengisi user id pembuat dengan user id ang login
 	newTarget.UserIDPembuat = userID
 
-	//mengisi divisi id dengan divisi user yang login
-	newTarget.DevisiID = userProfile.DevisiID
-
 	//user id penerima -> dari param yang dikasi fe jadi dari node js
 	idParam := c.Param("user_id")
 	newTarget.UserIDPenerima = idParam
 
 	//mengisi proof dengan link dari cloudnary
-	if newTarget.Proofs != "" {
-		cloudnaryLink, err := helper.UploadImage(c)
-		if err != nil {
-			log.Printf("Error uploading image to Cloudinary: %s", err.Error())
-			return helper.FailedRequest(c, err.Error(), nil)
+	_, errFile := c.FormFile("image")
+	if errFile != nil && errFile != http.ErrMissingFile {
+		// Handle the error, except when it's ErrMissingFile (no file uploaded)
+		return helper.FailedRequest(c, errFile.Error(), nil)
+	}
+
+	if errFile == nil {
+		// Jika ada file gambar yang diunggah, maka unggah ke Cloudinary
+		cloudnaryLink, errLink := helper.UploadImage(c)
+		if errLink != nil {
+			// Handle the error, if any
+			return helper.FailedRequest(c, errLink.Error(), nil)
 		}
 		newTarget.Proofs = cloudnaryLink
 	}
-
 	//mappingg dari request to EntityTarget
 	targetInput := TargetRequestToEntity(newTarget)
 	targetID, err := h.targetService.Create(targetInput)
@@ -100,14 +98,14 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	} else {
 		qParam.Page = 1
 	}
-	searchKonten := c.QueryParam("searchKonten")
+	searchKonten := c.QueryParam("search_konten")
 	qParam.SearchKonten = searchKonten
 
-	searchStatus := c.QueryParam("searchStatus")
+	searchStatus := c.QueryParam("search_status")
 	qParam.SearchStatus = searchStatus
 
 	userID, _, _ := middlewares.ExtractToken(c)
-	_, data, err := h.targetService.GetAll(userID, qParam)
+	nextPage, data, err := h.targetService.GetAll(userID, qParam)
 
 	if err != nil {
 		log.Printf("Internal server error: %s", err.Error())
@@ -120,18 +118,17 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	}
 
 	log.Println("Get all targets successfully")
-	return helper.Success(c, "Get all targets successfully", targetsResponse)
+	return helper.SuccessGetAll(c, "get all target successfully", targetsResponse, nextPage)
 }
 
+// GetTargetById retrieves target details by its ID.
 func (h *targetHandler) GetTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
+
 	idParam := c.Param("target_id")
-	result, err := h.targetService.GetById(idParam, apiUser.ID)
+
+	// Get target details and check if the user has permission to access it
+	result, err := h.targetService.GetById(idParam, userID)
 	if err != nil {
 		log.Printf("Error getting target details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
@@ -144,58 +141,67 @@ func (h *targetHandler) GetTargetById(c echo.Context) error {
 
 func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
+
 	idParam := c.Param("target_id")
-	_, err = h.targetService.GetById(idParam, apiUser.ID)
-	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
-
-	//mengambil data input dari user id penerima
-	inputTarget := TargetReqPenerima{}
-	errBind := c.Bind(&inputTarget)
-	if errBind != nil {
-		return helper.FailedRequest(c, "success create target", err.Error())
-	}
-	//Mapping targeet request to entity
-	entityTarget := TargetReqPenerimaToEntity(inputTarget)
-
-	// Melakukan pembaruan data target di service
-	err = h.targetService.UpdateById(idParam, apiUser.ID, entityTarget)
-	if err != nil {
-		log.Printf("Error update target: %s", err.Error())
-		return helper.InternalError(c, "error updated data", err.Error())
-	}
-	// Mendapatkan data proyek yang telah diperbarui untuk respon
-	updatedTarget, err := h.targetService.GetById(idParam, userID)
-	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
-	// Mapping updated target to Target Response
-	resultResponse := EntityToResponse(updatedTarget)
-	// Kirim respon JSON
-	return helper.Success(c, "target updated successfully", resultResponse)
-}
-
-func (h *targetHandler) DeleteTargetById(c echo.Context) error {
-	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := h.targetService.GetUserByIDAPI(userID)
-	if err != nil {
-		log.Printf("Error getting user details: %s", err.Error())
-		return helper.FailedRequest(c, err.Error(), nil)
-	}
-	idParam := c.Param("target_id")
-	_, err = h.targetService.GetById(idParam, apiUser.ID)
+	_, err := h.targetService.GetById(idParam, userID)
 	if err != nil {
 		log.Printf("Error getting target details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
+
+	// Get input data from the user
+	inputTarget := TargetRequest{}
+	errBind := c.Bind(&inputTarget)
+	if errBind != nil {
+		return helper.FailedRequest(c, "failed to bind target data", err.Error())
+	}
+	//mengisi proof dengan link dari cloudnary
+	_, errFile := c.FormFile("image")
+	if errFile != nil {
+		// Handle the error, if any
+		return helper.FailedRequest(c, errFile.Error(), nil)
+	}
+
+	cloudnaryLink, errLink := helper.UploadImage(c)
+	if errLink != nil {
+		// Handle the error, if any
+		return helper.FailedRequest(c, errLink.Error(), nil)
+	}
+	inputTarget.Proofs = cloudnaryLink
+	// Map target request to entity
+	entityTarget := TargetRequestToEntity(inputTarget)
+
+	// Perform the target data update in the service
+	err = h.targetService.UpdateById(idParam, userID, entityTarget)
+	if err != nil {
+		log.Printf("Error updating target: %s", err.Error())
+		return helper.InternalError(c, "failed to update target data", err.Error())
+	}
+	// Get the updated target data for response
+	updatedTarget, err := h.targetService.GetById(idParam, userID)
+	if err != nil {
+		log.Printf("Error getting updated target details: %s", err.Error())
+		return helper.FailedRequest(c, err.Error(), nil)
+	}
+	// Map the updated target to Target Response
+	resultResponse := EntityToResponse(updatedTarget)
+	// Send JSON response
+	return helper.Success(c, "target updated successfully", resultResponse)
+}
+
+// DeleteTargetById handles the deletion of a target by its ID.
+func (h *targetHandler) DeleteTargetById(c echo.Context) error {
+	userID, _, _ := middlewares.ExtractToken(c)
+
+	idParam := c.Param("target_id")
+
+	// Check if the target exists and is allowed to be deleted
+	err := h.targetService.DeleteById(idParam, userID)
+	if err != nil {
+		log.Printf("Error deleting target: %s", err.Error())
+		return helper.FailedRequest(c, err.Error(), nil)
+	}
+
 	log.Println("Target deleted successfully")
 	return helper.Success(c, "Target deleted successfully", nil)
 }
