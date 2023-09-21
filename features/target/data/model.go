@@ -18,7 +18,7 @@ type Target struct {
 	DevisiID       string         `gorm:"column:devisi_id;not null"`
 	UserIDPembuat  string         `gorm:"column:user_id_pembuat;not null"`
 	UserIDPenerima string         `gorm:"column:user_id_penerima;not null"`
-	Due_Date       string         `gorm:"column:due_date;not null"`
+	DueDate        string         `gorm:"column:due_date;not null"`
 	Proofs         string         `gorm:"column:proofs"`
 }
 
@@ -32,7 +32,7 @@ type TargetPengguna struct {
 	DevisiID       string
 	UserIDPembuat  string
 	UserIDPenerima string
-	Due_Date       string
+	DueDate        string
 	Proofs         string
 	User           User
 }
@@ -78,7 +78,7 @@ func ModelToPengguna(user Target) TargetPengguna {
 		DevisiID:       user.DevisiID,
 		UserIDPembuat:  user.UserIDPembuat,
 		UserIDPenerima: user.UserIDPenerima,
-		Due_Date:       user.Due_Date,
+		DueDate:        user.DueDate,
 		Proofs:         user.Proofs,
 	}
 }
@@ -95,7 +95,7 @@ func PenggunaToEntity(user TargetPengguna) target.TargetEntity {
 		DevisiID:       user.DevisiID,
 		UserIDPembuat:  user.UserIDPembuat,
 		UserIDPenerima: user.UserIDPenerima,
-		Due_Date:       user.Due_Date,
+		DueDate:        user.DueDate,
 		Proofs:         user.Proofs,
 		User:           UserToEntity(user.User),
 	}
@@ -125,7 +125,7 @@ func EntityToModel(target target.TargetEntity) Target {
 		DevisiID:       target.DevisiID,
 		UserIDPembuat:  target.UserIDPembuat,
 		UserIDPenerima: target.UserIDPenerima,
-		Due_Date:       target.Due_Date,
+		DueDate:        target.DueDate,
 		Proofs:         target.Proofs,
 	}
 }
@@ -140,7 +140,7 @@ func ModelToEntity(model Target) target.TargetEntity {
 		DevisiID:       model.DevisiID,
 		UserIDPembuat:  model.UserIDPembuat,
 		UserIDPenerima: model.UserIDPenerima,
-		Due_Date:       model.Due_Date,
+		DueDate:        model.DueDate,
 		Proofs:         model.Proofs,
 	}
 }
@@ -158,7 +158,7 @@ func ListModelToEntity(models []Target) []target.TargetEntity {
 			DevisiID:       model.DevisiID,
 			UserIDPembuat:  model.UserIDPembuat,
 			UserIDPenerima: model.UserIDPenerima,
-			Due_Date:       model.Due_Date,
+			DueDate:        model.DueDate,
 			Proofs:         model.Proofs,
 		})
 	}

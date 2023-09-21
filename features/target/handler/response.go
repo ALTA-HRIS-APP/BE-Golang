@@ -9,7 +9,7 @@ type TargetResponse struct {
 	DevisiID       string `json:"devisi_id,omitempty"`
 	UserIDPembuat  string `json:"user_id_pembuat,omitempty"`
 	UserIDPenerima string `json:"user_id_penerima,omitempty"`
-	Due_Date       string `json:"due_date,omitempty"`
+	DueDate        string `json:"due_date,omitempty"`
 	Proofs         string `json:"proofs,omitempty"`
 }
 
@@ -21,7 +21,7 @@ func EntityToResponse(entity target.TargetEntity) TargetResponse {
 		DevisiID:       entity.DevisiID,
 		UserIDPembuat:  entity.UserIDPembuat,
 		UserIDPenerima: entity.UserIDPenerima,
-		Due_Date:       entity.Due_Date,
+		DueDate:        entity.DueDate,
 		Proofs:         entity.Proofs,
 	}
 }
