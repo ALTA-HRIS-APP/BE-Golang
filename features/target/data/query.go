@@ -1,7 +1,6 @@
 package data
 
 import (
-	apinodejs "be_golang/klp3/features/apiNodejs"
 	"be_golang/klp3/features/target"
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
@@ -16,6 +15,11 @@ type targetQuery struct {
 	db *gorm.DB
 }
 
+func New(database *gorm.DB) target.TargetDataInterface {
+	return &targetQuery{
+		db: database,
+	}
+}
 func (r *targetQuery) GetUserByIDAPI(idUser string) (target.PenggunaEntity, error) {
 	// Panggil metode GetUserByID dari externalAPI
 	user, err := usernodejs.GetByIdUser(idUser)
@@ -27,12 +31,6 @@ func (r *targetQuery) GetUserByIDAPI(idUser string) (target.PenggunaEntity, erro
 	dataUserEntity := UserPenggunaToEntity(dataUser)
 	log.Println("consume api successfully")
 	return dataUserEntity, nil
-}
-
-func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
-	return &targetQuery{
-		db: database,
-	}
 }
 
 // Insert implements target.TargetDataInterface.

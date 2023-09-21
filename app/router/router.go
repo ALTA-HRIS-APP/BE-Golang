@@ -52,7 +52,7 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.GET("/absensis", handlerAbsensi.GetAllAbsensi, middlewares.JWTMiddleware())
 	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById, middlewares.JWTMiddleware())
 
-	targetRepo := _targetRepo.New(db, externalAPI)
+	targetRepo := _targetRepo.New(db)
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)
 
