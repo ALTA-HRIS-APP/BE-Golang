@@ -102,22 +102,9 @@ func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
 
-	// Format respons sesuai dengan yang diinginkan
-	resultResponse := AbsensiResponse{
-		ID:              absensiResult.ID,
-		OverTimeMasuk:   absensiResult.OverTimeMasuk,
-		OverTimeKeluar:  absensiResult.OverTimePulang,
-		JamMasuk:        absensiResult.JamMasuk,
-		JamKeluar:       absensiResult.JamKeluar,
-		TanggalSekarang: absensiResult.UpdatedAt.Format("2006-01-02"),
-		CreatedAt:       absensiResult.CreatedAt.Format("15:04:05.000"),
-		UpdateAt:        absensiResult.UpdatedAt.Format("15:04:05.000"),
-		UserID:          userResult.ID,
-		User: UserResponse{
-			ID:   userResult.ID,
-			Name: userResult.NamaLengkap,
-		},
-	}
+	// Mapping respons sesuai dengan yang diinginkan
+	resultResponse := EntityToResponse(absensiResult)
+	resultResponse.UserID = userResult.ID
 
 	return helper.Success(c, "success read absensi", resultResponse)
 }
