@@ -17,6 +17,7 @@ type targetQuery struct {
 
 func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByID dari externalAPI
+
 	user, err := r.externalAPI.GetUserByID(idUser)
 	if err != nil {
 		log.Printf("Error consume api user: %s", err.Error())
@@ -180,6 +181,7 @@ func (r *targetQuery) Delete(targetID string) error {
 		log.Printf("Error deleting target: %s", tx.Error)
 		return tx.Error
 	}
+
 	if tx.RowsAffected == 0 {
 		log.Println("No rows affected when deleting target")
 		return errors.New("target not found")

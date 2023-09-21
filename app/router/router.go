@@ -19,13 +19,14 @@ import (
 	_targetHandler "be_golang/klp3/features/target/handler"
 	_targetService "be_golang/klp3/features/target/service"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-func InitRouter(c *echo.Echo, db *gorm.DB) {
+func InitRouter(c *echo.Echo, db *gorm.DB, redis *redis.Client) {
 	externalAPI := apinodejs.NewExternalData("https://project2.otixx.online")
-	dataRes := dataR.New(db)
+	dataRes := dataR.New(db,redis)
 	serviceRes := serviceR.New(dataRes)
 	handlerRes := handlerR.New(serviceRes)
 

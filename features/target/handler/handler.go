@@ -165,6 +165,7 @@ func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 		log.Printf("Error getting user details: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
+
 	idParam := c.Param("target_id")
 	_, err = h.targetService.GetById(idParam, apiUser.ID)
 	if err != nil {
