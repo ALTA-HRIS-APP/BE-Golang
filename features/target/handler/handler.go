@@ -6,7 +6,6 @@ import (
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -61,52 +60,26 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 }
 
 func (h *targetHandler) GetAllTarget(c echo.Context) error {
-	var qParam target.QueryParam
-	page := c.QueryParam("page")
-	limitPerPage := c.QueryParam("limitPerPage")
-
-	if limitPerPage == "" {
-		qParam.ExistOtherPage = false
-	} else {
-		qParam.ExistOtherPage = true
-		itemsConv, errItem := strconv.Atoi(limitPerPage)
-		if errItem != nil {
-			return helper.FailedRequest(c, "item per page not valid", nil)
-		}
-		qParam.LimitPerPage = itemsConv
-	}
-	if page == "" {
-		qParam.Page = 1
-	} else {
-		pageConv, errPage := strconv.Atoi(page)
-		if errPage != nil {
-			return helper.FailedRequest(c, "page not valid", nil)
-		}
-		qParam.Page = pageConv
-	}
-
-	searchKonten := c.QueryParam("search_konten")
-	qParam.SearchKonten = searchKonten
-
-	searchStatus := c.QueryParam("search_status")
-	qParam.SearchStatus = searchStatus
-
+	params := c.QueryParams()
 	token, errToken := usernodejs.GetTokenHandler(c)
 	if errToken != nil {
 		return helper.Forbidden(c, "token tidak ditemukan", nil)
 	}
 	idUser, _, _ := middlewares.ExtractToken(c)
-	bol, data, err := h.targetService.GetAll(token, idUser, qParam)
+	response, pagination, err := h.targetService.GetAll(token, idUser, params)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}
 
 	var targetsResponse []TargetResponse
-	for _, v := range data {
+	for _, v := range response {
 		targetsResponse = append(targetsResponse, EntityToResponse(v))
 	}
 
-	return helper.SuccessGetAll(c, "get all target successfully", targetsResponse, bol)
+	return helper.Success(c, "get all target successfully", echo.Map{
+		"targets":    response,
+		"pagination": pagination,
+	})
 }
 
 func (h *targetHandler) GetTargetById(c echo.Context) error {

@@ -1,6 +1,8 @@
 package target
 
 import (
+	"be_golang/klp3/helper"
+	"net/url"
 	"time"
 )
 
@@ -31,13 +33,14 @@ type PenggunaEntity struct {
 type QueryParam struct {
 	Page           int
 	LimitPerPage   int
+	Offset         int
 	SearchKonten   string
 	SearchStatus   string
 	ExistOtherPage bool
 }
 type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	SelectAll(token string, param QueryParam) (int64, []TargetEntity, error)
+	SelectAll(token string, param QueryParam) ([]TargetEntity, int, error)
 	Select(idTarget string) (TargetEntity, error)
 	Update(idTarget string, targetData TargetEntity) error
 	Delete(idTarget string) error
@@ -47,7 +50,7 @@ type TargetDataInterface interface {
 
 type TargetServiceInterface interface {
 	Create(input TargetEntity) (string, error)
-	GetAll(token string, idUser string, param QueryParam) (bool, []TargetEntity, error)
+	GetAll(token string, idUser string, params url.Values) ([]TargetEntity, helper.Paginator, error)
 	GetById(idTarget string, idUser string) (TargetEntity, error)
 	UpdateById(idTarget string, idUser string, targetData TargetEntity) error
 	DeleteById(idTarget string, idUser string) error

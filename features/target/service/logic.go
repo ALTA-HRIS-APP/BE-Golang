@@ -2,7 +2,10 @@ package service
 
 import (
 	"be_golang/klp3/features/target"
+	"be_golang/klp3/helper"
 	"errors"
+	"math"
+	"net/url"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -54,81 +57,31 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 	return idTarget, nil
 }
 
-func (s *targetService) GetAll(token string, idUser string, param target.QueryParam) (bool, []target.TargetEntity, error) {
-	var totalPage int64
-	nextPage := true
+func (s *targetService) GetAll(token string, idUser string, params url.Values) ([]target.TargetEntity, helper.Paginator, error) {
 
-	// // Get user's role
-	// user, err := s.targetRepo.GetUserByIDAPI(idUser)
-	// if err != nil {
-	// 	return true, nil, err
-	// }
-
-	// if user.Jabatan == "karyawan" {
-	// 	count, dataTarget, err := s.targetRepo.SelectAllKaryawan(idUser, param)
-	// 	if err != nil {
-	// 		return true, nil, err
-	// 	}
-	// 	if count == 0 {
-	// 		nextPage = false
-	// 	}
-	// 	if param.ExistOtherPage || count != 0 {
-	// 		totalPage = count / int64(param.LimitPerPage)
-	// 		if count%int64(param.LimitPerPage) != 0 {
-	// 			totalPage += 1
-	// 		}
-
-	// 		if param.Page == int(totalPage) {
-	// 			nextPage = false
-	// 		}
-
-	// 		if dataTarget == nil {
-	// 			nextPage = false
-	// 		}
-	// 	}
-	// 	return nextPage, dataTarget, nil
-	// } else {
-	// 	count, dataTarget, err := s.targetRepo.SelectAll(token, param)
-	// 	if err != nil {
-	// 		return true, nil, err
-	// 	}
-	// 	if count == 0 {
-	// 		nextPage = false
-	// 	}
-	// 	if param.ExistOtherPage || count != 0 {
-	// 		totalPage = count / int64(param.LimitPerPage)
-	// 		if count%int64(param.LimitPerPage) != 0 {
-	// 			totalPage += 1
-	// 		}
-
-	// 		if param.Page == int(totalPage) {
-	// 			nextPage = false
-	// 		}
-	// 		if dataTarget == nil {
-	// 			nextPage = false
-	// 		}
-	// 	}
-	count, dataTarget, err := s.targetRepo.SelectAll(token, param)
+	pagination, err := helper.PaginationBuilder(params.Get("per_page"), params.Get("page"))
 	if err != nil {
-		return true, nil, err
+		return nil, helper.Paginator{}, err
 	}
-	if count == 0 {
-		nextPage = false
+	filter := target.QueryParam{
+		Page:         pagination.Page,
+		LimitPerPage: pagination.PerPage,
+		Offset:       pagination.Offset,
+		SearchKonten: params.Get("search_konten"),
 	}
-	if param.ExistOtherPage || count != 0 {
-		totalPage = count / int64(param.LimitPerPage)
-		if count%int64(param.LimitPerPage) != 0 {
-			totalPage += 1
-		}
 
-		if param.Page == int(totalPage) {
-			nextPage = false
-		}
-		if dataTarget == nil {
-			nextPage = false
-		}
+	dataTarget, total, err := s.targetRepo.SelectAll(token, filter)
+	if err != nil {
+		return nil, helper.Paginator{}, err
 	}
-	return nextPage, dataTarget, nil
+
+	paginator := helper.Paginator{
+		TotalData: total,
+		Page:      pagination.Page,
+		TotalPage: int(math.Ceil(float64(total) / float64(pagination.PerPage))),
+		PerPage:   pagination.PerPage,
+	}
+	return dataTarget, paginator, nil
 
 }
 

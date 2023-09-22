@@ -22,6 +22,10 @@ type Target struct {
 	Proofs         string         `gorm:"column:proofs"`
 }
 
+func (d *Target) TableName() string {
+	return "targets"
+}
+
 type TargetPengguna struct {
 	ID             string
 	CreatedAt      time.Time

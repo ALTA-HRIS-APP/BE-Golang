@@ -51,73 +51,25 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 }
 
 // SelectAll implements target.TargetDataInterface.
-func (r *targetQuery) SelectAll(token string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+func (r *targetQuery) SelectAll(token string, param target.QueryParam) ([]target.TargetEntity, int, error) {
 	// Initialize variables
 	var inputModel []Target
 	var totalTarget int64
-
-	// Initial query
-	query := r.db
-	if param.ExistOtherPage {
-		offset := (param.Page - 1) * param.LimitPerPage
-		fmt.Println("offset", offset)
-		if param.SearchKonten != "" {
-			query = query.Where("konten_target like ?", "%"+param.SearchKonten+"%")
-		}
-		if param.SearchStatus != "" {
-			query = query.Where("status like ?", "%"+param.SearchStatus+"%")
-		}
-		tx := query.Find(&inputModel)
-		if tx.Error != nil {
-			return 0, nil, errors.New("failed get all target")
-		}
-		totalTarget = tx.RowsAffected
-		query = query.Offset(offset).Limit(param.LimitPerPage)
-	}
-	// Handle searching by description if provided
+	var where string
+	var args []any
 	if param.SearchKonten != "" {
-		query = query.Where("konten_target like ?", "%"+param.SearchKonten+"%")
+		where += " konten_target LIKE ? "
+		args = append(args, "%"+param.SearchKonten+"%")
 	}
-	if param.SearchStatus != "" {
-		query = query.Where("status like ?", "%"+param.SearchStatus+"%")
+	if err := r.db.Scopes(helper.Paginate(param.Offset, param.LimitPerPage, "created_at desc", r.db)).Where(where, args...).Find(&inputModel).Error; err != nil {
+		return nil, 0, err
 	}
-
-	// Execute the query on the database
-	tx := query.Find(&inputModel)
-	if tx.Error != nil {
-		return 0, nil, errors.New("failed to get all targets")
+	if err := r.db.Model(&inputModel).Where(where, args...).Count(&totalTarget).Error; err != nil {
+		return nil, 0, err
 	}
-	// dataPengguna, err := usernodejs.GetAllUser(token)
-	// if err != nil {
-	// 	return 0, nil, err
-	// }
-
-	// var dataUser []User
-	// for _, v := range dataPengguna {
-	// 	dataUser = append(dataUser, PenggunaToUser(v))
-	// }
-
-	// var userEntity []target.UserEntity
-	// for _, v := range dataUser {
-	// 	userEntity = append(userEntity, UserToEntity(v))
-	// }
-
-	// var targetPengguna []TargetPengguna
-	// for _, v := range inputModel {
-	// 	targetPengguna = append(targetPengguna, ModelToPengguna(v))
-	// }
-
-	// var targetEntity []target.TargetEntity
-	// for i := 0; i < len(userEntity); i++ {
-	// 	for j := 0; j < len(targetPengguna); j++ {
-	// 		if userEntity[i].ID == targetPengguna[j].UserIDPenerima {
-	// 			targetPengguna[j].User = User(userEntity[i])
-	// 			targetEntity = append(targetEntity, PenggunaToEntity(targetPengguna[j]))
-	// 		}
-	// 	}
-	// }
+	println(totalTarget)
 	targetEntity := ListModelToEntity(inputModel)
-	return totalTarget, targetEntity, nil
+	return targetEntity, int(totalTarget), nil
 }
 
 // SelectAllKaryawan implements target.TargetDataInterface.
