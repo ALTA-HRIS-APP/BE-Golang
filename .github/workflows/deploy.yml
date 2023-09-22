@@ -39,4 +39,4 @@ jobs:
             docker rm project3-Container
             docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/project3-images
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/project3-images:latest
-            docker run -d -p 80:80 -e JWT_KEY=${{ secrets.JWT_KEY }} -e CLOUD_NAME=${{secrets.CLOUD_NAME}} -e KEY_API=${{secrets.KEY_API}} -e KEY_API_SECRET=${{secrets.KEY_API_SECRET}} -e DBUSER=${{ secrets.DBUSER }} -e DBPASS=${{ secrets.DBPASS }} -e DBHOST=${{ secrets.DBHOST }} -e DBPORT=${{ secrets.DBPORT }} -e DBNAME=${{ secrets.DBNAME }} --name project3-Container ${{ secrets.DOCKERHUB_USERNAME }}/project3-images:latest
+            docker run -d -p 80:80 -e IP_REDIS=${{ secrets.IP_REDIS }} -e PASS_REDIS=${{secrets.PASS_REDIS}} -e JWT_KEY=${{ secrets.JWT_KEY }} -e CLOUD_NAME=${{secrets.CLOUD_NAME}} -e KEY_API=${{secrets.KEY_API}} -e KEY_API_SECRET=${{secrets.KEY_API_SECRET}} -e DBUSER=${{ secrets.DBUSER }} -e DBPASS=${{ secrets.DBPASS }} -e DBHOST=${{ secrets.DBHOST }} -e DBPORT=${{ secrets.DBPORT }} -e DBNAME=${{ secrets.DBNAME }} --name project3-Container ${{ secrets.DOCKERHUB_USERNAME }}/project3-images:latest

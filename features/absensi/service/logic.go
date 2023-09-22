@@ -3,7 +3,6 @@ package service
 import (
 	"be_golang/klp3/features/absensi"
 	apinodejs "be_golang/klp3/features/apiNodejs"
-	usernodejs "be_golang/klp3/features/userNodejs"
 	"errors"
 	"log"
 	"strconv"
@@ -17,6 +16,21 @@ type AbsensiService struct {
 	validate       *validator.Validate
 }
 
+// GetById implements absensi.AbsensiServiceInterface
+func (service *AbsensiService) GetById(absensiID string) (absensi.AbsensiEntity, error) {
+	result, err := service.absensiService.SelectById(absensiID)
+	if err != nil {
+		return absensi.AbsensiEntity{}, err
+	}
+	user,errUser:=service.absensiService.SelectUserById(result.UserID)
+	if errUser != nil {
+		return absensi.AbsensiEntity{}, err
+	}
+	result.User.ID=user.ID
+	result.User.Name=user.NamaLengkap
+	return result, nil
+}
+
 // GetUserByIDAPI implements absensi.AbsensiServiceInterface
 func (service *AbsensiService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
 	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data absensiRepo
@@ -27,15 +41,6 @@ func (service *AbsensiService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna
 	}
 	log.Println("consume api in service successfully")
 	return user, nil
-}
-
-// GetById implements absensi.AbsensiServiceInterface
-func (service *AbsensiService) GetById(absensiID string, userID string) (absensi.AbsensiEntity, error) {
-	result, err := service.absensiService.SelectById(absensiID, userID)
-	if err != nil {
-		return absensi.AbsensiEntity{}, err
-	}
-	return result, nil
 }
 
 // Add implements absensi.AbsensiServiceInterface
@@ -117,56 +122,69 @@ func (service *AbsensiService) Edit(idUser string, id string) error {
 }
 
 // Get implements absensi.AbsensiServiceInterface
-func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bool, []absensi.AbsensiEntity, error) {
-	var total_pages int64
+func (service *AbsensiService) Get(token string,idUser string, param absensi.QueryParams) (bool, []absensi.AbsensiEntity, error) {
+	var totalPage int64
 	nextPage := true
-	dataUser, errUser := usernodejs.GetByIdUser(idUser)
-	if errUser != nil {
-		return true, nil, errors.New("error get data user")
+
+	// Get user's role
+	user, err := service.absensiService.SelectUserById(idUser)
+	if err != nil {
+		log.Printf("Error getting user details: %s", err.Error())
+		return false, nil, err
 	}
-
-	if dataUser.Jabatan == "karyawan" {
-		count, dataReim, errReim := service.absensiService.SelectAllKaryawan(idUser, param)
-		if errReim != nil {
-			return true, nil, errReim
+	var data []absensi.AbsensiEntity
+	if user.Jabatan == "karyawan" {
+		// Karyawan can only view their own absensis
+		count, karyawanData, err := service.absensiService.SelectAllKaryawan(idUser, param)
+		if err != nil {
+			log.Printf("Error selecting all absensis: %s", err.Error())
+			return false, nil, err
 		}
+		
+		if count == 0 {
+			nextPage = false
+		}
+		data = karyawanData
 		if param.IsClassDashboard {
-			total_pages = count / int64(param.ItemsPerPage)
+			totalPage = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
-				total_pages += 1
+				totalPage += 1
 			}
 
-			if param.Page == int(total_pages) {
+			if param.Page == int(totalPage) {
 				nextPage = false
 			}
-			count_lebih := count / int64(param.Page)
-			if count_lebih < int64(param.ItemsPerPage) {
+			if data == nil {
 				nextPage = false
 			}
 		}
-		return nextPage, dataReim, nil
 	} else {
-		count, dataReim, errReim := service.absensiService.SelectAll(param)
-		if errReim != nil {
-			return true, nil, errReim
+		count, allData, err := service.absensiService.SelectAll(token,param)
+		if err != nil {
+			log.Printf("Error selecting all absensis: %s", err.Error())
+			return false, nil, err
 		}
+		if count == 0 {
+			nextPage = false
+		}
+		data = allData
 		if param.IsClassDashboard {
-			total_pages = count / int64(param.ItemsPerPage)
+			totalPage = count / int64(param.ItemsPerPage)
 			if count%int64(param.ItemsPerPage) != 0 {
-				total_pages += 1
+				totalPage += 1
 			}
 
-			if param.Page == int(total_pages) {
+			if param.Page == int(totalPage) {
 				nextPage = false
 			}
-			count_lebih := count / int64(param.Page)
-			if count_lebih < int64(param.ItemsPerPage) {
+			if data == nil {
 				nextPage = false
 			}
 		}
-		return nextPage, dataReim, nil
-
+		log.Println("Absensis read successfully")
+		return nextPage, data, nil
 	}
+	return nextPage, data, nil
 }
 
 func New(service absensi.AbsensiDataInterface) absensi.AbsensiServiceInterface {

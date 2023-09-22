@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	BaseURL         = "http://project2.otixx.online"
+	BaseURL         = "https://project2.otixx.online"
 	LoginEndpoint   = "/login"
 	ProfileEndpoint = "/profile"
 	UserEndpoint    = "/user"

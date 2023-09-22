@@ -18,6 +18,8 @@ tags:
     description: operation about cuti
   - name: Target
     description: operation about target
+  - name: Absensi
+    description: operation about absensi
 paths:
   /reimbursements:
     post:
@@ -372,6 +374,194 @@ paths:
           $ref: "#/components/responses/responseNotFound"
         "500":
           $ref: "#/components/responses/responseFailedInternal"
+  /absensis:
+    get:
+      tags:
+        - Absensi
+      summary: Get All Absensi
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: key
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for success retrieve all user data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/inline_response_200"
+              example:
+                message: success get all absesnsi data
+                data:
+                  - id: 13177381ujdhkhu
+                    full_name: User1
+                    jam_masuk: 07:30:00
+                    jam_keluar: 16:30:00
+                    date: 2023-09-19
+                    check_in: 07:40:56.000
+                    check_out: 16:20:56.000
+                    overtime_masuk: "10"
+                    overtime_keluar: "-10"
+                  - id: 19237hdhwhdwh
+                    full_name: User2
+                    jam_masuk: 07:30:00
+                    jam_keluar: 16:30:00
+                    date: 2023-09-19
+                    check_in: 07:40:56.480
+                    check_out: 16:20:56.480
+                    overtime_masuk: "10"
+                    overtime_keluar: "-10"
+                  - id: 19237hdhsyw25whdwh
+                    full_name: User3
+                    jam_masuk: 07:30:00
+                    jam_keluar: 16:30:00
+                    date: 2023-09-19
+                    check_in: 07:40:56.480
+                    check_out: 16:20:56.480
+                    overtime_masuk: "10"
+                    overtime_keluar: "-10"
+        "404":
+          description: The requested resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Requested resource was not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Internal Server Error
+    post:
+      tags:
+        - Absensi
+      summary: Absensi Masuk
+      security:
+        - JWTAuth: []
+      responses:
+        "201":
+          description: Absen Sucess
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/inline_response_201"
+              example:
+                message: absensi success
+        "404":
+          description: The requested resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Requested resource was not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Internal Server Error
+  /absensis/{absensi_id}:
+    get:
+      tags:
+        - Absensi
+      summary: Get specific absensi information
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: absensi_id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success get specific absensi information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/inline_response_201"
+              example:
+                message: Success get specific absensi information
+                data:
+                  id: 123wdgwdhwi
+                  employee_name: user 1
+                  jam_masuk: 07:30:00
+                  jam_keluar: 16:30:00
+                  date: 2023-09-19
+                  check_in: 07:40:56.480
+                  check_out: 16:20:56.480
+                  overtime_masuk: "10"
+                  overtime_keluar: "-10"
+        "404":
+          description: The requested resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Requested resource was not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Internal Server Error
+    put:
+      tags:
+        - Absensi
+      summary: Absensi Pulang
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: absensi_id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Absen Sucess
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/inline_response_201"
+              example:
+                message: absensi success
+        "404":
+          description: The requested resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Requested resource was not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseObj"
+              example:
+                message: Internal Server Error
 #==================================#
 # component
 #==================================#
@@ -403,7 +593,30 @@ components:
           type: string
           format: binary
           description: "allowed file extension: jpg, png, jpeg"
-
+    ResponseObj:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+    inline_response_200:
+      allOf:
+        - type: object
+        - $ref: "#/components/schemas/ResponseArr"
+    inline_response_201:
+      allOf:
+        - type: object
+        - $ref: "#/components/schemas/ResponseObj"
+    ResponseArr:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
     create_cuti:
       type: object
       properties:
@@ -441,22 +654,22 @@ components:
       properties:
         konten_target:
           type: string
-          description: "example: debug code"
+          description: "example: reimbursment pekerja"
         status:
           type: string
           description: "example: not-completed"
         divisi_id:
           type: integer
-          description: "example: ......"
+          description: "example: 68a83bd8-a392-4877-b10f-f0025185"
         user_id_pembuat:
           type: string
-          description: "example: ......."
+          description: "example: 54396f94-07b8-4450-8105-7c"
         user_id_penerima:
           type: string
-          description: "example: ......"
+          description: "example: 27567353-9507-43d3-b08c-e"
         due_date:
           type: string
-          description: "example: 19-09-2023"
+          description: "example: 25-09-2023"
         image:
           type: string
           format: binary
@@ -486,7 +699,6 @@ components:
           type: string
           format: binary
           description: "allowed file extension: jpg, png, jpeg"
-
   responses:
     responseSuccess:
       description: failed
@@ -567,7 +779,48 @@ components:
                   status:
                     type: string
                     example: "pending"
-
+    responseGetByIdTargets:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int64
+                example: 200
+              message:
+                type: string
+                example: "success get all targets"
+              data:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                    konten_target:
+                      type: string
+                    status:
+                      type: string
+                    devisi_id:
+                      type: string
+                    user_id_pembuat:
+                      type: string
+                    user_id_penerima:
+                      type: string
+                    due_date:
+                      type: string
+                    proofs:
+                      type: string
+                example:
+                  - id: 0d53eb66-a96b-4c32-8e5e-13158e2006a4
+                    konten_target: reimbursment pekerja
+                    status: not completed
+                    devisi_id: 68a83bd8-a392-4877-b10f-f00251850cb8
+                    user_id_pembuat: 54396f94-07b8-4450-8105-7c4472bf8701
+                    user_id_penerima: 27567353-9507-43d3-b08c-eea2c8c094fb
+                    due_date: 25-09-2023
     responseGetAllReimbursment:
       description: success
       content:
@@ -665,22 +918,27 @@ components:
                     proofs:
                       type: string
                 example:
-                  - id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    konten_target: ""
-                    status: "not-completed"
-                    devisi_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_pembuat: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_penerima: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    proofs: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
-                    user_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                  - id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    konten_target: ""
-                    status: "not-completed"
-                    devisi_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_pembuat: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    user_id_penerima: "1759b423-1cbe-4c4a-bb27-612237b00259"
-                    proofs: "https://res.cloudinary.com/duklipjcj/image/upload/v1693188884/292691.41653526-bd1a-485c-985b-885eba8ad3c1.%2CATAP.jpg.jpg"
-                    user_id: "1759b423-1cbe-4c4a-bb27-612237b00259"
+                  - id: 0d53eb66-a96b-4c32-8e5e-13158e2006a4
+                    konten_target: reimbursment pekerja
+                    status: not completed
+                    devisi_id: 68a83bd8-a392-4877-b10f-f00251850cb8
+                    user_id_pembuat: 54396f94-07b8-4450-8105-7c4472bf8701
+                    user_id_penerima: 27567353-9507-43d3-b08c-eea2c8c094fb
+                    due_date: 25-09-2023
+                  - id: 10b28ed5-59dc-4383-ae02-154a2516d40a
+                    konten_target: "Pengelolaan Utang "
+                    status: not completed
+                    devisi_id: b256efa8-56ea-11ee-9bcf-fcc1d3dbd38e
+                    user_id_pembuat: b03afa83-cf52-494b-b3d2-9cd89a4867d5
+                    user_id_penerima: 54396f94-07b8-4450-8105-7c4472bf8701
+                    due_date: 30-09-2023
+                  - id: 473a2b0e-cec1-4ede-abb0-4f3237b0889e
+                    konten_target: gaji karyawan
+                    status: not completed
+                    devisi_id: 68a83bd8-a392-4877-b10f-f00251850cb8
+                    user_id_pembuat: 54396f94-07b8-4450-8105-7c4472bf8701
+                    user_id_penerima: 27567353-9507-43d3-b08c-eea2c8c094fb
+                    due_date: 25-09-2023
 
     responseGetAllCuti:
       description: success

@@ -19,13 +19,14 @@ import (
 	_targetHandler "be_golang/klp3/features/target/handler"
 	_targetService "be_golang/klp3/features/target/service"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-func InitRouter(c *echo.Echo, db *gorm.DB) {
-	externalAPI := apinodejs.NewExternalData("http://project2.otixx.online")
-	dataRes := dataR.New(db)
+func InitRouter(c *echo.Echo, db *gorm.DB, redis *redis.Client) {
+	externalAPI := apinodejs.NewExternalData("https://project2.otixx.online")
+	dataRes := dataR.New(db, redis)
 	serviceRes := serviceR.New(dataRes)
 	handlerRes := handlerR.New(serviceRes)
 
@@ -51,10 +52,10 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 
 	c.POST("/absensis", handlerAbsensi.Add, middlewares.JWTMiddleware())
 	c.PUT("/absensis/:id_absensi", handlerAbsensi.Edit, middlewares.JWTMiddleware())
-	c.GET("/absensis", handlerAbsensi.GetAllAbsensi, middlewares.JWTMiddleware())
+	c.GET("/absensis", handlerAbsensi.GetAll, middlewares.JWTMiddleware())
 	c.GET("/absensis/:id_absensi", handlerAbsensi.GetAbsensiById, middlewares.JWTMiddleware())
 
-	targetRepo := _targetRepo.New(db, externalAPI)
+	targetRepo := _targetRepo.New(db)
 	targetService := _targetService.New(targetRepo)
 	targetHandlerAPI := _targetHandler.New(targetService)
 
