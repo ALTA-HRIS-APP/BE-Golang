@@ -41,32 +41,32 @@ func (_m *ReimbursementData) Insert(input reimbusment.ReimbursementEntity) error
 	return r0
 }
 
-// SelectAll provides a mock function with given fields: param
-func (_m *ReimbursementData) SelectAll(param reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error) {
-	ret := _m.Called(param)
+// SelectAll provides a mock function with given fields: token, param
+func (_m *ReimbursementData) SelectAll(token string, param reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error) {
+	ret := _m.Called(token, param)
 
 	var r0 int64
 	var r1 []reimbusment.ReimbursementEntity
 	var r2 error
-	if rf, ok := ret.Get(0).(func(reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error)); ok {
-		return rf(param)
+	if rf, ok := ret.Get(0).(func(string, reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error)); ok {
+		return rf(token, param)
 	}
-	if rf, ok := ret.Get(0).(func(reimbusment.QueryParams) int64); ok {
-		r0 = rf(param)
+	if rf, ok := ret.Get(0).(func(string, reimbusment.QueryParams) int64); ok {
+		r0 = rf(token, param)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
-	if rf, ok := ret.Get(1).(func(reimbusment.QueryParams) []reimbusment.ReimbursementEntity); ok {
-		r1 = rf(param)
+	if rf, ok := ret.Get(1).(func(string, reimbusment.QueryParams) []reimbusment.ReimbursementEntity); ok {
+		r1 = rf(token, param)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).([]reimbusment.ReimbursementEntity)
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(reimbusment.QueryParams) error); ok {
-		r2 = rf(param)
+	if rf, ok := ret.Get(2).(func(string, reimbusment.QueryParams) error); ok {
+		r2 = rf(token, param)
 	} else {
 		r2 = ret.Error(2)
 	}
