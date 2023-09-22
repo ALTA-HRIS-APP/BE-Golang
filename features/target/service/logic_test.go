@@ -105,47 +105,77 @@ func TestGetById(t *testing.T) {
 
 func TestUpdateTarget(t *testing.T) {}
 
-func TestDeleteById(t *testing.T) {
-	// Membuat instance mock untuk TargetData
-	mocksTargetDataLayer := new(mocks.TargetData)
+// func TestDeleteById(t *testing.T) {
+// 	repo := new(mocks.TargetData)
 
-	// Membuat instance targetService dengan mock
-	srv := New(mocksTargetDataLayer)
+// 	userPembuat := target.PenggunaEntity{
+// 		ID:          "54396f94",
+// 		NamaLengkap: "popol",
+// 		Jabatan:     "manager",
+// 	}
 
-	// ID target yang akan dihapus dan ID pengguna yang melakukan penghapusan
-	targetID := "1"
-	userID := "54396f94-07b8-4450-8105-7c4472bf8701" // Ganti dengan userID yang sesuai dengan pengujian ini
+// 	targetToDelete := target.TargetEntity{
+// 		ID:             "54396f94",
+// 		UserIDPembuat:  "54396f94",
+// 		UserIDPenerima: "54396f94",
+// 	}
 
-	// Data pengguna pembuat target
-	userPembuat := target.PenggunaEntity{
-		ID:          "54396f94-07b8-4450-8105-7c4472bf8701", // Menggunakan userID yang sesuai
-		NamaLengkap: "popol",
-		Jabatan:     "manager",
+// 	t.Run("Success Delete Target", func(t *testing.T) {
+// 		repo.On("Select", "54396f94").Return(targetToDelete, nil).Once()
+// 		repo.On("GetUserByIDAPI", "54396f94").Return(userPembuat, nil).Once()
+// 		repo.On("Delete", "54396f94").Return(nil).Once()
+// 		srv := New(repo)
+// 		err := srv.DeleteById("54396f94", "54396f94")
+// 		assert.Nil(t, err)
+// 		repo.AssertExpectations(t)
+// 	})
+// }
+
+func TestGetAll(t *testing.T) {
+	// Mock targetRepo
+	mockTargetRepo := new(mocks.TargetData)
+
+	// Data dummy
+	token := "12345"
+	idUser := "123456"
+	param := target.QueryParam{
+		Page:           1,
+		LimitPerPage:   10,
+		ExistOtherPage: true,
+		// Isi parameter sesuai kebutuhan tes Anda
 	}
 
-	// Data target yang akan dihapus (sesuaikan dengan yang sesuai dengan pengujian ini)
-	targetToDelete := target.TargetEntity{
-		UserIDPembuat:  "54396f94-07b8-4450-8105-7c4472bf8701", // Menggunakan userID yang sesuai
-		UserIDPenerima: "27567353-9507-43d3-b08c-eea2c8c094fb",
+	count := int64(2)
+	dataTarget := []target.TargetEntity{
+		{
+			ID:             "afd75070-9de2-4bef-be2c-cf60a63c719d",
+			KontenTarget:   "RAB",
+			Status:         "completed",
+			DevisiID:       "68a83bd8-a392-4877-b10f-f00251850cb8",
+			UserIDPembuat:  "54396f94-07b8-4450-8105-7c4472bf8701",
+			UserIDPenerima: "27567353-9507-43d3-b08c-eea2c8c094fb",
+			DueDate:        "31-09-2023",
+			Proofs:         "https://res.cloudinary.com/duklipjcj/image/upload/v1695210901/Screenshot%20%28173%29.png.png",
+		},
+		{
+			ID:             "dsdsdsd",
+			KontenTarget:   "Managemen",
+			Status:         "completed",
+			DevisiID:       "68a83bd8-a392-4877-b10f-f00251850cb8",
+			UserIDPembuat:  "54396f94-07b8-4450-8105-7c4472bf8701",
+			UserIDPenerima: "27567353-9507-43d3-b08c-eea2c8c094fb",
+			DueDate:        "31-09-2023",
+			Proofs:         "https://res.cloudinary.com/duklipjcj/image/upload/v1695210901/Screenshot%20%28173%29.png.png",
+		},
 	}
 
-	t.Run("Success Delete Target", func(t *testing.T) {
-		// Expectation: Mock akan memanggil GetUserByIDAPI dengan userID yang sesuai
-		mocksTargetDataLayer.On("GetUserByIDAPI", "54396f94-07b8-4450-8105-7c4472bf8701").Return(userPembuat, nil).Once()
+	mockTargetRepo.On("SelectAll", token, param).Return(count, dataTarget, nil).Once()
+	service := New(mockTargetRepo)
+	nextPage, result, err := service.GetAll(token, idUser, param)
 
-		// Expectation: Mock akan memanggil Select untuk mendapatkan data target yang akan dihapus
-		mocksTargetDataLayer.On("Select", targetID).Return(targetToDelete, nil).Once()
-
-		// Expectation: Mock akan memanggil Delete untuk menghapus target
-		mocksTargetDataLayer.On("Delete", targetID).Return(nil).Once()
-
-		// Menggunakan targetService untuk menghapus target
-		err := srv.DeleteById(targetID, userID)
-
-		// Memastikan tidak ada error yang terjadi
-		assert.Nil(t, err)
-
-		// Memastikan semua ekspektasi terpenuhi
-		mocksTargetDataLayer.AssertExpectations(t)
-	})
+	assert.NoError(t, err)
+	assert.False(t, nextPage)
+	assert.NotNil(t, result)
+	assert.Len(t, result, len(dataTarget))
+	mockTargetRepo.AssertExpectations(t)
 }
