@@ -37,18 +37,18 @@ type QueryParam struct {
 }
 type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	SelectAll(token string,param QueryParam) (int64, []TargetEntity, error)
-	Select(targetID string) (TargetEntity, error)
-	Update(targetID string, targetData TargetEntity) error
-	Delete(targetID string) error
+	SelectAll(token string, param QueryParam) (int64, []TargetEntity, error)
+	Select(idTarget string) (TargetEntity, error)
+	Update(idTarget string, targetData TargetEntity) error
+	Delete(idTarget string) error
 	GetUserByIDAPI(idUser string) (PenggunaEntity, error)
 	SelectAllKaryawan(idUser string, param QueryParam) (int64, []TargetEntity, error)
 }
 
 type TargetServiceInterface interface {
 	Create(input TargetEntity) (string, error)
-	GetAll(token string,userID string, param QueryParam) (bool, []TargetEntity, error)
-	GetById(targetID string, userID string) (TargetEntity, error)
-	UpdateById(targetID string, userID string, targetData TargetEntity) error
-	DeleteById(targetID string, userID string) error
+	GetAll(token string, idUser string, param QueryParam) (bool, []TargetEntity, error)
+	GetById(idTarget string, idUser string) (TargetEntity, error)
+	UpdateById(idTarget string, idUser string, targetData TargetEntity) error
+	DeleteById(idTarget string, idUser string) error
 }

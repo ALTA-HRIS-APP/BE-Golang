@@ -47,76 +47,94 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 		return "", errors.New("your role does not have permission to create targets")
 	}
 
-	targetID, err := s.targetRepo.Insert(input)
+	idTarget, err := s.targetRepo.Insert(input)
 	if err != nil {
 		return "", err
 	}
-	return targetID, nil
+	return idTarget, nil
 }
 
-func (s *targetService) GetAll(token string,userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
+func (s *targetService) GetAll(token string, idUser string, param target.QueryParam) (bool, []target.TargetEntity, error) {
 	var totalPage int64
 	nextPage := true
 
-	// Get user's role
-	user, err := s.targetRepo.GetUserByIDAPI(userID)
+	// // Get user's role
+	// user, err := s.targetRepo.GetUserByIDAPI(idUser)
+	// if err != nil {
+	// 	return true, nil, err
+	// }
+
+	// if user.Jabatan == "karyawan" {
+	// 	count, dataTarget, err := s.targetRepo.SelectAllKaryawan(idUser, param)
+	// 	if err != nil {
+	// 		return true, nil, err
+	// 	}
+	// 	if count == 0 {
+	// 		nextPage = false
+	// 	}
+	// 	if param.ExistOtherPage || count != 0 {
+	// 		totalPage = count / int64(param.LimitPerPage)
+	// 		if count%int64(param.LimitPerPage) != 0 {
+	// 			totalPage += 1
+	// 		}
+
+	// 		if param.Page == int(totalPage) {
+	// 			nextPage = false
+	// 		}
+
+	// 		if dataTarget == nil {
+	// 			nextPage = false
+	// 		}
+	// 	}
+	// 	return nextPage, dataTarget, nil
+	// } else {
+	// 	count, dataTarget, err := s.targetRepo.SelectAll(token, param)
+	// 	if err != nil {
+	// 		return true, nil, err
+	// 	}
+	// 	if count == 0 {
+	// 		nextPage = false
+	// 	}
+	// 	if param.ExistOtherPage || count != 0 {
+	// 		totalPage = count / int64(param.LimitPerPage)
+	// 		if count%int64(param.LimitPerPage) != 0 {
+	// 			totalPage += 1
+	// 		}
+
+	// 		if param.Page == int(totalPage) {
+	// 			nextPage = false
+	// 		}
+	// 		if dataTarget == nil {
+	// 			nextPage = false
+	// 		}
+	// 	}
+	count, dataTarget, err := s.targetRepo.SelectAll(token, param)
 	if err != nil {
 		return true, nil, err
 	}
-
-	var data []target.TargetEntity
-	if user.Jabatan == "karyawan" {
-		// Karyawan can only view their own targets
-		count, karyawanData, err := s.targetRepo.SelectAllKaryawan(userID, param)
-		if err != nil {
-			return true, nil, err
+	if count == 0 {
+		nextPage = false
+	}
+	if param.ExistOtherPage || count != 0 {
+		totalPage = count / int64(param.LimitPerPage)
+		if count%int64(param.LimitPerPage) != 0 {
+			totalPage += 1
 		}
-		if count == 0 {
+
+		if param.Page == int(totalPage) {
 			nextPage = false
 		}
-		data = karyawanData
-		if param.ExistOtherPage {
-			totalPage = count / int64(param.LimitPerPage)
-			if count%int64(param.LimitPerPage) != 0 {
-				totalPage += 1
-			}
-
-			if param.Page == int(totalPage) {
-				nextPage = false
-			}
-			if data == nil {
-				nextPage = false
-			}
-		}
-	} else {
-		count, allData, err := s.targetRepo.SelectAll(token,param)
-		if err != nil {
-			return true, nil, err
-		}
-		if count == 0 {
+		if dataTarget == nil {
 			nextPage = false
-		}
-		data = allData
-		if param.ExistOtherPage {
-			totalPage = count / int64(param.LimitPerPage)
-			if count%int64(param.LimitPerPage) != 0 {
-				totalPage += 1
-			}
-
-			if param.Page == int(totalPage) {
-				nextPage = false
-			}
-			if data == nil {
-				nextPage = false
-			}
 		}
 	}
-	return nextPage, data, nil
+	return nextPage, dataTarget, nil
+
 }
 
 // GetById implements target.TargetServiceInterface.
-func (s *targetService) GetById(targetID string, userID string) (target.TargetEntity, error) {
-	result, err := s.targetRepo.Select(targetID)
+func (s *targetService) GetById(idTarget string, idUser string) (target.TargetEntity, error) {
+	result, err := s.targetRepo.Select(idTarget)
 	if err != nil {
 		return target.TargetEntity{}, err
 	}
@@ -124,15 +142,15 @@ func (s *targetService) GetById(targetID string, userID string) (target.TargetEn
 }
 
 // UpdateById implements target.TargetServiceInterface.
-func (s *targetService) UpdateById(targetID string, userID string, targetData target.TargetEntity) error {
+func (s *targetService) UpdateById(idTarget string, idUser string, targetData target.TargetEntity) error {
 	// Get user information who will perform the update
-	user, err := s.targetRepo.GetUserByIDAPI(userID)
+	user, err := s.targetRepo.GetUserByIDAPI(idUser)
 	if err != nil {
 		return err
 	}
 
 	// Get the target to be updated
-	existingTarget, err := s.targetRepo.Select(targetID)
+	existingTarget, err := s.targetRepo.Select(idTarget)
 	if err != nil {
 		return err
 	}
@@ -148,7 +166,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 	}
 
 	if user.Jabatan == "manager" {
-		if userTarget.Jabatan == "karyawan" || existingTarget.UserIDPenerima == userID {
+		if userTarget.Jabatan == "karyawan" || existingTarget.UserIDPenerima == idUser {
 			if userTarget.Devisi == user.Devisi {
 				allowedToUpdate = true
 			}
@@ -156,7 +174,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 	}
 
 	if user.Jabatan == "karyawan" {
-		if existingTarget.UserIDPenerima == userID {
+		if existingTarget.UserIDPenerima == idUser {
 			allowedToUpdate = true
 		}
 	}
@@ -165,7 +183,7 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 		return errors.New("you do not have permission to edit this target")
 	}
 
-	err = s.targetRepo.Update(targetID, targetData)
+	err = s.targetRepo.Update(idTarget, targetData)
 	if err != nil {
 		return err
 	}
@@ -174,14 +192,14 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 }
 
 // DeleteById implements target.TargetServiceInterface.
-func (s *targetService) DeleteById(targetID string, userID string) error {
-	user, err := s.targetRepo.GetUserByIDAPI(userID)
+func (s *targetService) DeleteById(idTarget string, idUser string) error {
+	user, err := s.targetRepo.GetUserByIDAPI(idUser)
 	if err != nil {
 		return err
 	}
 
 	// Dapatkan target yang akan diperbarui
-	existingTarget, err := s.targetRepo.Select(targetID)
+	existingTarget, err := s.targetRepo.Select(idTarget)
 	if err != nil {
 		return err
 	}
@@ -204,7 +222,7 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 	if !allowedToDelete {
 		return errors.New("you do not have permission to delete this target")
 	}
-	err = s.targetRepo.Delete(targetID)
+	err = s.targetRepo.Delete(idTarget)
 	if err != nil {
 		return err
 	}

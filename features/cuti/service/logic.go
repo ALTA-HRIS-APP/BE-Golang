@@ -22,24 +22,50 @@ func (service *CutiService) Delete(id string) error {
 	return nil
 }
 
+// GetCutiById implements cuti.CutiServiceInterface.
+func (service *CutiService) GetCutiById(id string) (cuti.CutiEntity, error) {
+	data, err := service.cutiService.SelectById(id)
+	if err != nil {
+		return cuti.CutiEntity{}, err
+	}
+	dataUser, errUser := service.cutiService.SelectUserById(data.UserID)
+	if errUser != nil {
+		return cuti.CutiEntity{}, err
+	}
+	data.User.ID = dataUser.ID
+	data.User.Name = dataUser.NamaLengkap
+
+	return data, nil
+}
+
 // Edit implements cuti.CutiServiceInterface.
 func (service *CutiService) Edit(input cuti.CutiEntity, id string, idUser string) error {
+	const MaxCutiMelahirkan = 90
+	const MaxCutiHariRaya = 7
+	const MaxCutiSakit = 5
+	const MaxCutiTahunan = 12
+
 	dataUser, errUser := usernodejs.GetByIdUser(idUser)
 	if errUser != nil {
 		return errors.New("user not found")
 	}
 	if input.TipeCuti == "melahirkan" {
-		if input.JumlahCuti > 90 {
+		if input.JumlahCuti > MaxCutiMelahirkan {
 			return errors.New("cuti melahirkan maksimal 90 hari")
 		}
 
 	} else if input.TipeCuti == "hari raya" {
-		if input.JumlahCuti > 7 {
+		if input.JumlahCuti > MaxCutiHariRaya {
 			return errors.New("cuti hari raya maksimal 7 hari")
 		}
 
+	} else if input.TipeCuti == "sakit" {
+		if input.JumlahCuti > MaxCutiSakit {
+			return errors.New("cuti sakit maksimal 5 hari")
+		}
+
 	} else {
-		if input.JumlahCuti > 12 {
+		if input.JumlahCuti > MaxCutiTahunan {
 			return errors.New("cuti tahunan maksimal 12 hari")
 		}
 
@@ -122,30 +148,69 @@ func (service *CutiService) Edit(input cuti.CutiEntity, id string, idUser string
 }
 
 // Get implements cuti.CutiServiceInterface.
-func (service *CutiService) Get(token string,idUser string) ([]cuti.CutiEntity, error) {
-	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+func (service *CutiService) Get(token string, idUser string, param cuti.QueryParams) (bool, []cuti.CutiEntity, error) {
+	var total_pages int64
+	nextPage := true
+	dataUser, errUser := service.cutiService.SelectUserById(idUser)
+  
 	if errUser != nil {
-		return nil, errors.New("eror get data user")
+		return true, nil, errors.New("error get data user")
 	}
 	if dataUser.Jabatan == "karyawan" {
-		dataCuti, errCuti := service.cutiService.SelectAllKaryawan(idUser)
+		count, dataCuti, errCuti := service.cutiService.SelectAllKaryawan(idUser, param)
 		if errCuti != nil {
-			return nil, errCuti
+			return true, nil, errCuti
 		}
-		return dataCuti, nil
+		if count == 0 {
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0 {
+			total_pages = count / int64(param.ItemsPerPage)
+			if count%int64(param.ItemsPerPage) != 0 {
+				total_pages += 1
+			}
+
+			if param.Page == int(total_pages) {
+				nextPage = false
+			}
+
+			if dataCuti == nil {
+				nextPage = false
+			}
+		}
+		return nextPage, dataCuti, nil
 	} else {
-		dataCuti, errCuti := service.cutiService.SelectAll(token)
+
+		count, dataCuti, errCuti := service.cutiService.SelectAll(token,param)
 		if errCuti != nil {
-			return nil, errCuti
+			return true, nil, errCuti
 		}
-		return dataCuti, nil
+		if count == 0 {
+			nextPage = false
+		}
+		if param.IsClassDashboard || count != 0 {
+			total_pages = count / int64(param.ItemsPerPage)
+			if count%int64(param.ItemsPerPage) != 0 {
+				total_pages += 1
+			}
+
+			if param.Page == int(total_pages) {
+				nextPage = false
+			}
+			if dataCuti == nil {
+				nextPage = false
+			}
+
+		}
+		return nextPage, dataCuti, nil
+
 	}
 }
 
 // Add implements cuti.CutiServiceInterface.
 func (service *CutiService) Add(input cuti.CutiEntity) error {
 	const MaxCutiMelahirkan = 90
-	const MaxCutiSakit = 3
+	const MaxCutiSakit = 5
 	const MaxCutiHariRaya = 7
 	const MaxCutiTahunan = 12
 	errValidate := service.validate.Struct(input)
@@ -164,7 +229,7 @@ func (service *CutiService) Add(input cuti.CutiEntity) error {
 
 	} else if input.TipeCuti == "sakit" {
 		if input.JumlahCuti > MaxCutiSakit {
-			return errors.New("cuti sakit maksimal 3 hari")
+			return errors.New("cuti sakit maksimal 5 hari")
 		}
 		err := service.cutiService.Insert(input)
 		if err != nil {
