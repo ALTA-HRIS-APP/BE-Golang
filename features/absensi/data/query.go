@@ -92,7 +92,7 @@ func (repo *absensiQuery) Update(input absensi.AbsensiEntity, idUser string, id 
 }
 
 // SelectAll implements absensi.AbsensiDataInterface
-func (repo *absensiQuery) SelectAll(token string,param absensi.QueryParams) (int64, []absensi.AbsensiEntity, error) {
+func (repo *absensiQuery) SelectAll(token string, param absensi.QueryParams) (int64, []absensi.AbsensiEntity, error) {
 	var inputModel []Absensi
 	var total_absensi int64
 
@@ -163,7 +163,6 @@ func (repo *absensiQuery) SelectAll(token string,param absensi.QueryParams) (int
 			}
 		}
 	}
-	log.Println("select all",absensiEntity)
 	return total_absensi, absensiEntity, nil
 }
 
@@ -231,7 +230,7 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 			absensiEntity = append(absensiEntity, PenggunaToEntity(value))
 		}
 	}
-	log.Println("select all karyawan",absensiEntity)
+	log.Println("select all karyawan", absensiEntity)
 	return total_absensi, absensiEntity, nil
 }
 

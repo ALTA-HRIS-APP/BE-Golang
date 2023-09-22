@@ -40,7 +40,7 @@ func (handler *AbsensiHandler) Add(c echo.Context) error {
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}
-	return helper.SuccessCreate(c, "success create absen", nil)
+	return helper.SuccessWithOutData(c, "success create absen")
 }
 
 func (handler *AbsensiHandler) GetAll(c echo.Context) error {
@@ -73,12 +73,12 @@ func (handler *AbsensiHandler) GetAll(c echo.Context) error {
 	qparams.SerachTanggal = tanggal
 
 	idUser, _, _ := middlewares.ExtractToken(c)
-	token,errToken:=usernodejs.GetTokenHandler(c)
-	if errToken != nil{
-		return helper.Forbidden(c,"error get token",nil)
+	token, errToken := usernodejs.GetTokenHandler(c)
+	if errToken != nil {
+		return helper.Forbidden(c, "error get token", nil)
 	}
 	// idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
-	bol, data, err := handler.absensiService.Get(token,idUser, qparams)
+	bol, data, err := handler.absensiService.Get(token, idUser, qparams)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}
