@@ -13,6 +13,15 @@ type CutiService struct {
 	validate    *validator.Validate
 }
 
+// Delete implements cuti.CutiServiceInterface.
+func (service *CutiService) Delete(id string) error {
+	err := service.cutiService.Delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // GetCutiById implements cuti.CutiServiceInterface.
 func (service *CutiService) GetCutiById(id string) (cuti.CutiEntity, error) {
 	data, err := service.cutiService.SelectById(id)
@@ -27,15 +36,6 @@ func (service *CutiService) GetCutiById(id string) (cuti.CutiEntity, error) {
 	data.User.Name = dataUser.NamaLengkap
 
 	return data, nil
-}
-
-// Delete implements cuti.CutiServiceInterface.
-func (service *CutiService) Delete(id string) error {
-	err := service.cutiService.Delete(id)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // Edit implements cuti.CutiServiceInterface.

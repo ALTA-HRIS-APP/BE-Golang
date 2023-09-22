@@ -14,6 +14,19 @@ type CutiData struct {
 	db *gorm.DB
 }
 
+// Delete implements cuti.CutiDataInterface.
+func (repo *CutiData) Delete(id string) error {
+	var inputModel Cuti
+	tx := repo.db.Where("id = ?", id).Delete(&inputModel)
+	if tx.Error != nil {
+		return errors.New("delete error")
+	}
+	if tx.RowsAffected == 0 {
+		return errors.New("row not affected")
+	}
+	return nil
+}
+
 // SelectAllKaryawan implements cuti.CutiDataInterface.
 func (repo *CutiData) SelectAllKaryawan(idUser string, param cuti.QueryParams) (int64, []cuti.CutiEntity, error) {
 	var inputModel []Cuti
@@ -71,19 +84,6 @@ func (repo *CutiData) SelectUserById(idUser string) (cuti.PenggunaEntity, error)
 	dataUser := UserNodeJskePengguna(data)
 	dataEntity := UserPenggunaToEntity(dataUser)
 	return dataEntity, nil
-}
-
-// Delete implements cuti.CutiDataInterface.
-func (repo *CutiData) Delete(id string) error {
-	var inputModel Cuti
-	tx := repo.db.Where("id=?", id).Delete(&inputModel)
-	if tx.Error != nil {
-		return errors.New("delete error cuti")
-	}
-	if tx.RowsAffected == 0 {
-		return errors.New("row not affected")
-	}
-	return nil
 }
 
 // SelectById implements cuti.CutiDataInterface.
