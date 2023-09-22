@@ -51,5 +51,4 @@ type TargetServiceInterface interface {
 	GetById(targetID string, userID string) (TargetEntity, error)
 	UpdateById(targetID string, userID string, targetData TargetEntity) error
 	DeleteById(targetID string, userID string) error
-	// GetUserByIDAPI(idUser string) (PenggunaEntity, error)
 }
