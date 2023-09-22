@@ -54,7 +54,7 @@ func (s *targetService) Create(input target.TargetEntity) (string, error) {
 	return targetID, nil
 }
 
-func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
+func (s *targetService) GetAll(token string,userID string, param target.QueryParam) (bool, []target.TargetEntity, error) {
 	var totalPage int64
 	nextPage := true
 
@@ -89,7 +89,7 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 			}
 		}
 	} else {
-		count, allData, err := s.targetRepo.SelectAll(param)
+		count, allData, err := s.targetRepo.SelectAll(token,param)
 		if err != nil {
 			return true, nil, err
 		}

@@ -122,7 +122,7 @@ func (service *AbsensiService) Edit(idUser string, id string) error {
 }
 
 // Get implements absensi.AbsensiServiceInterface
-func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bool, []absensi.AbsensiEntity, error) {
+func (service *AbsensiService) Get(token string,idUser string, param absensi.QueryParams) (bool, []absensi.AbsensiEntity, error) {
 	var totalPage int64
 	nextPage := true
 
@@ -159,7 +159,7 @@ func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bo
 			}
 		}
 	} else {
-		count, allData, err := service.absensiService.SelectAll(param)
+		count, allData, err := service.absensiService.SelectAll(token,param)
 		if err != nil {
 			log.Printf("Error selecting all absensis: %s", err.Error())
 			return false, nil, err

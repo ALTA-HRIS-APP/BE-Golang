@@ -30,7 +30,7 @@ type UserEntity struct {
 type CutiDataInterface interface {
 	Insert(input CutiEntity) error
 	SelectAllKaryawan(idUser string) ([]CutiEntity, error)
-	SelectAll() ([]CutiEntity, error)
+	SelectAll(token string,) ([]CutiEntity, error)
 	SelectById(id string) (CutiEntity, error)
 	UpdateKaryawan(input CutiEntity, id string) error
 	Update(input CutiEntity, id string) error
@@ -38,7 +38,7 @@ type CutiDataInterface interface {
 }
 type CutiServiceInterface interface {
 	Add(input CutiEntity) error
-	Get(idUser string) ([]CutiEntity, error)
+	Get(token string,idUser string) ([]CutiEntity, error)
 	Edit(input CutiEntity, id string, idUser string) error
 	Delete(id string) error
 }
