@@ -96,14 +96,6 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 		if count == 0 {
 			nextPage = false
 		}
-		// // Check division access
-		// for _, targetPenerima := range allData {
-		// 	if user.Devisi != targetPenerima.DevisiID { // Replace 'Division' with the actual field that stores the division in 'target.TargetEntity'
-		// 		// User does not have access to this target
-		// 		continue
-		// 	}
-		// 	data = append(data, targetPenerima)
-		// }
 		data = allData
 		if param.ExistOtherPage {
 			totalPage = count / int64(param.LimitPerPage)
@@ -119,8 +111,6 @@ func (s *targetService) GetAll(userID string, param target.QueryParam) (bool, []
 			}
 		}
 	}
-
-	// Debugging: Print user's role and total count of targets
 	return nextPage, data, nil
 }
 
@@ -147,24 +137,18 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 		return err
 	}
 
-	// Get information about the target recipient user
 	userTarget, err := s.targetRepo.GetUserByIDAPI(existingTarget.UserIDPenerima)
 	if err != nil {
 		return err
 	}
 
-	// Initialize a variable indicating whether the update is allowed
 	allowedToUpdate := false
-
-	// Check permissions based on user role
 	if user.Jabatan == "c-level" {
 		allowedToUpdate = true
 	}
 
 	if user.Jabatan == "manager" {
 		if userTarget.Jabatan == "karyawan" || existingTarget.UserIDPenerima == userID {
-			// Managers can edit employee targets or their own targets
-			// But only if they are in the same division
 			if userTarget.Devisi == user.Devisi {
 				allowedToUpdate = true
 			}
@@ -172,18 +156,15 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 	}
 
 	if user.Jabatan == "karyawan" {
-		// Employees can only edit their own targets
 		if existingTarget.UserIDPenerima == userID {
 			allowedToUpdate = true
 		}
 	}
 
-	// Check update permission
 	if !allowedToUpdate {
 		return errors.New("you do not have permission to edit this target")
 	}
 
-	// Perform the update only if allowed
 	err = s.targetRepo.Update(targetID, targetData)
 	if err != nil {
 		return err
@@ -194,7 +175,6 @@ func (s *targetService) UpdateById(targetID string, userID string, targetData ta
 
 // DeleteById implements target.TargetServiceInterface.
 func (s *targetService) DeleteById(targetID string, userID string) error {
-	//Dapatkan peran pengguna
 	user, err := s.targetRepo.GetUserByIDAPI(userID)
 	if err != nil {
 		return err
@@ -212,7 +192,6 @@ func (s *targetService) DeleteById(targetID string, userID string) error {
 		return err
 	}
 
-	// Inisialisasi variabel yang menunjukkan apakah pembaruan diizinkan
 	allowedToDelete := false
 
 	if user.Jabatan == "c-level" {

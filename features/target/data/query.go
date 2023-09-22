@@ -6,7 +6,6 @@ import (
 	"be_golang/klp3/helper"
 	"errors"
 	"fmt"
-	"log"
 
 	"gorm.io/gorm"
 )
@@ -24,12 +23,10 @@ func (r *targetQuery) GetUserByIDAPI(idUser string) (target.PenggunaEntity, erro
 	// Panggil metode GetUserByID dari externalAPI
 	user, err := usernodejs.GetByIdUser(idUser)
 	if err != nil {
-		log.Printf("Error consume api user: %s", err.Error())
 		return target.PenggunaEntity{}, err
 	}
 	dataUser := UserNodeJsToPengguna(user)
 	dataUserEntity := UserPenggunaToEntity(dataUser)
-	log.Println("consume api successfully")
 	return dataUserEntity, nil
 }
 
@@ -37,7 +34,6 @@ func (r *targetQuery) GetUserByIDAPI(idUser string) (target.PenggunaEntity, erro
 func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 	uuid, err := helper.GenerateUUID()
 	if err != nil {
-		log.Printf("Error generating UUID: %s", err.Error())
 		return "", errors.New("failed genereted uuid")
 	}
 
@@ -46,14 +42,11 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 	//simpan ke db
 	tx := r.db.Create(&newTarget)
 	if tx.Error != nil {
-		log.Printf("Error inserting target: %s", tx.Error)
 		return "", tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when inserting target")
 		return "", errors.New("target not found")
 	}
-	log.Println("Target inserted successfully")
 	return newTarget.ID, nil
 }
 
@@ -83,7 +76,6 @@ func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.Target
 	// Execute the query on the database
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		log.Printf("Error retrieving all targets: %s", tx.Error)
 		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
@@ -98,32 +90,27 @@ func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.Target
 	for _, v := range dataPengguna {
 		dataUser = append(dataUser, PenggunaToUser(v))
 	}
-	fmt.Println("dataUser after retrieval:", dataUser)
 
 	var userEntity []target.UserEntity
 	for _, v := range dataUser {
 		userEntity = append(userEntity, UserToEntity(v))
 	}
-	fmt.Println("userEntity after mapping:", userEntity)
 
 	var targetPengguna []TargetPengguna
 	for _, v := range inputModel {
 		targetPengguna = append(targetPengguna, ModelToPengguna(v))
 	}
-	fmt.Println("targetPengguna after mapping:", targetPengguna)
 
 	var targetEntity []target.TargetEntity
 	for i := 0; i < len(userEntity); i++ {
 		for j := 0; j < len(targetPengguna); j++ {
 			if userEntity[i].ID == targetPengguna[j].UserIDPenerima {
-				fmt.Printf("Matching user ID: %s with targetPengguna[%d].User ID Penerima: %s\n", userEntity[i].ID, j, targetPengguna[j].UserIDPenerima)
 				targetPengguna[j].User = User(userEntity[i])
 				targetEntity = append(targetEntity, PenggunaToEntity(targetPengguna[j]))
 			}
 		}
 	}
 	// resultTargetSlice := ListModelToEntity(inputModel)
-	log.Println("Targets read successfully")
 	return totalTarget, targetEntity, nil
 }
 
@@ -151,7 +138,6 @@ func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) 
 	// Execute the query on the database
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		log.Printf("Error retrieving all targets for user %s: %s", idUser, tx.Error)
 		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
@@ -180,7 +166,6 @@ func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) 
 	}
 
 	// resultTargetSlice := ListModelToEntity(inputModel)
-	log.Println("Targets read successfully for user", idUser)
 	return totalTarget, targetEntity, nil
 }
 
@@ -190,16 +175,13 @@ func (r *targetQuery) Select(targetID string) (target.TargetEntity, error) {
 
 	tx := r.db.Where("id = ?", targetID).First(&targetData)
 	if tx.Error != nil {
-		log.Printf("Error reading target: %s", tx.Error)
 		return target.TargetEntity{}, tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when reading target")
 		return target.TargetEntity{}, errors.New("target not found")
 	}
 	// Mapping target to CoreTarget
 	coreTarget := ModelToEntity(targetData)
-	log.Println("Target read successfully")
 	return coreTarget, nil
 }
 
@@ -207,12 +189,10 @@ func (r *targetQuery) Select(targetID string) (target.TargetEntity, error) {
 func (r *targetQuery) Update(targetID string, targetData target.TargetEntity) error {
 	var target Target
 	tx := r.db.Where("id = ?", targetID).First(&target)
-	log.Printf("Error reading target by id: %s", tx.Error)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when reading target")
 		return errors.New("target not found")
 	}
 
@@ -222,10 +202,8 @@ func (r *targetQuery) Update(targetID string, targetData target.TargetEntity) er
 	// Perform the update of project data in the database
 	tx = r.db.Model(&target).Updates(updatedTarget)
 	if tx.Error != nil {
-		log.Printf("Error updating target: %s", tx.Error)
 		return errors.New(tx.Error.Error() + " failed to update data")
 	}
-	log.Println("Target updated successfully")
 	return nil
 }
 
@@ -234,14 +212,11 @@ func (r *targetQuery) Delete(targetID string) error {
 	var target Target
 	tx := r.db.Where("id = ?", targetID).Delete(&target)
 	if tx.Error != nil {
-		log.Printf("Error deleting target: %s", tx.Error)
 		return tx.Error
 	}
 
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when deleting target")
 		return errors.New("target not found")
 	}
-	log.Println("Target deleted successfully")
 	return nil
 }
