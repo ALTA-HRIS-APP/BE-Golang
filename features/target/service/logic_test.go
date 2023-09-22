@@ -45,7 +45,60 @@ func TestCreate(t *testing.T) {
 	})
 }
 
-func TestGetAll(t *testing.T) {}
+func TestGetAll(t *testing.T) {
+	// Membuat objek mock TargetData
+	mocksTargetDataLayer := new(mocks.TargetData)
+
+	t.Run("Success: Karyawan viewing their own targets", func(t *testing.T) {
+		userID := "54396f94-07b8-4450-8105-7c4472bf8701"
+		param := target.QueryParam{
+			Page:           int(1),
+			LimitPerPage:   int(1),
+			SearchKonten:   "menejemen",
+			SearchStatus:   "not completed",
+			ExistOtherPage: true,
+		}
+
+		// Membuat instance user dengan peran karyawan
+		user := target.PenggunaEntity{
+			ID:      userID,
+			Jabatan: "karyawan",
+		}
+
+		// Mengatur bahwa pemanggilan metode GetUserByIDAPI akan mengembalikan user yang valid
+		mocksTargetDataLayer.On("GetUserByIDAPI", userID).Return(user, nil).Once()
+
+		// Mengatur bahwa pemanggilan metode SelectAllKaryawan akan mengembalikan data target yang valid
+		// Sesuaikan dengan hasil yang diharapkan
+		mocksTargetDataLayer.On("SelectAllKaryawan", userID, param).Return(int64(2), []target.TargetEntity{
+			// Isi data target yang diharapkan
+		}, nil).Once()
+
+		srv := New(mocksTargetDataLayer)
+
+		hasNextPage, data, err := srv.GetAll(userID, param)
+		assert.Nil(t, err)
+		assert.True(t, hasNextPage)
+		// Memeriksa data yang dihasilkan sesuai dengan yang diharapkan
+		// Sesuaikan dengan harapan Anda
+		assert.Len(t, data, 2)
+
+		mocksTargetDataLayer.AssertExpectations(t)
+	})
+
+	t.Run("Success: Non-Karyawan viewing all targets", func(t *testing.T) {
+		// Kasus ini akan mirip dengan kasus sebelumnya, tetapi dengan peran yang berbeda
+		// Pastikan untuk mengatur hasil pemanggilan metode SelectAll yang sesuai
+	})
+
+	t.Run("Success: No Next Page", func(t *testing.T) {
+		// Kasus ini menguji ketika parameter ExistOtherPage = false
+		// Anda dapat mengaturnya dengan parameter yang sesuai
+		// dan memeriksa bahwa hasNextPage adalah false
+	})
+
+	// ... Pengujian lainnya ...
+}
 func TestGetById(t *testing.T) {
 	// Membuat objek mock TargetData
 	mocksTargetDataLayer := new(mocks.TargetData)
