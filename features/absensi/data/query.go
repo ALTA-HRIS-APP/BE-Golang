@@ -164,6 +164,7 @@ func (repo *absensiQuery) SelectAll(param absensi.QueryParams) (int64, []absensi
 			}
 		}
 	}
+	log.Println("select all",absensiEntity)
 	return total_absensi, absensiEntity, nil
 }
 
@@ -231,6 +232,7 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 			absensiEntity = append(absensiEntity, PenggunaToEntity(value))
 		}
 	}
+	log.Println("select all karyawan",absensiEntity)
 	return total_absensi, absensiEntity, nil
 }
 

@@ -47,8 +47,9 @@ func (repo *ReimbusmentData) SelectUserById(idUser string) (reimbusment.Pengguna
 		if err != nil {
 			return reimbusment.PenggunaEntity{}, err
 		}
-		if err := repo.redis.Set(ctx, redisKey, jsonData, 1*time.Hour).Err(); err != nil {
-			log.Println("Gagal menyimpan data ke Redis:", err)
+		errSet := repo.redis.Set(ctx, redisKey, jsonData, 1*time.Hour).Err()
+		if errSet != nil {
+			log.Println("Gagal menyimpan data ke Redis:", errSet)
 		} else {
 			log.Println("Data disimpan di Redis cache")
 		}

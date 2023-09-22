@@ -22,6 +22,12 @@ func (service *AbsensiService) GetById(absensiID string) (absensi.AbsensiEntity,
 	if err != nil {
 		return absensi.AbsensiEntity{}, err
 	}
+	user,errUser:=service.absensiService.SelectUserById(result.UserID)
+	if errUser != nil {
+		return absensi.AbsensiEntity{}, err
+	}
+	result.User.ID=user.ID
+	result.User.Name=user.NamaLengkap
 	return result, nil
 }
 
@@ -121,12 +127,11 @@ func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bo
 	nextPage := true
 
 	// Get user's role
-	user, err := service.absensiService.GetUserByIDAPI(idUser)
+	user, err := service.absensiService.SelectUserById(idUser)
 	if err != nil {
 		log.Printf("Error getting user details: %s", err.Error())
 		return false, nil, err
 	}
-
 	var data []absensi.AbsensiEntity
 	if user.Jabatan == "karyawan" {
 		// Karyawan can only view their own absensis
@@ -135,6 +140,7 @@ func (service *AbsensiService) Get(idUser string, param absensi.QueryParams) (bo
 			log.Printf("Error selecting all absensis: %s", err.Error())
 			return false, nil, err
 		}
+		
 		if count == 0 {
 			nextPage = false
 		}
