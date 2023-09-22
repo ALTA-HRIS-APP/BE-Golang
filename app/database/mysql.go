@@ -23,6 +23,6 @@ func InitMysql(cfg *config.AppConfig) *gorm.DB {
 	return DB
 }
 
-func InitialMigration(db *gorm.DB){
-	db.AutoMigrate(&absensi.Absensi{},&cuti.Cuti{},&reimbusment.Reimbursement{},target.Target{})
+func InitialMigration(db *gorm.DB) {
+	db.AutoMigrate(&absensi.Absensi{}, &cuti.Cuti{}, &reimbusment.Reimbursement{}, target.Target{})
 }

@@ -4,6 +4,7 @@ import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/cuti"
 	"be_golang/klp3/helper"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -72,19 +73,34 @@ func (handler *CutiHandler) Edit(c echo.Context) error {
 }
 
 func (handler *CutiHandler) GetAll(c echo.Context) error {
-	// page := c.QueryParam("page")
-	// pageConv, errPage := strconv.Atoi(page)
-	// if errPage != nil {
-	// 	return helper.FailedRequest(c, "page not valid", nil)
-	// }
-	// itemsPerPage := c.QueryParam("itemPerPage")
-	// itemsConv, errItem := strconv.Atoi(itemsPerPage)
-	// if errItem != nil {
-	// 	return helper.FailedRequest(c, "item not valid", nil)
-	// }
-	// searchName := c.QueryParam("searchName")
+	var qparams cuti.QueryParams
+	page := c.QueryParam("page")
+	itemsPerPage := c.QueryParam("itemsPerPage")
+
+	if itemsPerPage == "" {
+		qparams.IsClassDashboard = false
+	} else {
+		qparams.IsClassDashboard = true
+		itemsConv, errItem := strconv.Atoi(itemsPerPage)
+		if errItem != nil {
+			return helper.FailedRequest(c, "item per page not valid", nil)
+		}
+		qparams.ItemsPerPage = itemsConv
+	}
+	if page == "" {
+		qparams.Page = 1
+	} else {
+		pageConv, errPage := strconv.Atoi(page)
+		if errPage != nil {
+			return helper.FailedRequest(c, "page not valid", nil)
+		}
+		qparams.Page = pageConv
+	}
+
+	searchName := c.QueryParam("searchName")
+	qparams.SearchName = searchName
 	idUser, _, _ := middlewares.ExtractToken(c)
-	data, err := handler.cutiHandler.Get(idUser)
+	bol, data, err := handler.cutiHandler.Get(idUser, qparams)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}
@@ -92,8 +108,19 @@ func (handler *CutiHandler) GetAll(c echo.Context) error {
 	for _, value := range data {
 		response = append(response, EntityToResponse(value))
 	}
-	return helper.Success(c, "get all cuti successfully", response)
+	return helper.SuccessGetAll(c, "get all cuti successfully", response, bol)
 }
+
+func (handler *CutiHandler) GetById(c echo.Context) error {
+	id := c.Param("id_cuti")
+	data, err := handler.cutiHandler.GetCutiById(id)
+	if err != nil {
+		return helper.InternalError(c, err.Error(), nil)
+	}
+	response := EntityToResponse(data)
+	return helper.Success(c, "success get by id cuti", response)
+}
+
 func (handler *CutiHandler) Delete(c echo.Context) error {
 	id := c.Param("id_cuti")
 	err := handler.cutiHandler.Delete(id)

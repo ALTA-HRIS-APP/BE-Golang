@@ -42,6 +42,8 @@ func InitRouter(c *echo.Echo, db *gorm.DB) {
 	c.POST("/cutis", handlerCuti.AddCuti, middlewares.JWTMiddleware())
 	c.GET("/cutis", handlerCuti.GetAll, middlewares.JWTMiddleware())
 	c.PUT("/cutis/:id_cuti", handlerCuti.Edit, middlewares.JWTMiddleware())
+	c.DELETE("/cutis/:id_cuti", handlerRes.Delete, middlewares.JWTMiddleware())
+	c.GET("/cutis/:id_cuti", handlerRes.GetById, middlewares.JWTMiddleware())
 
 	dataAbsensi := dataA.New(db, externalAPI)
 	serviceAbsensi := serviceA.New(dataAbsensi)
