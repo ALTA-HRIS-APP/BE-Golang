@@ -22,7 +22,6 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
-
 	router.InitRouter(e, mysql, redis)
 	e.Logger.Fatal(e.Start(":80"))
 }

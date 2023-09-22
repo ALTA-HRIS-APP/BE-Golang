@@ -39,7 +39,7 @@ func (service *ReimbursementService) Delete(id string) error {
 }
 
 // Get implements reimbusment.ReimbusmentServiceInterface.
-func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
+func (service *ReimbursementService) Get(token string,idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
 
 	var total_pages int64
 	nextPage := true
@@ -71,7 +71,7 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 		}
 		return nextPage, dataReim, nil
 	} else {
-		count, dataReim, errReim := service.reimbursmentService.SelectAll(param)
+		count, dataReim, errReim := service.reimbursmentService.SelectAll(token,param)
 		if errReim != nil {
 			return true, nil, errReim
 		}

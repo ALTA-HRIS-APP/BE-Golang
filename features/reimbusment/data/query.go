@@ -71,7 +71,7 @@ func (repo *ReimbusmentData) Delete(id string) error {
 }
 
 // SelectAll implements reimbusment.ReimbusmentDataInterface.
-func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error) {
+func (repo *ReimbusmentData) SelectAll(token string,param reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error) {
 	var inputModel []Reimbursement
 	var total_reimbursement int64
 
@@ -97,8 +97,8 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 	if tx.Error != nil {
 		return 0, nil, errors.New("error get all reimbursement")
 	}
-
-	dataPengguna, errUser := usernodejs.GetAllUser()
+	
+	dataPengguna, errUser := usernodejs.GetAllUser(token)
 	if errUser != nil {
 		return 0, nil, errUser
 	}

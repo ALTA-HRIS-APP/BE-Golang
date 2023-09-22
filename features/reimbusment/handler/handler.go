@@ -3,6 +3,7 @@ package handler
 import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/reimbusment"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"fmt"
 	"strconv"
@@ -80,7 +81,7 @@ func (handler *ReimbusmentHandler) GetAll(c echo.Context) error {
 	var qparams reimbusment.QueryParams
 	page := c.QueryParam("page")
 	itemsPerPage := c.QueryParam("itemsPerPage")
-
+	
 	if itemsPerPage == "" {
 		qparams.IsClassDashboard = false
 	} else {
@@ -103,8 +104,13 @@ func (handler *ReimbusmentHandler) GetAll(c echo.Context) error {
 
 	searchName := c.QueryParam("searchName")
 	qparams.SearchName = searchName
+
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken !=nil{
+		return helper.Forbidden(c,"token tidak ditemukan",nil)
+	}
 	idUser, _, _ := middlewares.ExtractToken(c)
-	bol, data, err := handler.reimbushmentHandler.Get(idUser, qparams)
+	bol, data, err := handler.reimbushmentHandler.Get(token,idUser, qparams)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}

@@ -64,15 +64,15 @@ func (repo *CutiData) UpdateKaryawan(input cuti.CutiEntity, id string) error {
 }
 
 // SelectAll implements cuti.CutiDataInterface.
-func (repo *CutiData) SelectAll() ([]cuti.CutiEntity, error) {
+func (repo *CutiData) SelectAll(token string) ([]cuti.CutiEntity, error) {
 	var inputModel []Cuti
 	//offset := (page - 1) * item
 	tx := repo.db.Find(&inputModel)
 	if tx.Error != nil {
 		return nil, errors.New("error get all cuti")
 	}
-
-	dataPengguna, errUser := usernodejs.GetAllUser()
+	
+	dataPengguna, errUser := usernodejs.GetAllUser(token)
 	if errUser != nil {
 		return nil, errUser
 	}
