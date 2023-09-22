@@ -157,9 +157,9 @@ func (service *CutiService) Get(token string, idUser string, param cuti.QueryPar
 		return true, nil, errors.New("error get data user")
 	}
 	if dataUser.Jabatan == "karyawan" {
-		count, dataReim, errReim := service.cutiService.SelectAllKaryawan(idUser, param)
-		if errReim != nil {
-			return true, nil, errReim
+		count, dataCuti, errCuti := service.cutiService.SelectAllKaryawan(idUser, param)
+		if errCuti != nil {
+			return true, nil, errCuti
 		}
 		if count == 0 {
 			nextPage = false
@@ -174,16 +174,16 @@ func (service *CutiService) Get(token string, idUser string, param cuti.QueryPar
 				nextPage = false
 			}
 
-			if dataReim == nil {
+			if dataCuti == nil {
 				nextPage = false
 			}
 		}
-		return nextPage, dataReim, nil
+		return nextPage, dataCuti, nil
 	} else {
 
-		count, dataReim, errReim := service.cutiService.SelectAll(token, param)
-		if errReim != nil {
-			return true, nil, errReim
+		count, dataCuti, errCuti := service.cutiService.SelectAll(token,param)
+		if errCuti != nil {
+			return true, nil, errCuti
 		}
 		if count == 0 {
 			nextPage = false
@@ -197,12 +197,12 @@ func (service *CutiService) Get(token string, idUser string, param cuti.QueryPar
 			if param.Page == int(total_pages) {
 				nextPage = false
 			}
-			if dataReim == nil {
+			if dataCuti == nil {
 				nextPage = false
 			}
 
 		}
-		return nextPage, dataReim, nil
+		return nextPage, dataCuti, nil
 
 	}
 }
@@ -210,7 +210,7 @@ func (service *CutiService) Get(token string, idUser string, param cuti.QueryPar
 // Add implements cuti.CutiServiceInterface.
 func (service *CutiService) Add(input cuti.CutiEntity) error {
 	const MaxCutiMelahirkan = 90
-	const MaxCutiSakit = 3
+	const MaxCutiSakit = 5
 	const MaxCutiHariRaya = 7
 	const MaxCutiTahunan = 12
 	errValidate := service.validate.Struct(input)
@@ -229,7 +229,7 @@ func (service *CutiService) Add(input cuti.CutiEntity) error {
 
 	} else if input.TipeCuti == "sakit" {
 		if input.JumlahCuti > MaxCutiSakit {
-			return errors.New("cuti sakit maksimal 3 hari")
+			return errors.New("cuti sakit maksimal 5 hari")
 		}
 		err := service.cutiService.Insert(input)
 		if err != nil {
