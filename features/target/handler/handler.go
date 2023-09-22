@@ -22,7 +22,7 @@ func New(service target.TargetServiceInterface) *targetHandler {
 }
 
 func (h *targetHandler) CreateTarget(c echo.Context) error {
-	userID, _, _ := middlewares.ExtractToken(c)
+	idUser, _, _ := middlewares.ExtractToken(c)
 
 	newTarget := TargetRequest{}
 	err := c.Bind(&newTarget)
@@ -30,7 +30,7 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 		return helper.FailedRequest(c, "Failed to bind data", nil)
 	}
 
-	newTarget.UserIDPembuat = userID
+	newTarget.UserIDPembuat = idUser
 
 	idParam := c.Param("user_id")
 	newTarget.UserIDPenerima = idParam
@@ -50,11 +50,11 @@ func (h *targetHandler) CreateTarget(c echo.Context) error {
 	}
 	//mappingg dari request to EntityTarget
 	targetInput := TargetRequestToEntity(newTarget)
-	targetID, err := h.targetService.Create(targetInput)
+	idTarget, err := h.targetService.Create(targetInput)
 	if err != nil {
 		return helper.InternalError(c, "Failed to insert data", err.Error())
 	}
-	targetInput.ID = targetID
+	targetInput.ID = idTarget
 	// Mapping create target to Target Response
 	responseTarget := EntityToResponse(targetInput)
 	return helper.SuccessCreate(c, "success create target", responseTarget)
@@ -65,37 +65,38 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	page := c.QueryParam("page")
 	limitPerPage := c.QueryParam("limitPerPage")
 
-	if limitPerPage != "" {
+	if limitPerPage == "" {
+		qParam.ExistOtherPage = false
+	} else {
 		qParam.ExistOtherPage = true
-		limitConv, err := strconv.Atoi(limitPerPage)
-		if err != nil {
-			return helper.FailedRequest(c, "Invalid limit item per page", nil)
+		itemsConv, errItem := strconv.Atoi(limitPerPage)
+		if errItem != nil {
+			return helper.FailedRequest(c, "item per page not valid", nil)
 		}
-		qParam.LimitPerPage = limitConv
+		qParam.LimitPerPage = itemsConv
 	}
-	if page != "" {
-		pageConv, err := strconv.Atoi(page)
-		if err != nil {
-			return helper.FailedRequest(c, "Invalid page", nil)
+	if page == "" {
+		qParam.Page = 1
+	} else {
+		pageConv, errPage := strconv.Atoi(page)
+		if errPage != nil {
+			return helper.FailedRequest(c, "page not valid", nil)
 		}
 		qParam.Page = pageConv
-	} else {
-		qParam.Page = 1
 	}
+
 	searchKonten := c.QueryParam("search_konten")
 	qParam.SearchKonten = searchKonten
 
 	searchStatus := c.QueryParam("search_status")
 	qParam.SearchStatus = searchStatus
 
-	userID, _, _ := middlewares.ExtractToken(c)
-
-	token,errToken:=usernodejs.GetTokenHandler(c)
-	if errToken != nil{
-		return helper.Forbidden(c,"error token forbiden",nil)
+	token, errToken := usernodejs.GetTokenHandler(c)
+	if errToken != nil {
+		return helper.Forbidden(c, "token tidak ditemukan", nil)
 	}
-	nextPage, data, err := h.targetService.GetAll(token,userID, qParam)
-
+	idUser, _, _ := middlewares.ExtractToken(c)
+	bol, data, err := h.targetService.GetAll(token, idUser, qParam)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}
@@ -105,15 +106,15 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 		targetsResponse = append(targetsResponse, EntityToResponse(v))
 	}
 
-	return helper.SuccessGetAll(c, "get all target successfully", targetsResponse, nextPage)
+	return helper.SuccessGetAll(c, "get all target successfully", targetsResponse, bol)
 }
 
 func (h *targetHandler) GetTargetById(c echo.Context) error {
-	userID, _, _ := middlewares.ExtractToken(c)
+	idUser, _, _ := middlewares.ExtractToken(c)
 
 	idParam := c.Param("target_id")
 
-	result, err := h.targetService.GetById(idParam, userID)
+	result, err := h.targetService.GetById(idParam, idUser)
 	if err != nil {
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
@@ -123,10 +124,10 @@ func (h *targetHandler) GetTargetById(c echo.Context) error {
 }
 
 func (h *targetHandler) UpdateTargetById(c echo.Context) error {
-	userID, _, _ := middlewares.ExtractToken(c)
+	idUser, _, _ := middlewares.ExtractToken(c)
 
 	idParam := c.Param("target_id")
-	_, err := h.targetService.GetById(idParam, userID)
+	_, err := h.targetService.GetById(idParam, idUser)
 	if err != nil {
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
@@ -154,12 +155,12 @@ func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 	// Map target request to entity
 	entityTarget := TargetRequestToEntity(inputTarget)
 
-	err = h.targetService.UpdateById(idParam, userID, entityTarget)
+	err = h.targetService.UpdateById(idParam, idUser, entityTarget)
 	if err != nil {
 		return helper.InternalError(c, "failed to update target data", err.Error())
 	}
 	// Get the updated target data for response
-	updatedTarget, err := h.targetService.GetById(idParam, userID)
+	updatedTarget, err := h.targetService.GetById(idParam, idUser)
 	if err != nil {
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
@@ -170,11 +171,11 @@ func (h *targetHandler) UpdateTargetById(c echo.Context) error {
 
 // DeleteTargetById handles the deletion of a target by its ID.
 func (h *targetHandler) DeleteTargetById(c echo.Context) error {
-	userID, _, _ := middlewares.ExtractToken(c)
+	idUser, _, _ := middlewares.ExtractToken(c)
 
 	idParam := c.Param("target_id")
 
-	err := h.targetService.DeleteById(idParam, userID)
+	err := h.targetService.DeleteById(idParam, idUser)
 	if err != nil {
 		return helper.FailedRequest(c, err.Error(), nil)
 	}

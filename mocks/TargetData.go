@@ -99,32 +99,32 @@ func (_m *TargetData) Select(targetID string) (target.TargetEntity, error) {
 	return r0, r1
 }
 
-// SelectAll provides a mock function with given fields: param
-func (_m *TargetData) SelectAll(param target.QueryParam) (int64, []target.TargetEntity, error) {
-	ret := _m.Called(param)
+// SelectAll provides a mock function with given fields: token, param
+func (_m *TargetData) SelectAll(token string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+	ret := _m.Called(token, param)
 
 	var r0 int64
 	var r1 []target.TargetEntity
 	var r2 error
-	if rf, ok := ret.Get(0).(func(target.QueryParam) (int64, []target.TargetEntity, error)); ok {
-		return rf(param)
+	if rf, ok := ret.Get(0).(func(string, target.QueryParam) (int64, []target.TargetEntity, error)); ok {
+		return rf(token, param)
 	}
-	if rf, ok := ret.Get(0).(func(target.QueryParam) int64); ok {
-		r0 = rf(param)
+	if rf, ok := ret.Get(0).(func(string, target.QueryParam) int64); ok {
+		r0 = rf(token, param)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
-	if rf, ok := ret.Get(1).(func(target.QueryParam) []target.TargetEntity); ok {
-		r1 = rf(param)
+	if rf, ok := ret.Get(1).(func(string, target.QueryParam) []target.TargetEntity); ok {
+		r1 = rf(token, param)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).([]target.TargetEntity)
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(target.QueryParam) error); ok {
-		r2 = rf(param)
+	if rf, ok := ret.Get(2).(func(string, target.QueryParam) error); ok {
+		r2 = rf(token, param)
 	} else {
 		r2 = ret.Error(2)
 	}
