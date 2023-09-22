@@ -5,12 +5,72 @@ import (
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
 
 type CutiData struct {
 	db *gorm.DB
+}
+
+// SelectAllKaryawan implements cuti.CutiDataInterface.
+func (repo *CutiData) SelectAllKaryawan(idUser string, param cuti.QueryParams) (int64, []cuti.CutiEntity, error) {
+	var inputModel []Cuti
+	var total_cuti int64
+
+	query := repo.db
+
+	if param.IsClassDashboard {
+		offset := (param.Page - 1) * param.ItemsPerPage
+		if param.SearchName != "" {
+			query = query.Where("user_id=? and description like ?", idUser, "%"+param.SearchName+"%")
+		}
+		tx := query.Find(&inputModel)
+		if tx.Error != nil {
+			return 0, nil, errors.New("failed get all cuti")
+		}
+		total_cuti = tx.RowsAffected
+		query = query.Offset(offset).Limit(param.ItemsPerPage)
+	}
+	if param.SearchName != "" {
+		query = query.Where("user_id=? and description like ?", idUser, "%"+param.SearchName+"%")
+	}
+	tx := query.Find(&inputModel)
+	if tx.Error != nil {
+		return 0, nil, errors.New("error get all cuti karyawan")
+	}
+
+	dataUser, errUser := usernodejs.GetByIdUser(idUser)
+	if errUser != nil {
+		return 0, nil, errUser
+	}
+	pengguna := PenggunaToUser(dataUser)
+	userEntity := UserToEntity(pengguna)
+
+	var cutiPengguna []CutiPengguna
+	for _, value := range inputModel {
+		cutiPengguna = append(cutiPengguna, ModelToPengguna(value))
+	}
+	var cutiEntity []cuti.CutiEntity
+	for _, value := range cutiPengguna {
+		if value.UserID == userEntity.ID {
+			value.User = User(userEntity)
+			cutiEntity = append(cutiEntity, PengunaToEntity(value))
+		}
+	}
+	return total_cuti, cutiEntity, nil
+}
+
+// SelectUserById implements cuti.CutiDataInterface.
+func (repo *CutiData) SelectUserById(idUser string) (cuti.PenggunaEntity, error) {
+	data, err := usernodejs.GetByIdUser(idUser)
+	if err != nil {
+		return cuti.PenggunaEntity{}, errors.New("error select user by id")
+	}
+	dataUser := UserNodeJskePengguna(data)
+	dataEntity := UserPenggunaToEntity(dataUser)
+	return dataEntity, nil
 }
 
 // Delete implements cuti.CutiDataInterface.
@@ -64,17 +124,38 @@ func (repo *CutiData) UpdateKaryawan(input cuti.CutiEntity, id string) error {
 }
 
 // SelectAll implements cuti.CutiDataInterface.
-func (repo *CutiData) SelectAll(token string) ([]cuti.CutiEntity, error) {
+
+func (repo *CutiData) SelectAll(token string, param cuti.QueryParams) (int64, []cuti.CutiEntity, error) {
+
 	var inputModel []Cuti
-	//offset := (page - 1) * item
-	tx := repo.db.Find(&inputModel)
+	var total_cuti int64
+
+	query := repo.db
+
+	if param.IsClassDashboard {
+		offset := (param.Page - 1) * param.ItemsPerPage
+		fmt.Println("offset", offset)
+		if param.SearchName != "" {
+			query = query.Where("description like ?", "%"+param.SearchName+"%")
+		}
+		tx := query.Find(&inputModel)
+		if tx.Error != nil {
+			return 0, nil, errors.New("failed get all cuti")
+		}
+		total_cuti = tx.RowsAffected
+		query = query.Offset(offset).Limit(param.ItemsPerPage)
+	}
+	if param.SearchName != "" {
+		query = query.Where("description like ?", "%"+param.SearchName+"%")
+	}
+	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		return nil, errors.New("error get all cuti")
+		return 0, nil, errors.New("error get all cuti")
 	}
 	
 	dataPengguna, errUser := usernodejs.GetAllUser(token)
 	if errUser != nil {
-		return nil, errUser
+		return 0, nil, errUser
 	}
 	var dataUser []User
 	for _, value := range dataPengguna {
@@ -84,53 +165,25 @@ func (repo *CutiData) SelectAll(token string) ([]cuti.CutiEntity, error) {
 	for _, value := range dataUser {
 		userEntity = append(userEntity, UserToEntity(value))
 	}
-	var cutiPengguna []CutiPengguna
+	fmt.Println("user entity", userEntity)
+	var reimbushPengguna []CutiPengguna
 	for _, value := range inputModel {
-		cutiPengguna = append(cutiPengguna, ModelToPengguna(value))
+		reimbushPengguna = append(reimbushPengguna, ModelToPengguna(value))
 	}
-
-	var cutiEntity []cuti.CutiEntity
+	fmt.Println("reimb", reimbushPengguna)
+	var reimbushEntity []cuti.CutiEntity
 	for i := 0; i < len(userEntity); i++ {
-		for j := 0; j < len(cutiPengguna); j++ {
-			if userEntity[i].ID == cutiPengguna[j].UserID {
-				cutiPengguna[j].User = User(userEntity[i])
-				cutiEntity = append(cutiEntity, PengunaToEntity(cutiPengguna[j]))
+		for j := 0; j < len(reimbushPengguna); j++ {
+			if userEntity[i].ID == reimbushPengguna[j].UserID {
+				reimbushPengguna[j].User = User(userEntity[i])
+				reimbushEntity = append(reimbushEntity, PengunaToEntity(reimbushPengguna[j]))
 			}
 		}
 	}
-	return cutiEntity, nil
+	return total_cuti, reimbushEntity, nil
 }
 
 // SelectAllKaryawan implements cuti.CutiDataInterface.
-func (repo *CutiData) SelectAllKaryawan(idUser string) ([]cuti.CutiEntity, error) {
-	//offset := (page - 1) * item
-	var inputModel []Cuti
-	tx := repo.db.Find(&inputModel)
-	if tx.Error != nil {
-		return nil, errors.New("error get all cuti karyawan")
-	}
-
-	dataUser, errUser := usernodejs.GetByIdUser(idUser)
-	if errUser != nil {
-		return nil, errUser
-	}
-	pengguna := PenggunaToUser(dataUser)
-	userEntity := UserToEntity(pengguna)
-
-	var cutiPengguna []CutiPengguna
-	for _, value := range inputModel {
-		cutiPengguna = append(cutiPengguna, ModelToPengguna(value))
-	}
-
-	var cutiEntity []cuti.CutiEntity
-	for _, value := range cutiPengguna {
-		if value.UserID == userEntity.ID {
-			value.User = User(userEntity)
-			cutiEntity = append(cutiEntity, PengunaToEntity(value))
-		}
-	}
-	return cutiEntity, nil
-}
 
 // insert implements cuti.CutiDataInterface.
 func (repo *CutiData) Insert(input cuti.CutiEntity) error {

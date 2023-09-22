@@ -13,7 +13,7 @@ type Cuti struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	TipeCuti     string         `gorm:"type:enum('melahirkan','hari raya','tahunan');default:'tahunan';column:tipe_cuti"`
+	TipeCuti     string         `gorm:"type:enum('melahirkan','sakit','hari raya','tahunan');default:'tahunan';column:tipe_cuti"`
 	Status       string         `gorm:"default:pending"`
 	JumlahCuti   int
 	BatasanCuti  int `gorm:"column:batasan_cuti;default:90"`
@@ -46,6 +46,29 @@ type CutiPengguna struct {
 type User struct {
 	ID   string
 	Name string
+}
+type Pengguna struct {
+	ID          string
+	NamaLengkap string
+	Jabatan     string
+	Devisi      string
+}
+
+func UserNodeJskePengguna(pengguna usernodejs.Pengguna) Pengguna {
+	return Pengguna{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Jabatan:     pengguna.Jabatan,
+		Devisi:      pengguna.Devisi.Nama,
+	}
+}
+func UserPenggunaToEntity(pengguna Pengguna) cuti.PenggunaEntity {
+	return cuti.PenggunaEntity{
+		ID:          pengguna.ID,
+		NamaLengkap: pengguna.NamaLengkap,
+		Jabatan:     pengguna.Jabatan,
+		Devisi:      pengguna.Devisi,
+	}
 }
 
 func ModelToPengguna(user Cuti) CutiPengguna {
