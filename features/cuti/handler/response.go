@@ -14,7 +14,7 @@ type CutiResponse struct {
 	JumlahCuti   int        `json:"jumlah_cuti,omitempty"`
 	Description  string     `json:"description,omitempty"`
 	Persetujuan  string     `json:"persetujuan,omitempty"`
-	StartCuti    string     `json:"strat_cuti,omitempty"`
+	StartCuti    string     `json:"start_cuti,omitempty"`
 	EndCuti      string     `json:"end_cuti,omitempty"`
 	UrlPendukung string     `json:"url_pendukung,omitempty"`
 	UserID       string     `json:"user_id,omitempty"`
