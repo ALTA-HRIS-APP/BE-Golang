@@ -13,13 +13,13 @@ type TargetData struct {
 	mock.Mock
 }
 
-// Delete provides a mock function with given fields: targetID
-func (_m *TargetData) Delete(targetID string) error {
-	ret := _m.Called(targetID)
+// Delete provides a mock function with given fields: idTarget
+func (_m *TargetData) Delete(idTarget string) error {
+	ret := _m.Called(idTarget)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(targetID)
+		r0 = rf(idTarget)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -75,23 +75,23 @@ func (_m *TargetData) Insert(input target.TargetEntity) (string, error) {
 	return r0, r1
 }
 
-// Select provides a mock function with given fields: targetID
-func (_m *TargetData) Select(targetID string) (target.TargetEntity, error) {
-	ret := _m.Called(targetID)
+// Select provides a mock function with given fields: idTarget
+func (_m *TargetData) Select(idTarget string) (target.TargetEntity, error) {
+	ret := _m.Called(idTarget)
 
 	var r0 target.TargetEntity
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string) (target.TargetEntity, error)); ok {
-		return rf(targetID)
+		return rf(idTarget)
 	}
 	if rf, ok := ret.Get(0).(func(string) target.TargetEntity); ok {
-		r0 = rf(targetID)
+		r0 = rf(idTarget)
 	} else {
 		r0 = ret.Get(0).(target.TargetEntity)
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(targetID)
+		r1 = rf(idTarget)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -165,13 +165,13 @@ func (_m *TargetData) SelectAllKaryawan(idUser string, param target.QueryParam) 
 	return r0, r1, r2
 }
 
-// Update provides a mock function with given fields: targetID, targetData
-func (_m *TargetData) Update(targetID string, targetData target.TargetEntity) error {
-	ret := _m.Called(targetID, targetData)
+// Update provides a mock function with given fields: idTarget, targetData
+func (_m *TargetData) Update(idTarget string, targetData target.TargetEntity) error {
+	ret := _m.Called(idTarget, targetData)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string, target.TargetEntity) error); ok {
-		r0 = rf(targetID, targetData)
+		r0 = rf(idTarget, targetData)
 	} else {
 		r0 = ret.Error(0)
 	}
