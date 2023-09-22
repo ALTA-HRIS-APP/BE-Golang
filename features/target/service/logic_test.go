@@ -133,10 +133,10 @@ func TestDeleteById(t *testing.T) {
 		// Expectation: Mock akan memanggil GetUserByIDAPI dengan userID yang sesuai
 		mocksTargetDataLayer.On("GetUserByIDAPI", "54396f94-07b8-4450-8105-7c4472bf8701").Return(userPembuat, nil).Once()
 
-		// Expectation: Mock akan memanggil Select untuk mendapatkan data target yang akan dihapus (sesuaikan dengan pengujian ini)
+		// Expectation: Mock akan memanggil Select untuk mendapatkan data target yang akan dihapus
 		mocksTargetDataLayer.On("Select", targetID).Return(targetToDelete, nil).Once()
 
-		// Expectation: Mock akan memanggil Delete untuk menghapus target (sesuaikan dengan pengujian ini)
+		// Expectation: Mock akan memanggil Delete untuk menghapus target
 		mocksTargetDataLayer.On("Delete", targetID).Return(nil).Once()
 
 		// Menggunakan targetService untuk menghapus target
