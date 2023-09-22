@@ -45,7 +45,7 @@ type ReimbusmentDataInterface interface{
 	Update(input ReimbursementEntity,id string)(error)
 	SelectById(id string)(ReimbursementEntity,error)
 	SelectAllKaryawan(idUser string,param QueryParams)(int64,[]ReimbursementEntity,error)
-	SelectAll(param QueryParams)(int64,[]ReimbursementEntity,error)
+	SelectAll(token string,param QueryParams)(int64,[]ReimbursementEntity,error)
 	Delete(id string)error
 	SelectUserById(idUser string)(PenggunaEntity,error)
 }
@@ -53,7 +53,7 @@ type ReimbusmentDataInterface interface{
 type ReimbusmentServiceInterface interface{
 	Add(input ReimbursementEntity)(error)
 	Edit(input ReimbursementEntity,id string,idUser string)(error)
-	Get(idUser string,param QueryParams)(bool,[]ReimbursementEntity,error)
+	Get(token string,idUser string,param QueryParams)(bool,[]ReimbursementEntity,error)
 	Delete(id string)error
 	GetReimbusherById(id string)(ReimbursementEntity,error)
 }

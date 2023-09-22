@@ -58,7 +58,7 @@ func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 }
 
 // SelectAll implements target.TargetDataInterface.
-func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.TargetEntity, error) {
+func (r *targetQuery) SelectAll(token string,param target.QueryParam) (int64, []target.TargetEntity, error) {
 	// Initialize variables
 	var inputModel []Target
 	var totalTarget int64
@@ -87,7 +87,7 @@ func (r *targetQuery) SelectAll(param target.QueryParam) (int64, []target.Target
 		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
-	dataPengguna, err := usernodejs.GetAllUser()
+	dataPengguna, err := usernodejs.GetAllUser(token)
 	if err != nil {
 		return 0, nil, err
 	}

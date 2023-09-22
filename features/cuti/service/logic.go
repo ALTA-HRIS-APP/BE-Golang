@@ -122,7 +122,7 @@ func (service *CutiService) Edit(input cuti.CutiEntity, id string, idUser string
 }
 
 // Get implements cuti.CutiServiceInterface.
-func (service *CutiService) Get(idUser string) ([]cuti.CutiEntity, error) {
+func (service *CutiService) Get(token string,idUser string) ([]cuti.CutiEntity, error) {
 	dataUser, errUser := usernodejs.GetByIdUser(idUser)
 	if errUser != nil {
 		return nil, errors.New("eror get data user")
@@ -134,7 +134,7 @@ func (service *CutiService) Get(idUser string) ([]cuti.CutiEntity, error) {
 		}
 		return dataCuti, nil
 	} else {
-		dataCuti, errCuti := service.cutiService.SelectAll()
+		dataCuti, errCuti := service.cutiService.SelectAll(token)
 		if errCuti != nil {
 			return nil, errCuti
 		}

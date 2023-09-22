@@ -3,6 +3,7 @@ package handler
 import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/cuti"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"strings"
 
@@ -84,7 +85,11 @@ func (handler *CutiHandler) GetAll(c echo.Context) error {
 	// }
 	// searchName := c.QueryParam("searchName")
 	idUser, _, _ := middlewares.ExtractToken(c)
-	data, err := handler.cutiHandler.Get(idUser)
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken != nil{
+		return helper.Forbidden(c,"token tidak ditemukan",nil)
+	}
+	data, err := handler.cutiHandler.Get(token,idUser)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}

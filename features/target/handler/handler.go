@@ -3,6 +3,7 @@ package handler
 import (
 	"be_golang/klp3/app/middlewares"
 	"be_golang/klp3/features/target"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"log"
 	"net/http"
@@ -105,7 +106,12 @@ func (h *targetHandler) GetAllTarget(c echo.Context) error {
 	qParam.SearchStatus = searchStatus
 
 	userID, _, _ := middlewares.ExtractToken(c)
-	nextPage, data, err := h.targetService.GetAll(userID, qParam)
+
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken != nil{
+		return helper.Forbidden(c,"error token forbiden",nil)
+	}
+	nextPage, data, err := h.targetService.GetAll(token,userID, qParam)
 
 	if err != nil {
 		log.Printf("Internal server error: %s", err.Error())

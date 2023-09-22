@@ -37,7 +37,7 @@ type QueryParam struct {
 }
 type TargetDataInterface interface {
 	Insert(input TargetEntity) (string, error)
-	SelectAll(param QueryParam) (int64, []TargetEntity, error)
+	SelectAll(token string,param QueryParam) (int64, []TargetEntity, error)
 	Select(targetID string) (TargetEntity, error)
 	Update(targetID string, targetData TargetEntity) error
 	Delete(targetID string) error
@@ -47,7 +47,7 @@ type TargetDataInterface interface {
 
 type TargetServiceInterface interface {
 	Create(input TargetEntity) (string, error)
-	GetAll(userID string, param QueryParam) (bool, []TargetEntity, error)
+	GetAll(token string,userID string, param QueryParam) (bool, []TargetEntity, error)
 	GetById(targetID string, userID string) (TargetEntity, error)
 	UpdateById(targetID string, userID string, targetData TargetEntity) error
 	DeleteById(targetID string, userID string) error
