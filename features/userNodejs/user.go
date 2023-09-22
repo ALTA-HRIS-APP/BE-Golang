@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var url_base = "http://project2.otixx.online"
+const url_base = "https://project2.otixx.online"
 
 func LoginUser(login Login) (string, error) {
 
@@ -77,27 +77,46 @@ func GetProfil(token string) (Pengguna, error) {
 	return userGet, nil
 }
 
-func GetAllUser() ([]Pengguna, error) {
+func GetAllUser(token string) ([]Pengguna, error) {
 	link := fmt.Sprintf("%s/user", url_base)
-	response, err := http.Get(link)
+	
+	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
-		fmt.Printf("the HTTP request failed with error %s\n", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		var respData Data
-		err := json.Unmarshal(data, &respData)
-		if err != nil {
-			fmt.Println("Error:", err)
-			return nil, err
-		}
-		var dataPengguna []Pengguna
-		for _, pengguna := range respData.Meta.Data {
-			dataPengguna = append(dataPengguna, ByteToResponse(pengguna))
-		}
-		return dataPengguna, nil
+		fmt.Printf("Error creating HTTP request: %s\n", err)
+		return nil, err
 	}
-	return nil, err
+
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return nil, err
+	}
+
+	var respData Data
+	err = json.Unmarshal(data, &respData)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return nil, err
+	}
+
+	var dataPengguna []Pengguna
+	for _, pengguna := range respData.Meta.Data {
+		dataPengguna = append(dataPengguna, ByteToResponse(pengguna))
+	}
+
+	return dataPengguna, nil
 }
+
 
 func GetByIdUser(idUser string) (Pengguna, error) {
 	link := fmt.Sprintf("%s/user/%s", url_base, idUser)

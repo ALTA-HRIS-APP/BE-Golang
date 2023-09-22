@@ -39,7 +39,7 @@ func (service *ReimbursementService) Delete(id string) error {
 }
 
 // Get implements reimbusment.ReimbusmentServiceInterface.
-func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
+func (service *ReimbursementService) Get(token string,idUser string, param reimbusment.QueryParams) (bool, []reimbusment.ReimbursementEntity, error) {
 
 	var total_pages int64
 	nextPage := true
@@ -71,7 +71,7 @@ func (service *ReimbursementService) Get(idUser string, param reimbusment.QueryP
 		}
 		return nextPage, dataReim, nil
 	} else {
-		count, dataReim, errReim := service.reimbursmentService.SelectAll(param)
+		count, dataReim, errReim := service.reimbursmentService.SelectAll(token,param)
 		if errReim != nil {
 			return true, nil, errReim
 		}
@@ -140,8 +140,8 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 		if input.Status != "" {
 			return errors.New("manager tidak boleh mengedit status")
 		}
-		if input.Persetujuan == "reject" {
-			input.Status = "reject"
+		if input.Persetujuan == "Rejected" {
+			input.Status = "Rejected"
 			err := service.reimbursmentService.Update(input, id)
 			if err != nil {
 				return err
@@ -165,15 +165,15 @@ func (service *ReimbursementService) Edit(input reimbusment.ReimbursementEntity,
 		if dataUserPengaju.Jabatan == "hr" || dataUserPengaju.Jabatan == "c-level" {
 			return errors.New("hanya bisa approve reimbursement karyawan dan manager")
 		}
-		if input.Persetujuan == "reject" {
-			input.Status = "reject"
+		if input.Persetujuan == "Rejected" {
+			input.Status = "Rejected"
 			err := service.reimbursmentService.Update(input, id)
 			if err != nil {
 				return err
 			}
 			return nil
 		} else {
-			input.Status = "approve"
+			input.Status = "Done"
 			err := service.reimbursmentService.Update(input, id)
 			if err != nil {
 				return err

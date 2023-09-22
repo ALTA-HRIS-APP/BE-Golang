@@ -4,25 +4,57 @@ import (
 	"be_golang/klp3/features/reimbusment"
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"time"
+
+	"github.com/go-redis/redis/v8"
 
 	"gorm.io/gorm"
 )
 
 type ReimbusmentData struct {
 	db *gorm.DB
+	redis *redis.Client
 }
 
 // SelectUserById implements reimbusment.ReimbusmentDataInterface.
 func (repo *ReimbusmentData) SelectUserById(idUser string) (reimbusment.PenggunaEntity, error) {
-	data,err:=usernodejs.GetByIdUser(idUser)
-	if err != nil{
-		return reimbusment.PenggunaEntity{},err
+	ctx := context.Background()
+    redisKey := fmt.Sprintf("user:%s", idUser)
+    cachedData, err := repo.redis.Get(ctx, redisKey).Result()
+    if err == nil {
+        var userRedis reimbusment.PenggunaEntity
+        if err := json.Unmarshal([]byte(cachedData), &userRedis); err != nil {
+            return reimbusment.PenggunaEntity{}, err
+        }
+        log.Println("Data ditemukan di Redis cache")
+        return userRedis, nil
+    } else if err != redis.Nil {
+        return reimbusment.PenggunaEntity{}, err
+    }else{
+		dataUser,errUser:=usernodejs.GetByIdUser(idUser)
+		if errUser != nil{
+			return reimbusment.PenggunaEntity{},errors.New("failed get user by id")
+		}
+		dataPengguna:=UserNodeJskePengguna(dataUser)
+		dataEntity := UserPenggunaToEntity(dataPengguna)
+	
+		jsonData, err := json.Marshal(dataEntity)
+		if err != nil {
+			return reimbusment.PenggunaEntity{}, err
+		}
+		errSet := repo.redis.Set(ctx, redisKey, jsonData, 1*time.Hour).Err()
+		if errSet != nil {
+			log.Println("Gagal menyimpan data ke Redis:", errSet)
+		} else {
+			log.Println("Data disimpan di Redis cache")
+		}
+		return dataEntity, nil
 	}
-	dataUser:=UserNodeJskePengguna(data)
-	dataEntity:=UserPenggunaToEntity(dataUser)
-	return dataEntity,nil
 }
 
 // Delete implements reimbusment.ReimbusmentDataInterface.
@@ -39,7 +71,7 @@ func (repo *ReimbusmentData) Delete(id string) error {
 }
 
 // SelectAll implements reimbusment.ReimbusmentDataInterface.
-func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error) {
+func (repo *ReimbusmentData) SelectAll(token string,param reimbusment.QueryParams) (int64, []reimbusment.ReimbursementEntity, error) {
 	var inputModel []Reimbursement
 	var total_reimbursement int64
 
@@ -65,8 +97,8 @@ func (repo *ReimbusmentData) SelectAll(param reimbusment.QueryParams) (int64, []
 	if tx.Error != nil {
 		return 0, nil, errors.New("error get all reimbursement")
 	}
-
-	dataPengguna, errUser := usernodejs.GetAllUser()
+	
+	dataPengguna, errUser := usernodejs.GetAllUser(token)
 	if errUser != nil {
 		return 0, nil, errUser
 	}
@@ -201,8 +233,9 @@ func (repo *ReimbusmentData) Insert(input reimbusment.ReimbursementEntity) error
 	return nil
 }
 
-func New(db *gorm.DB) reimbusment.ReimbusmentDataInterface {
+func New(db *gorm.DB,redis *redis.Client) reimbusment.ReimbusmentDataInterface {
 	return &ReimbusmentData{
 		db: db,
+		redis: redis,
 	}
 }

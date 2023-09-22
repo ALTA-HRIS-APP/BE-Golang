@@ -43,7 +43,7 @@ func (handler *AbsensiHandler) Add(c echo.Context) error {
 	return helper.SuccessCreate(c, "success create absen", nil)
 }
 
-func (handler *AbsensiHandler) GetAllAbsensi(c echo.Context) error {
+func (handler *AbsensiHandler) GetAll(c echo.Context) error {
 	var qparams absensi.QueryParams
 	page := c.QueryParam("page")
 	itemsPerPage := c.QueryParam("itemsPerPage")
@@ -68,35 +68,49 @@ func (handler *AbsensiHandler) GetAllAbsensi(c echo.Context) error {
 		qparams.Page = pageConv
 	}
 
-	searchName := c.QueryParam("searchName")
-	qparams.SearchName = searchName
+	// Hanya memproses pencarian dan filter berdasarkan tanggal
+	tanggal := c.QueryParam("created_at")
+	qparams.SerachTanggal = tanggal
+
 	idUser, _, _ := middlewares.ExtractToken(c)
-	bol, data, err := handler.absensiService.Get(idUser, qparams)
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken != nil{
+		return helper.Forbidden(c,"error get token",nil)
+	}
+	// idUser := "13947f80-78b9-446f-9fe4-cb25caa4bea4"
+	bol, data, err := handler.absensiService.Get(token,idUser, qparams)
 	if err != nil {
 		return helper.InternalError(c, err.Error(), nil)
 	}
 	var response []AbsensiResponse
 	for _, value := range data {
 		response = append(response, EntityToResponse(value))
-
 	}
-	return helper.SuccessGetAll(c, "get all reimbursement successfully", response, bol)
+	return helper.SuccessGetAll(c, "get all absensi successfully", response, bol)
 }
 
 func (handler *AbsensiHandler) GetAbsensiById(c echo.Context) error {
 	userID, _, _ := middlewares.ExtractToken(c)
-	apiUser, err := usernodejs.GetByIdUser(userID)
+
+	// Dapatkan data absensi berdasarkan ID
+	idParam := c.Param("id_absensi")
+	absensiResult, err := handler.absensiService.GetById(idParam)
 	if err != nil {
-		log.Printf("Error get detail user: %s", err.Error())
+		log.Printf("Error get detail absensi: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
-	idParam := c.Param("id_absensi")
-	result, err := handler.absensiService.GetById(idParam, apiUser.ID)
+
+	// Dapatkan data user berdasarkan ID
+	userResult, err := usernodejs.GetByIdUser(userID)
 	if err != nil {
 		log.Printf("Error get detail user: %s", err.Error())
 		return helper.FailedRequest(c, err.Error(), nil)
 	}
 
-	resultResponse := EntityToResponse(result)
-	return helper.Success(c, "success create absensi", resultResponse)
+	// Format respons sesuai dengan yang diinginkan
+	resultResponse := EntityToResponse(absensiResult)
+	resultResponse.User.ID = userResult.ID
+	resultResponse.User.Name = userResult.NamaLengkap
+
+	return helper.Success(c, "success read absensi", resultResponse)
 }

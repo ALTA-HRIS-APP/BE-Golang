@@ -1,77 +1,70 @@
 package data
 
 import (
-	apinodejs "be_golang/klp3/features/apiNodejs"
 	"be_golang/klp3/features/target"
+	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
-	"log"
+	"fmt"
 
 	"gorm.io/gorm"
 )
 
 type targetQuery struct {
-	db          *gorm.DB
-	externalAPI apinodejs.ExternalDataInterface
+	db *gorm.DB
 }
 
-func New(database *gorm.DB, externalAPI apinodejs.ExternalDataInterface) target.TargetDataInterface {
+func New(database *gorm.DB) target.TargetDataInterface {
 	return &targetQuery{
-		db:          database,
-		externalAPI: externalAPI,
+		db: database,
 	}
 }
-
-func (r *targetQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
+func (r *targetQuery) GetUserByIDAPI(idUser string) (target.PenggunaEntity, error) {
 	// Panggil metode GetUserByID dari externalAPI
-	user, err := r.externalAPI.GetUserByID(idUser)
+	user, err := usernodejs.GetByIdUser(idUser)
 	if err != nil {
-		log.Printf("Error consume api user: %s", err.Error())
-		return apinodejs.Pengguna{}, err
+		return target.PenggunaEntity{}, err
 	}
-	log.Println("consume api successfully")
-	return user, nil
+	dataUser := UserNodeJsToPengguna(user)
+	dataUserEntity := UserPenggunaToEntity(dataUser)
+	return dataUserEntity, nil
 }
 
 // Insert implements target.TargetDataInterface.
 func (r *targetQuery) Insert(input target.TargetEntity) (string, error) {
 	uuid, err := helper.GenerateUUID()
 	if err != nil {
-		log.Printf("Error generating UUID: %s", err.Error())
 		return "", errors.New("failed genereted uuid")
 	}
 
-	newTarget := MapEntityToModel(input)
+	newTarget := EntityToModel(input)
 	newTarget.ID = uuid
 	//simpan ke db
 	tx := r.db.Create(&newTarget)
 	if tx.Error != nil {
-		log.Printf("Error inserting target: %s", tx.Error)
 		return "", tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when inserting target")
 		return "", errors.New("target not found")
 	}
-	log.Println("Target inserted successfully")
 	return newTarget.ID, nil
 }
 
 // SelectAll implements target.TargetDataInterface.
-func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+func (r *targetQuery) SelectAll(token string,param target.QueryParam) (int64, []target.TargetEntity, error) {
 	// Initialize variables
 	var inputModel []Target
 	var totalTarget int64
 
 	// Initial query
-	query := r.db.Where("user_id = ?", userID)
+	query := r.db
 
 	// Handle searching by description if provided
 	if param.SearchKonten != "" {
-		query = query.Where("description like ?", "%"+param.SearchKonten+"%")
+		query = query.Where("konten_target like ?", "%"+param.SearchKonten+"%")
 	}
 	if param.SearchStatus != "" {
-		query = query.Where("description like ?", "%"+param.SearchStatus+"%")
+		query = query.Where("status like ?", "%"+param.SearchStatus+"%")
 	}
 
 	// Handle special condition for class dashboard
@@ -83,58 +76,134 @@ func (r *targetQuery) SelectAll(userID string, param target.QueryParam) (int64, 
 	// Execute the query on the database
 	tx := query.Find(&inputModel)
 	if tx.Error != nil {
-		log.Printf("Error retrieving all targets: %s", tx.Error)
 		return 0, nil, errors.New("failed to get all targets")
 	}
 	totalTarget = tx.RowsAffected
+	dataPengguna, err := usernodejs.GetAllUser(token)
+	if err != nil {
+		return 0, nil, err
+	}
+	if err != nil {
+		return 0, nil, err
+	}
+	var dataUser []User
+	for _, v := range dataPengguna {
+		dataUser = append(dataUser, PenggunaToUser(v))
+	}
 
-	resultTargetSlice := ListModelToEntity(inputModel)
-	log.Println("Targets read successfully")
-	return totalTarget, resultTargetSlice, nil
+	var userEntity []target.UserEntity
+	for _, v := range dataUser {
+		userEntity = append(userEntity, UserToEntity(v))
+	}
+
+	var targetPengguna []TargetPengguna
+	for _, v := range inputModel {
+		targetPengguna = append(targetPengguna, ModelToPengguna(v))
+	}
+
+	var targetEntity []target.TargetEntity
+	for i := 0; i < len(userEntity); i++ {
+		for j := 0; j < len(targetPengguna); j++ {
+			if userEntity[i].ID == targetPengguna[j].UserIDPenerima {
+				targetPengguna[j].User = User(userEntity[i])
+				targetEntity = append(targetEntity, PenggunaToEntity(targetPengguna[j]))
+			}
+		}
+	}
+	// resultTargetSlice := ListModelToEntity(inputModel)
+	return totalTarget, targetEntity, nil
+}
+
+// SelectAllKaryawan implements target.TargetDataInterface.
+func (r *targetQuery) SelectAllKaryawan(idUser string, param target.QueryParam) (int64, []target.TargetEntity, error) {
+	var inputModel []Target
+	var totalTarget int64
+
+	query := r.db
+
+	// Handle searching by description if provided
+	if param.SearchKonten != "" {
+		query = query.Where("user_id = ? AND konten_target LIKE ?", idUser, "%"+param.SearchKonten+"%")
+	}
+	if param.SearchStatus != "" {
+		query = query.Where("user_id = ? AND status LIKE ?", idUser, "%"+param.SearchStatus+"%")
+	}
+
+	// Special condition for class dashboard
+	if param.ExistOtherPage {
+		offset := (param.Page - 1) * param.LimitPerPage
+		query = query.Where("user_id = ?", idUser).Offset(int(offset)).Limit(param.LimitPerPage)
+	}
+
+	// Execute the query on the database
+	tx := query.Find(&inputModel)
+	if tx.Error != nil {
+		return 0, nil, errors.New("failed to get all targets")
+	}
+	totalTarget = tx.RowsAffected
+	dataUser, err := usernodejs.GetByIdUser(idUser)
+	if err != nil {
+		return 0, nil, err
+	}
+	pengguna := PenggunaToUser(dataUser)
+	userEntity := UserToEntity(pengguna)
+
+	var targetPengguna []TargetPengguna
+	for _, v := range inputModel {
+		targetPengguna = append(targetPengguna, ModelToPengguna(v))
+	}
+
+	fmt.Printf("Number of targets retrieved for user %s: %d\n", idUser, len(targetPengguna))
+
+	var targetEntity []target.TargetEntity
+	for _, v := range targetPengguna {
+		if v.UserIDPenerima == userEntity.ID {
+			v.User = User(userEntity)
+			targetEntity = append(targetEntity, PenggunaToEntity(v))
+
+			fmt.Printf("Target matched: UserIDPenerima: %s, userEntity.ID: %s\n", v.UserIDPenerima, userEntity.ID)
+		}
+	}
+
+	// resultTargetSlice := ListModelToEntity(inputModel)
+	return totalTarget, targetEntity, nil
 }
 
 // Select implements target.TargetDataInterface.
-func (r *targetQuery) Select(targetID string, userID string) (target.TargetEntity, error) {
+func (r *targetQuery) Select(targetID string) (target.TargetEntity, error) {
 	var targetData Target
 
-	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).First(&targetData)
+	tx := r.db.Where("id = ?", targetID).First(&targetData)
 	if tx.Error != nil {
-		log.Printf("Error reading target: %s", tx.Error)
 		return target.TargetEntity{}, tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when reading target")
 		return target.TargetEntity{}, errors.New("target not found")
 	}
 	// Mapping target to CoreTarget
-	coreTarget := MapModelToEntity(targetData)
-	log.Println("Target read successfully")
+	coreTarget := ModelToEntity(targetData)
 	return coreTarget, nil
 }
 
 // Update implements target.TargetDataInterface.
-func (r *targetQuery) Update(targetID string, userID string, targetData target.TargetEntity) error {
+func (r *targetQuery) Update(targetID string, targetData target.TargetEntity) error {
 	var target Target
-	tx := r.db.Where("id = ? AND user_id = ?", targetID, userID).First(&target)
-	log.Printf("Error read id: %s", tx.Error)
+	tx := r.db.Where("id = ?", targetID).First(&target)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when read target")
 		return errors.New("target not found")
 	}
 
-	//Mapping Entity Target to Model
-	updatedTarget := MapEntityToModel(targetData)
+	// Mapping Entity Target to Model
+	updatedTarget := EntityToModel(targetData)
 
-	// Lakukan pembaruan data proyek dalam database
+	// Perform the update of project data in the database
 	tx = r.db.Model(&target).Updates(updatedTarget)
 	if tx.Error != nil {
-		log.Printf("Error update target: %s", tx.Error)
 		return errors.New(tx.Error.Error() + " failed to update data")
 	}
-	log.Println("Update target successfully")
 	return nil
 }
 
@@ -143,13 +212,11 @@ func (r *targetQuery) Delete(targetID string) error {
 	var target Target
 	tx := r.db.Where("id = ?", targetID).Delete(&target)
 	if tx.Error != nil {
-		log.Printf("Error deleting target: %s", tx.Error)
 		return tx.Error
 	}
+
 	if tx.RowsAffected == 0 {
-		log.Println("No rows affected when deleting target")
 		return errors.New("target not found")
 	}
-	log.Println("Target deleted successfully")
 	return nil
 }

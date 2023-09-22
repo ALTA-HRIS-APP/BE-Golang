@@ -124,7 +124,9 @@ func (repo *CutiData) UpdateKaryawan(input cuti.CutiEntity, id string) error {
 }
 
 // SelectAll implements cuti.CutiDataInterface.
-func (repo *CutiData) SelectAll(param cuti.QueryParams) (int64, []cuti.CutiEntity, error) {
+
+func (repo *CutiData) SelectAll(token string, param cuti.QueryParams) (int64, []cuti.CutiEntity, error) {
+
 	var inputModel []Cuti
 	var total_cuti int64
 
@@ -150,8 +152,8 @@ func (repo *CutiData) SelectAll(param cuti.QueryParams) (int64, []cuti.CutiEntit
 	if tx.Error != nil {
 		return 0, nil, errors.New("error get all cuti")
 	}
-
-	dataPengguna, errUser := usernodejs.GetAllUser()
+	
+	dataPengguna, errUser := usernodejs.GetAllUser(token)
 	if errUser != nil {
 		return 0, nil, errUser
 	}

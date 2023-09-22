@@ -148,10 +148,11 @@ func (service *CutiService) Edit(input cuti.CutiEntity, id string, idUser string
 }
 
 // Get implements cuti.CutiServiceInterface.
-func (service *CutiService) Get(idUser string, param cuti.QueryParams) (bool, []cuti.CutiEntity, error) {
+func (service *CutiService) Get(token string, idUser string, param cuti.QueryParams) (bool, []cuti.CutiEntity, error) {
 	var total_pages int64
 	nextPage := true
 	dataUser, errUser := service.cutiService.SelectUserById(idUser)
+  
 	if errUser != nil {
 		return true, nil, errors.New("error get data user")
 	}
@@ -179,7 +180,8 @@ func (service *CutiService) Get(idUser string, param cuti.QueryParams) (bool, []
 		}
 		return nextPage, dataCuti, nil
 	} else {
-		count, dataCuti, errCuti := service.cutiService.SelectAll(param)
+
+		count, dataCuti, errCuti := service.cutiService.SelectAll(token,param)
 		if errCuti != nil {
 			return true, nil, errCuti
 		}
@@ -198,6 +200,7 @@ func (service *CutiService) Get(idUser string, param cuti.QueryParams) (bool, []
 			if dataCuti == nil {
 				nextPage = false
 			}
+
 		}
 		return nextPage, dataCuti, nil
 
