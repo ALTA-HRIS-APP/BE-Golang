@@ -2,7 +2,8 @@ package service
 
 import (
 	"be_golang/klp3/features/absensi"
-	apinodejs "be_golang/klp3/features/apiNodejs"
+	usernodejs "be_golang/klp3/features/userNodejs"
+
 	"errors"
 	"log"
 	"strconv"
@@ -32,12 +33,12 @@ func (service *AbsensiService) GetById(absensiID string) (absensi.AbsensiEntity,
 }
 
 // GetUserByIDAPI implements absensi.AbsensiServiceInterface
-func (service *AbsensiService) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
+func (service *AbsensiService) GetUserByIDAPI(idUser string) (usernodejs.Pengguna, error) {
 	// Panggil metode GetUserByIDFromExternalAPI dari lapisan data absensiRepo
 	user, err := service.absensiService.GetUserByIDAPI(idUser)
 	if err != nil {
 		log.Printf("Error consume api in service: %s", err.Error())
-		return apinodejs.Pengguna{}, err
+		return usernodejs.Pengguna{}, err
 	}
 	log.Println("consume api in service successfully")
 	return user, nil

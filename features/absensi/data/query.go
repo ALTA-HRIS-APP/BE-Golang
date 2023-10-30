@@ -2,7 +2,7 @@ package data
 
 import (
 	"be_golang/klp3/features/absensi"
-	apinodejs "be_golang/klp3/features/apiNodejs"
+
 	usernodejs "be_golang/klp3/features/userNodejs"
 	"be_golang/klp3/helper"
 	"errors"
@@ -15,7 +15,6 @@ import (
 
 type absensiQuery struct {
 	db          *gorm.DB
-	externalAPI apinodejs.ExternalDataInterface
 }
 
 // SelectUserById implements absensi.AbsensiDataInterface
@@ -49,12 +48,12 @@ func (repo *absensiQuery) SelectById(absensiID string) (absensi.AbsensiEntity, e
 }
 
 // GetUserByIDAPI implements absensi.AbsensiDataInterface
-func (repo *absensiQuery) GetUserByIDAPI(idUser string) (apinodejs.Pengguna, error) {
+func (repo *absensiQuery) GetUserByIDAPI(idUser string) (usernodejs.Pengguna, error) {
 	// Panggil metode GetUserByID dari externalAPI
-	user, err := repo.externalAPI.GetUserByID(idUser)
+	user, err := usernodejs.GetByIdUser(idUser)
 	if err != nil {
 		log.Printf("Error consume api user: %s", err.Error())
-		return apinodejs.Pengguna{}, err
+		return usernodejs.Pengguna{}, err
 	}
 	log.Println("consume api successfully")
 	return user, nil
@@ -234,9 +233,9 @@ func (repo *absensiQuery) SelectAllKaryawan(idUser string, param absensi.QueryPa
 	return total_absensi, absensiEntity, nil
 }
 
-func New(db *gorm.DB, externalAPI apinodejs.ExternalDataInterface) absensi.AbsensiDataInterface {
+func New(db *gorm.DB) absensi.AbsensiDataInterface {
 	return &absensiQuery{
 		db:          db,
-		externalAPI: externalAPI,
+
 	}
 }

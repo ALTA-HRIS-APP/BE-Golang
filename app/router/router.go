@@ -14,7 +14,6 @@ import (
 	handlerA "be_golang/klp3/features/absensi/handler"
 	serviceA "be_golang/klp3/features/absensi/service"
 
-	apinodejs "be_golang/klp3/features/apiNodejs"
 	_targetRepo "be_golang/klp3/features/target/data"
 	_targetHandler "be_golang/klp3/features/target/handler"
 	_targetService "be_golang/klp3/features/target/service"
@@ -25,7 +24,7 @@ import (
 )
 
 func InitRouter(c *echo.Echo, db *gorm.DB, redis *redis.Client) {
-	externalAPI := apinodejs.NewExternalData("https://project2.otixx.online")
+	
 	dataRes := dataR.New(db, redis)
 	serviceRes := serviceR.New(dataRes)
 	handlerRes := handlerR.New(serviceRes)
@@ -46,7 +45,7 @@ func InitRouter(c *echo.Echo, db *gorm.DB, redis *redis.Client) {
 	c.DELETE("/cutis/:id_cuti", handlerCuti.Delete, middlewares.JWTMiddleware())
 	c.GET("/cutis/:id_cuti", handlerCuti.GetById, middlewares.JWTMiddleware())
 
-	dataAbsensi := dataA.New(db, externalAPI)
+	dataAbsensi := dataA.New(db)
 	serviceAbsensi := serviceA.New(dataAbsensi)
 	handlerAbsensi := handlerA.New(serviceAbsensi)
 
